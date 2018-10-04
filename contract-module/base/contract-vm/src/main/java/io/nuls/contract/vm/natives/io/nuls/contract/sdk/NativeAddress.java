@@ -78,7 +78,11 @@ public class NativeAddress {
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
-        return frame.vm.getRepository().getBalance(address);
+        if (!frame.vm.getRepository().isExist(address)) {
+            return BigInteger.ZERO;
+        } else {
+            return frame.vm.getProgramExecutor().getAccount(address).getBalance();
+        }
     }
 
     public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
@@ -117,7 +121,7 @@ public class NativeAddress {
         if (value == null || value.compareTo(BigInteger.ZERO) <= 0) {
             throw new ErrorException(String.format("transfer amount error, value=%s", value), frame.vm.getGasUsed(), null);
         }
-        BigInteger balance = balance(from, frame);
+        BigInteger balance = frame.vm.getProgramExecutor().getAccount(from).getBalance();
         if (balance.compareTo(value) < 0) {
             if (frame.vm.getProgramContext().isEstimateGas()) {
                 balance = value;
@@ -136,7 +140,7 @@ public class NativeAddress {
             //BigInteger value;
             call(address, methodName, methodDesc, args, value, frame);
         } else {
-            frame.vm.getRepository().addBalance(from, value.negate());
+            frame.vm.getProgramExecutor().getAccount(from).addBalance(value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value);
             frame.vm.getTransfers().add(programTransfer);
         }
@@ -210,7 +214,7 @@ public class NativeAddress {
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
-            frame.vm.getRepository().addBalance(programCall.getSender(), programCall.getValue().negate());
+            frame.vm.getProgramExecutor().getAccount(programCall.getSender()).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
         }

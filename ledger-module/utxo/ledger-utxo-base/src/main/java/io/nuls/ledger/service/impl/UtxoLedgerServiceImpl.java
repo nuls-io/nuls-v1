@@ -24,7 +24,9 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
@@ -412,8 +414,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] txBytes = transaction.getHash().serialize();
             for (int i = 0; i < tos.size(); i++) {
                 Coin to = tos.get(i);
-                toTotal = toTotal.add(to.getNa());
 
+                // 如果不是调用合约的类型，并且合约地址作为nuls接收者，则返回错误，非合约交易不能转入nuls
+                if(ContractConstant.TX_TYPE_CALL_CONTRACT != transaction.getType()
+                        && AddressTool.validContractAddress(to.getOwner())) {
+                    Log.error("Ledger verify error: {}.", ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER.getEnMsg());
+                    return ValidateResult.getFailedResult(CLASS_NAME, ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
+                }
+
+                toTotal = toTotal.add(to.getNa());
                 if (temporaryToMap != null) {
                     temporaryToMap.put(asString(ArraysTool.concatenate(txBytes, new VarInt(i).encode())), to);
                 }

@@ -727,7 +727,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
             //如果为多签地址则以脚本方式存储
-            Coin toCoin = null;
+            Coin toCoin;
             if (to[2] == NulsContext.P2SH_ADDRESS_TYPE) {
                 Script scriptPubkey = SignatureUtil.createOutputScript(to);
                 toCoin = new Coin(scriptPubkey.getProgram(), values);

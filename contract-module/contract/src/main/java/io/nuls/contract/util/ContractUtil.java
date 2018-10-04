@@ -105,6 +105,13 @@ public class ContractUtil {
         return twoDimensionalArray(args, null);
     }
 
+    public static boolean isLegalContractAddress(byte[] addressBytes) {
+        if(addressBytes == null) {
+            return false;
+        }
+        return AddressTool.validContractAddress(addressBytes);
+    }
+
     public static String valueOf(Object obj) {
         return (obj == null) ? null : obj.toString();
     }
@@ -160,6 +167,18 @@ public class ContractUtil {
                 || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
                 || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT
                 || txType == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isGasCostContractTransaction(Transaction tx) {
+        if (tx == null) {
+            return false;
+        }
+        int txType = tx.getType();
+        if(txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             return true;
         }
         return false;

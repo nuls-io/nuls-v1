@@ -553,10 +553,12 @@ public class ForkChainProcess {
                     continue;
                 }
 
-                // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
+                // 区块中可以消耗的最大Gas总量，超过这个值，如果还有消耗GAS的合约交易，则本区块中不再继续验证区块
                 if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                    if (ContractUtil.isContractTransaction(tx)) {
-                        continue;
+                    if(ContractUtil.isGasCostContractTransaction(tx)) {
+                        Log.info("verify block failed: Excess contract transaction detected.");
+                        changeSuccess = false;
+                        break;
                     }
                 }
 
@@ -660,6 +662,10 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
+        }
+        if (!changeSuccess) {
+            contractService.removeContractTempBalance();
+            contractService.removeBatchExecute();
         }
         return changeSuccess;
     }

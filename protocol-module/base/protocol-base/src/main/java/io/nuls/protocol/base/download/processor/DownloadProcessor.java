@@ -57,6 +57,7 @@ public class DownloadProcessor extends Thread {
     private static long FAIL_RETRY_TIME = 30 * 1000L;
     private long failedTime;
 
+    // pierre test comment out
     private DownloadStatus downloadStatus = DownloadStatus.WAIT;
 
     private ScheduledThreadPoolExecutor threadPool;

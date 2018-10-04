@@ -227,9 +227,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                     return result;
                 }
             }
-            /*long gasUsed = programResult.getGasUsed();
-            // 预估1.5倍Gas
-            gasUsed += gasUsed >> 1;*/
             long gasUsed = gasLimit.longValue();
             Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
             // 总花费
@@ -448,15 +445,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if (accountResult.isFailed()) {
                 return accountResult;
             }
-
-            /*Account account = accountResult.getData();
-            // 验证账户密码
-            if (accountService.isEncrypted(account).isSuccess() && account.isLocked()) {
-                AssertUtil.canNotEmpty(password, "the password can not be empty");
-                if (!account.validatePassword(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }*/
 
             // 生成一个地址作为智能合约地址
             Address contractAddress = AccountTool.createContractAddress();
@@ -706,9 +694,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                     return result;
                 }
             }
-            /*long gasUsed = programResult.getGasUsed();
-            // 预估1.5倍Gas
-            gasUsed += gasUsed >> 1;*/
             long gasUsed = gasLimit.longValue();
             Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
             // 总花费
@@ -894,8 +879,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
-            // 当前区块高度
-            long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
             AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");

@@ -31,7 +31,9 @@ import io.nuls.contract.entity.txdata.ContractTransferData;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.entity.txdata.DeleteContractData;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.map.MapUtil;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Coin;
@@ -46,6 +48,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.core.tools.str.StringUtils.EMPTY;
 
 /**
  * @author: PierreLuo
@@ -156,6 +160,10 @@ public class ContractTransactionDto {
         } else if(type == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
             ContractTransferData transfer = (ContractTransferData) txData;
             result.put("data", new ContractTransferDataDto(transfer));
+        } else if(type == NulsConstant.TX_TYPE_COINBASE) {
+            Map<String, String> map = MapUtil.createLinkedHashMap(1);
+            map.put("sender", EMPTY);
+            result.put("data", map);
         }
         return result;
     }

@@ -152,7 +152,7 @@ public class BlockProcess {
             //最低覆盖率不能小于60%
             Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
-        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 1000) {
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 1000) {// pierre test comment out
             //延迟块数不能小于1000
             Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
@@ -229,12 +229,13 @@ public class BlockProcess {
                         Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
+                                ValidateResult verify = tx.verify();
                                 /** ************************************************************/
-                                if(tx.verify().isFailed()){
-                                    Log.error(JSONUtils.obj2json(tx.verify().getErrorCode()));
+                                if(verify.isFailed()){
+                                    Log.error(JSONUtils.obj2json(verify.getErrorCode()));
                                 }
                                 /** ************************************************************/
-                                boolean result = tx.verify().isSuccess();
+                                boolean result = verify.isSuccess();
                                 return result;
                             }
                         });
@@ -251,7 +252,6 @@ public class BlockProcess {
                     long bestHeight = bestBlockHeader.getHeight();
                     byte[] receiveStateRoot = ConsensusTool.getStateRoot(block.getHeader());
                     byte[] stateRoot = ConsensusTool.getStateRoot(bestBlockHeader);
-                    Result<ContractResult> invokeContractResult = null;
                     ContractResult contractResult = null;
                     Map<String, Coin> contractUsedCoinMap = new HashMap<>();
                     int totalGasUsed = 0;
@@ -270,10 +270,12 @@ public class BlockProcess {
                             continue;
                         }
 
-                        // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
+                        // 区块中可以消耗的最大Gas总量，超过这个值，如果还有消耗GAS的合约交易，则本区块中不再继续验证区块
                         if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                            if(ContractUtil.isContractTransaction(tx)) {
-                                continue;
+                            if(ContractUtil.isGasCostContractTransaction(tx)) {
+                                Log.info("verify block failed: Excess contract transaction detected.");
+                                success = false;
+                                break;
                             }
                         }
 
@@ -313,10 +315,6 @@ public class BlockProcess {
                     for (ContractResult result : contractResultList) {
                         result.setStateRoot(stateRoot);
                     }
-
-
-                    //byte[] processStateRoot = stateRoot;
-                    //stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
 
                     // 验证世界状态根
                     if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
@@ -386,6 +384,9 @@ public class BlockProcess {
 
                 return true;
             } else {
+                contractService.removeContractTempBalance();
+                contractService.removeBatchExecute();
+
                 chainManager.getMasterChain().rollback(block);
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
 

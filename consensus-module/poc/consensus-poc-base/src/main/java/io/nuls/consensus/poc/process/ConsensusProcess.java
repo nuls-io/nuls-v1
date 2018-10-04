@@ -48,7 +48,6 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.date.DateUtil;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -105,6 +104,7 @@ public class ConsensusProcess {
     }
 
     private void doWork() {
+        // pierre test comment out
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return;
         }
@@ -187,6 +187,7 @@ public class ConsensusProcess {
             this.clearTxMemoryPool();
             return false;
         }
+        // pierre test comment out
         // wait consensus ready running
         if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
             return false;
@@ -206,7 +207,6 @@ public class ConsensusProcess {
         boolean hasReceiveNewestBlock = false;
 
         try {
-            int i = 0;
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
@@ -273,6 +273,8 @@ public class ConsensusProcess {
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {
         Block bestBlock = chainManager.getBestBlock();
         /** ******************************************************************************************************** */
+
+        // pierre test comment out
         try {
             Log.info("");
             Log.info("****************************************************");
@@ -320,10 +322,6 @@ public class ConsensusProcess {
 
         Map<String, Coin> toMaps = new HashMap<>();
         Set<String> fromSet = new HashSet<>();
-
-        long t1 = 0, t2 = 0;
-
-        long time = System.currentTimeMillis();
 
         /**
          * pierre add 智能合约相关
@@ -383,9 +381,9 @@ public class ConsensusProcess {
                 txMemoryPool.addInFirst(tx, false);
                 break;
             }
-            // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装智能合约交易
+            // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装消耗GAS智能合约交易
             if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                if (ContractUtil.isContractTransaction(tx)) {
+                if(ContractUtil.isGasCostContractTransaction(tx)) {
                     txMemoryPool.addInFirst(tx, false);
                     continue;
                 }
@@ -494,6 +492,7 @@ public class ConsensusProcess {
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
+        // pierre test comment out
         Log.info("\ncheck count:" + count + "\ngetTxUse:" + getTxUse / 1000000 + " ,\nledgerExistUse:" + ledgerUse / 1000000 + ", \nverifyUse:" + verifyUse / 1000000 + " ,\noutHashSetUse:" + outHashSetUse / 1000000 + " ,\nfailedTimes:" + failedCount + ", \nfailedUse:" + failedUse / 1000000
                 + " ,\nconsensusTx:" + consensusTxUse / 1000000 + ", \nblockUse:" + createBlockUser / 1000000 + ", \nsleepTIme:" + sleepTIme + ",\nwhileTime:" + whileTime
                 + ", \naddTime:" + addTime / 1000000 + " ,\nsizeTime:" + sizeTime / 1000000 + " ,\nfailed1Use:" + failed1Use / 1000000);

@@ -24,35 +24,33 @@
  */
 package io.nuls.contract.ledger.service.impl;
 
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Balance;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
-import io.nuls.contract.ledger.util.ContractLedgerUtil;
 import io.nuls.contract.storage.service.ContractTransferTransactionStorageService;
 import io.nuls.contract.storage.service.ContractUtxoStorageService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.nuls.ledger.util.LedgerUtil.asString;
 
 /**
  * @desription:
@@ -101,6 +99,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             List<byte[]> fromList = new ArrayList<>();
             // 合约特殊转账交易
             List<Coin> froms = new ArrayList<>();
+            List<Coin> deleteFroms = new ArrayList<>();
             if(tx.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
                 froms = coinData.getFrom();
                 byte[] fromSource;
@@ -130,9 +129,16 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                         }
                         fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
                     }
+
+                    // 非合约地址在合约账本中不处理
+                    if (!ContractUtil.isLegalContractAddress(fromOfFromCoin.getOwner())) {
+                        continue;
+                    }
+
                     from.setFrom(fromOfFromCoin);
                     from.setTempOwner(fromOfFromCoin.getOwner());
-
+                    from.setKey(asString(fromSource));
+                    deleteFroms.add(from);
                     fromList.add(fromSource);
                 }
             }
@@ -141,7 +147,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             List<Coin> tos = coinData.getTo();
             List<Coin> contractTos = new ArrayList<>();
             List<Entry<byte[], byte[]>> toList = new ArrayList<>();
-            byte[] txHashBytes = null;
+            byte[] txHashBytes;
             try {
                 txHashBytes = tx.getHash().serialize();
             } catch (IOException e) {
@@ -153,14 +159,16 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
                 //toAddress = to.getOwner();
+                // 非合约地址在合约账本中不处理
                 toAddress = to.getAddress();
-                if (!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
+                if (!ContractUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
-                to.setTempOwner(toAddress);
-                contractTos.add(to);
                 try {
                     outKey = ArraysTool.concatenate(txHashBytes, new VarInt(i).encode());
+                    to.setTempOwner(toAddress);
+                    to.setKey(asString(outKey));
+                    contractTos.add(to);
                     toList.add(new Entry<byte[], byte[]>(outKey, to.serialize()));
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
@@ -171,7 +179,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 return Result.getFailed();
             }
             // 刷新余额
-            contractBalanceManager.refreshBalance(contractTos, froms);
+            contractBalanceManager.refreshBalance(contractTos, deleteFroms);
         }
         return Result.getSuccess();
     }
@@ -183,7 +191,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
         }
 
         CoinData coinData = tx.getCoinData();
-        byte[] txHashBytes = null;
+        byte[] txHashBytes;
         try {
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
@@ -193,7 +201,6 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
             List<Coin> contractTos = new ArrayList<>();
-            byte[] indexBytes;
             List<byte[]> toList = new ArrayList<>();
             byte[] outKey;
             Coin to;
@@ -202,12 +209,13 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 to = tos.get(i);
                 //toAddress = to.();
                 toAddress = to.getAddress();
-                if(!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
+                if(!ContractUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
-                to.setTempOwner(toAddress);
-                contractTos.add(to);
                 outKey = ArraysTool.concatenate(txHashBytes, new VarInt(i).encode());
+                to.setTempOwner(toAddress);
+                to.setKey(asString(outKey));
+                contractTos.add(to);
                 toList.add(outKey);
             }
 
@@ -222,7 +230,6 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 byte[] utxoFromIndex;
                 Transaction sourceTx;
                 Coin sourceTxCoinTo;
-                byte[] address;
                 for (Coin from : froms) {
                     fromSource = from.getOwner();
                     utxoFromHash = new byte[txHashSize];
@@ -240,8 +247,14 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                     }
 
                     sourceTxCoinTo = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
+
+                    if(!ContractUtil.isLegalContractAddress(sourceTxCoinTo.getAddress())) {
+                        continue;
+                    }
+
                     from.setFrom(sourceTxCoinTo);
                     from.setTempOwner(sourceTxCoinTo.getAddress());
+                    from.setKey(asString(fromSource));
                     try {
                         fromList.add(new Entry<byte[], byte[]>(fromSource, sourceTxCoinTo.serialize()));
                     } catch (IOException e) {
@@ -272,7 +285,9 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
         if(contractBalance == null) {
             return Result.getFailed(ContractErrorCode.DATA_ERROR);
         }
-        BigInteger balance = BigInteger.valueOf(contractBalance.getBalance().getValue());
+        // pierre test comment out
+        BigInteger balance = BigInteger.valueOf(contractBalance.getUsable().getValue());
+        //BigInteger balance = BigInteger.valueOf(contractBalance.getBalance().getValue());
 
         return Result.getSuccess().setData(balance);
     }

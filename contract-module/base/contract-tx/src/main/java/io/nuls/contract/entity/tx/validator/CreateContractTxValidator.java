@@ -23,47 +23,46 @@
  *
  */
 
-package io.nuls.protocol.base.validator;
+package io.nuls.contract.entity.tx.validator;
 
+import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.entity.tx.CreateContractTransaction;
+import io.nuls.contract.entity.txdata.CreateContractData;
+import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.script.SignatureUtil;
-import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.model.tx.TransferTransaction;
 
 import java.util.Set;
 
 /**
- * @author: Niels Wang
- * @date: 2018/7/5
+ * @author: PierreLuo
+ * @date: 2018/10/2
  */
 @Component
-public class TransferValidator implements NulsDataValidator<TransferTransaction> {
+public class CreateContractTxValidator implements NulsDataValidator<CreateContractTransaction> {
 
     @Override
-    public ValidateResult validate(TransferTransaction tx) throws NulsException {
-        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
-        for (Coin coin : tx.getCoinData().getTo()) {
-            byte[] owner = coin.getOwner();
-            if (owner.length > 23) {
-                owner = coin.getAddress();
-            }
-            // Keep the change maybe a very small coin
-            if (addressSet.contains(AddressTool.getStringAddressByBytes(owner))) {
-                // When the receiver sign this tx,Allow it transfer small coin
-                continue;
-            }
-
-            if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
-                return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TOO_SMALL_AMOUNT);
-            }
+    public ValidateResult validate(CreateContractTransaction tx) throws NulsException {
+        CreateContractData txData = tx.getTxData();
+        byte[] sender = txData.getSender();
+        byte[] contractAddress = txData.getContractAddress();
+        if(!ContractUtil.isLegalContractAddress(contractAddress)) {
+            Log.error("contract data error: Illegal contract address.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
         }
+        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
+
+        if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
+            Log.error("contract data error: The contract creater is not the transaction creator.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+
         return ValidateResult.getSuccessResult();
     }
 }
