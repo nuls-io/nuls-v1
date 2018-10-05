@@ -54,6 +54,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -247,6 +248,7 @@ public class ChainContainer implements Cloneable {
 
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
         BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
+
         //判断轮次信息是否正确
         if (extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() ||
                 (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound())) {
@@ -254,6 +256,25 @@ public class ChainContainer implements Cloneable {
             return Result.getFailed();
         }
 
+        if(NulsContext.MAIN_NET_VERSION > 1) {
+            //收到的区块头里不包含版本信息时，默认区块版本号为1.0
+            if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
+                Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+                return Result.getFailed();
+            } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
+                Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+                return Result.getFailed();
+            } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < 60) {
+                //最低覆盖率不能小于60%
+                Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+                return Result.getFailed();
+            } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 20) {// pierre test comment out
+                //todo 改成配置文件
+                //延迟块数不能小于1000
+                Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+                return Result.getFailed();
+            }
+        }
         MeetingRound currentRound = roundManager.getCurrentRound();
 
         if (isDownload && currentRound.getIndex() > extendsData.getRoundIndex()) {

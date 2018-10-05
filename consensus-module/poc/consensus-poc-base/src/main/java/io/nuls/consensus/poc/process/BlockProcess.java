@@ -138,27 +138,6 @@ public class BlockProcess {
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
             return false;
         }
-        //验证区块版本信息，如果区块版本小于当前主网版本，丢弃区块
-        BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
-
-        //收到的区块头里不包含版本信息时，默认区块版本号为1.0
-        if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
-            Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
-            return false;
-        } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
-            Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
-            return false;
-        } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < 60) {
-            //最低覆盖率不能小于60%
-            Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
-            return false;
-        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 20) {// pierre test comment out
-            //todo 改成配置文件
-            //延迟块数不能小于1000
-            Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
-            return false;
-        }
-
         // Verify the the block, the content to be verified includes: whether the block size exceeds the limit,
         // whether the attribute of the block header is legal, the Merkel tree root is correct, the signature is correct,
         // and whether the expanded round of information is valid
