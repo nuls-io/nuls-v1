@@ -71,6 +71,11 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
                 continue;
             }
 
+            if (coin.getLockTime() != 0) {
+                Log.error("contract data error: The amount of the transfer cannot be locked(UTXO status error).");
+                return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.UTXO_STATUS_CHANGE);
+            }
+
             if (!ArraysTool.arrayEquals(owner, contractAddress)) {
                 Log.error("contract data error: The receiver is not the contract address.");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);

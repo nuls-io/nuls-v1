@@ -25,6 +25,7 @@
 package io.nuls.contract.ledger.service;
 
 import io.nuls.account.model.Balance;
+import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -52,5 +53,5 @@ public interface ContractUtxoService {
 
     Result deleteUtxoOfTransaction(Transaction tx);
 
-    Result<BigInteger> getBalance(byte[] address);
+    Result<ContractBalance> getBalance(byte[] address);
 }
