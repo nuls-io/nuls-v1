@@ -108,8 +108,8 @@ public class VMContext {
     /**
      * @param address
      */
-    public BigInteger getBalance(byte[] address) {
-        Result<ContractBalance> result = contractUtxoService.getBalance(address);
+    public BigInteger getBalance(byte[] address, Long blockHeight) {
+        Result<ContractBalance> result = contractUtxoService.getBalance(address, blockHeight);
         if(result.isSuccess()) {
             ContractBalance balance = result.getData();
             // pierre test comment out

@@ -197,7 +197,7 @@ public class ContractBalanceManager {
      * @param bestHeight
      * @return
      */
-    public Result<ContractBalance> getBalance(byte[] address, Long bestHeight) {
+    public Result<ContractBalance> getBalance(byte[] address, Long blockHeight) {
         lock.lock();
         try {
             if (address == null || address.length != Address.ADDRESS_LENGTH) {
@@ -221,7 +221,7 @@ public class ContractBalanceManager {
                     } else {
                         // 真实余额区有值时，深度复制这个值到临时余额区，避免真实余额被临时余额所影响
                         // 刷新处理余额中的锁定余额
-                        this.handleLockedBalances(balance, bestHeight);
+                        this.handleLockedBalances(balance, blockHeight);
                         balance = depthClone(balance);
                         tempBalanceMap.put(addressKey, balance);
                     }
@@ -233,7 +233,7 @@ public class ContractBalanceManager {
                     balanceMap.put(addressKey, balance);
                 } else {
                     // 刷新处理余额中的锁定余额
-                    this.handleLockedBalances(balance, bestHeight);
+                    this.handleLockedBalances(balance, blockHeight);
                 }
             }
 
@@ -243,7 +243,7 @@ public class ContractBalanceManager {
         }
     }
 
-    private void handleLockedBalances(ContractBalance balance, Long bestHeight) {
+    private void handleLockedBalances(ContractBalance balance, Long blockHeight) {
         balance.setLocked(Na.ZERO);
         balance.setUsableConsensusReward(Na.ZERO);
         Collection<Coin> lockedCoins = balance.getConsensusRewardCoins().values();
@@ -252,7 +252,7 @@ public class ContractBalanceManager {
         int size = list.size();
         for(int i = 0; i < size; i++) {
             coin = list.get(i);
-            if(coin.usable(bestHeight)) {
+            if(coin.usable(blockHeight)) {
                 balance.addUsableConsensusReward(coin.getNa());
             } else {
                 balance.addLocked(coin.getNa());

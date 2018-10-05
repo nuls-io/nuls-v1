@@ -54,4 +54,6 @@ public interface ContractUtxoService {
     Result deleteUtxoOfTransaction(Transaction tx);
 
     Result<ContractBalance> getBalance(byte[] address);
+
+    Result<ContractBalance> getBalance(byte[] address, Long blockHeight);
 }
