@@ -152,7 +152,8 @@ public class BlockProcess {
             //最低覆盖率不能小于60%
             Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
-        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 1000) {// pierre test comment out
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 20) {// pierre test comment out
+            //todo 改成配置文件
             //延迟块数不能小于1000
             Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
