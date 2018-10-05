@@ -458,7 +458,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (account == null) {
             BigInteger balance = BigInteger.ZERO;
             if (vmContext != null) {
-                balance = vmContext.getBalance(address);
+                balance = vmContext.getBalance(address, blockNumber);
             }
             account = new ProgramAccount(address, balance);
             accounts.put(addressWrapper, account);

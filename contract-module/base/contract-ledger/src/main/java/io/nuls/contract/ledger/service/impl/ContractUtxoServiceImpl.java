@@ -277,16 +277,25 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
 
     @Override
     public Result<ContractBalance> getBalance(byte[] address) {
+        return getBalance(address, null);
+    }
+
+    @Override
+    public Result<ContractBalance> getBalance(byte[] address, Long blockHeight) {
         if (address == null || address.length != Address.ADDRESS_LENGTH) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
+        ContractBalance contractBalance;
+        if(blockHeight != null) {
+            contractBalance = contractBalanceManager.getBalance(address, blockHeight).getData();
+        } else {
+            contractBalance = contractBalanceManager.getBalance(address).getData();
+        }
 
-        ContractBalance contractBalance = contractBalanceManager.getBalance(address).getData();
         if(contractBalance == null) {
             return Result.getFailed(ContractErrorCode.DATA_ERROR);
         }
 
         return Result.getSuccess().setData(contractBalance);
     }
-
 }
