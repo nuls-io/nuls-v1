@@ -26,6 +26,7 @@ package io.nuls.contract.util;
 
 
 import io.nuls.contract.entity.BlockHeaderDto;
+import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.tools.str.StringUtils;
@@ -108,9 +109,11 @@ public class VMContext {
      * @param address
      */
     public BigInteger getBalance(byte[] address) {
-        Result<BigInteger> result = contractUtxoService.getBalance(address);
+        Result<ContractBalance> result = contractUtxoService.getBalance(address);
         if(result.isSuccess()) {
-            return result.getData();
+            ContractBalance balance = result.getData();
+            // pierre test comment out
+            return BigInteger.valueOf(balance.getRealUsable().getValue());
         }
         return BigInteger.ZERO;
     }

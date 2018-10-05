@@ -114,6 +114,7 @@ public class ContractBalanceManager {
             try {
                 coin.parse(coinEntry.getValue(), 0);
                 //strAddress = asString(coin.getOwner());
+                coin.setKey(asString(coinEntry.getKey()));
                 strAddress = asString(coin.getAddress());
             } catch (NulsException e) {
                 Log.error("parse contract coin error form db", e);
@@ -124,13 +125,11 @@ public class ContractBalanceManager {
                 balance = new ContractBalance();
                 balanceMap.put(strAddress, balance);
             }
-            if (coin.usable()) {
-                balance.addUsable(coin.getNa());
+            // 共识奖励的utxo
+            if(coin.getLockTime() != 0) {
+                balance.getConsensusRewardCoins().put(coin.getKey(), coin);
             } else {
-                if(!balance.getLockedCoins().containsKey(coin.getKey())) {
-                    balance.getLockedCoins().put(coin.getKey(), coin);
-                    balance.addLocked(coin.getNa());
-                }
+                balance.addUsable(coin.getNa());
             }
         }
     }
@@ -152,11 +151,11 @@ public class ContractBalanceManager {
                         balance = new ContractBalance();
                         balanceMap.put(strAddress, balance);
                     }
-                    if (coin.usable()) {
-                        balance.minusUsable(coin.getNa());
+                    // 共识奖励的utxo
+                    if(coin.getLockTime() != 0) {
+                        balance.getConsensusRewardCoins().remove(coin.getKey());
                     } else {
-                        balance.minusLocked(coin.getNa());
-                        balance.getLockedCoins().remove(coin.getKey());
+                        balance.minusUsable(coin.getNa());
                     }
                 }
             }
@@ -169,13 +168,11 @@ public class ContractBalanceManager {
                         balance = new ContractBalance();
                         balanceMap.put(strAddress, balance);
                     }
-                    if (coin.usable()) {
-                        balance.addUsable(coin.getNa());
+                    // 共识奖励的utxo
+                    if(coin.getLockTime() != 0) {
+                        balance.getConsensusRewardCoins().put(coin.getKey(), coin);
                     } else {
-                        if(!balance.getLockedCoins().containsKey(coin.getKey())) {
-                            balance.getLockedCoins().put(coin.getKey(), coin);
-                            balance.addLocked(coin.getNa());
-                        }
+                        balance.addUsable(coin.getNa());
                     }
                 }
             }
@@ -191,6 +188,16 @@ public class ContractBalanceManager {
      * @return
      */
     public Result<ContractBalance> getBalance(byte[] address) {
+        return getBalance(address, NulsContext.getInstance().getBestHeight());
+    }
+    /**
+     * 获取账户余额
+     *
+     * @param address
+     * @param bestHeight
+     * @return
+     */
+    public Result<ContractBalance> getBalance(byte[] address, Long bestHeight) {
         lock.lock();
         try {
             if (address == null || address.length != Address.ADDRESS_LENGTH) {
@@ -198,7 +205,7 @@ public class ContractBalanceManager {
             }
 
             String addressKey = asString(address);
-            ContractBalance balance = null;
+            ContractBalance balance;
             // 打包或验证区块前创建一个临时余额区，实时更新余额，打包完或验证区块后移除
             Map<String, ContractBalance> tempBalanceMap = tempBalanceMapManager.get();
             if(tempBalanceMap != null) {
@@ -213,6 +220,8 @@ public class ContractBalanceManager {
                         tempBalanceMap.put(addressKey, balance);
                     } else {
                         // 真实余额区有值时，深度复制这个值到临时余额区，避免真实余额被临时余额所影响
+                        // 刷新处理余额中的锁定余额
+                        this.handleLockedBalances(balance, bestHeight);
                         balance = depthClone(balance);
                         tempBalanceMap.put(addressKey, balance);
                     }
@@ -223,8 +232,8 @@ public class ContractBalanceManager {
                     balance = new ContractBalance();
                     balanceMap.put(addressKey, balance);
                 } else {
-                    // 处理余额中的锁定余额
-                    this.handleLockedBalances(balance);
+                    // 刷新处理余额中的锁定余额
+                    this.handleLockedBalances(balance, bestHeight);
                 }
             }
 
@@ -234,16 +243,19 @@ public class ContractBalanceManager {
         }
     }
 
-    private void handleLockedBalances(ContractBalance balance) {
-        Collection<Coin> lockedCoins = balance.getLockedCoins().values();
+    private void handleLockedBalances(ContractBalance balance, Long bestHeight) {
+        balance.setLocked(Na.ZERO);
+        balance.setUsableConsensusReward(Na.ZERO);
+        Collection<Coin> lockedCoins = balance.getConsensusRewardCoins().values();
         List<Coin> list = new ArrayList<>(lockedCoins);
-        for(Coin coin : list) {
-            if(coin.usable()) {
-                balance.minusLocked(coin.getNa());
-                balance.getLockedCoins().remove(coin.getKey());
-                balance.addUsable(coin.getNa());
+        Coin coin;
+        int size = list.size();
+        for(int i = 0; i < size; i++) {
+            coin = list.get(i);
+            if(coin.usable(bestHeight)) {
+                balance.addUsableConsensusReward(coin.getNa());
             } else {
-                break;
+                balance.addLocked(coin.getNa());
             }
         }
 
@@ -253,14 +265,14 @@ public class ContractBalanceManager {
         if(contractBalance == null) {
             return null;
         }
-        LinkedHashMap<String, Coin> lockedCoins = contractBalance.getLockedCoins();
+        LinkedHashMap<String, Coin> lockedCoins = contractBalance.getConsensusRewardCoins();
         LinkedHashMap<String, Coin> lockedCoinsClone = MapUtil.createLinkedHashMap(lockedCoins.size());
         Collection<Coin> values = lockedCoins.values();
         for(Coin coin : values) {
             lockedCoinsClone.put(coin.getKey(), coin);
         }
         ContractBalance result = new ContractBalance(Na.valueOf(contractBalance.getUsable().getValue()),
-                Na.valueOf(contractBalance.getLocked().getValue()), lockedCoinsClone);
+                Na.valueOf(contractBalance.getLocked().getValue()), Na.valueOf(contractBalance.getUsableConsensusReward().getValue()), lockedCoinsClone);
         return result;
     }
 
