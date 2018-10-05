@@ -4,11 +4,11 @@
   "txs": [
     {
       "address": "Nse64QEsc4yEHNfeds5Gk3rftGmCvssc",
-      "amount": 500000000,
+      "amount": 50000000,
       "lockTime": 0
     },{
       "address": "Nse4N9aeec5ViyeQnjanJzW7NjtqvV8n",
-      "amount": 500000000,
+      "amount": 50000000,
       "lockTime": 0
     }
   ],
