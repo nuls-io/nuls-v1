@@ -739,7 +739,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     // 刷新临时余额
                     if(contractExecutedResult.isSuccess()) {
                         if(tx instanceof CallContractTransaction) {
-                            this.refreshTempBalance((CallContractTransaction) tx, contractExecutedResult);
+                            this.refreshTempBalance((CallContractTransaction) tx, contractExecutedResult, height);
                         }
                     } else {
                         // 合约调用失败，把需要退还的UTXO记录到结果对象中
@@ -788,7 +788,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
             Result<ContractResult> result = callContract(track, height, stateRoot, callContractData);
             byte[] contractAddress = callContractData.getContractAddress();
-            BigInteger preBalance = vmContext.getBalance(contractAddress);
+            BigInteger preBalance = vmContext.getBalance(contractAddress, height);
             ContractResult contractResult = result.getData();
             if(!contractResult.isSuccess()) {
                 Log.info("contractResult failed. {}", contractResult.toString());
@@ -796,7 +796,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             contractResult.setPreBalance(preBalance);
             // 刷新临时余额
             if(result.isSuccess()) {
-                this.refreshTempBalance(callContractTransaction, contractResult);
+                this.refreshTempBalance(callContractTransaction, contractResult, height);
             } else {
                 // 合约调用失败，把需要退还的UTXO记录到结果对象中
                 contractResult.setValue(callContractData.getValue());
@@ -812,10 +812,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
     }
 
-    private void refreshTempBalance(CallContractTransaction callContractTransaction, ContractResult contractExecutedResult) {
+    private void refreshTempBalance(CallContractTransaction callContractTransaction, ContractResult contractExecutedResult, Long height) {
         CallContractData callContractData = callContractTransaction.getTxData();
         byte[] contractAddress = callContractData.getContractAddress();
-        BigInteger preBalance = vmContext.getBalance(contractAddress);
+        BigInteger preBalance = vmContext.getBalance(contractAddress, height);
         contractExecutedResult.setPreBalance(preBalance);
         // 增加转入
         long value = callContractData.getValue();
