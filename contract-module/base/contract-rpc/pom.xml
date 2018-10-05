@@ -5,14 +5,14 @@
     <parent>
         <artifactId>contract-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.contract-module</groupId>
     <artifactId>contract-rpc</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
     <name>contract-rpc</name>
 
@@ -50,13 +50,13 @@
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-base</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
 
     </dependencies>

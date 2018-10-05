@@ -45,6 +45,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.ChainLog;
@@ -116,17 +117,21 @@ public class ForkChainProcess {
                 long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
                 BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
                 byte[] rightHash = null;
+                byte[] rightAddress = null;
                 //String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
                 byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
+                boolean sameAddress = false;
                 //如果高度相同，则排序选一个hash，作为大家都认同的块
                 if (newChainBlockHeader.getHeight() == newChainHeight) {
                     byte[] newChainBlockHash = newChainBlockHeader.getHash().getDigestBytes();
                     rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
+                    sameAddress = ArraysTool.arrayEquals(forkChainBlockHeader.getPackingAddress(), newChainBlockHeader.getPackingAddress());
                 }
+                boolean hashEquals = Arrays.equals(forkChainBlockHash, rightHash);
                 if (newChainHeight > newestBlockHeight
                         || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
-                        || (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash))) {
-                    if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
+                        || (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress)) {
+                    if (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
                         Log.info("-+-+-+-+-+-+-+-+- height: " + newChainHeight + ", Right hash：" + Hex.encode(rightHash));
                         /** ******************************************************************************************************** */
@@ -465,7 +470,7 @@ public class ForkChainProcess {
 
         List<Block> successList = new ArrayList<>();
         try {
-            changeSuccess = doChange(successList,originalForkChain,verifyResultList);
+            changeSuccess = doChange(successList, originalForkChain, verifyResultList);
         } catch (Exception e) {
             Log.error(e);
             changeSuccess = false;
@@ -555,7 +560,7 @@ public class ForkChainProcess {
 
                 // 区块中可以消耗的最大Gas总量，超过这个值，如果还有消耗GAS的合约交易，则本区块中不再继续验证区块
                 if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                    if(ContractUtil.isGasCostContractTransaction(tx)) {
+                    if (ContractUtil.isGasCostContractTransaction(tx)) {
                         Log.info("verify block failed: Excess contract transaction detected.");
                         changeSuccess = false;
                         break;
