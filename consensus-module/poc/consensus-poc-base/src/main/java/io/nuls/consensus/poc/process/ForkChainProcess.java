@@ -511,8 +511,6 @@ public class ForkChainProcess {
         //add new block
         List<Block> addBlockList = originalForkChain.getChain().getBlockList();
 
-        Long newBestHeight = addBlockList.get(addBlockList.size() - 1).getHeader().getHeight();
-
         Result<Block> preBlockResult = blockService.getBlock(addBlockList.get(0).getHeader().getPreHash());
         Block preBlock = preBlockResult.getData();
         Block newBlock;
@@ -534,8 +532,7 @@ public class ForkChainProcess {
             byte[] stateRoot = ConsensusTool.getStateRoot(preBlock.getHeader());
             preBlock = newBlock;
             byte[] receiveStateRoot = ConsensusTool.getStateRoot(newBlock.getHeader());
-            Result<ContractResult> invokeContractResult = null;
-            ContractResult contractResult = null;
+            ContractResult contractResult;
             Map<String, Coin> contractUsedCoinMap = new HashMap<>();
             int totalGasUsed = 0;
 
@@ -616,8 +613,6 @@ public class ForkChainProcess {
             for (ContractResult result : contractResultList) {
                 result.setStateRoot(stateRoot);
             }
-
-            //stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
 
             // 验证世界状态根
             if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {

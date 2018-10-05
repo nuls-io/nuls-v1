@@ -276,7 +276,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
     }
 
     @Override
-    public Result<BigInteger> getBalance(byte[] address) {
+    public Result<ContractBalance> getBalance(byte[] address) {
         if (address == null || address.length != Address.ADDRESS_LENGTH) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
@@ -285,11 +285,8 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
         if(contractBalance == null) {
             return Result.getFailed(ContractErrorCode.DATA_ERROR);
         }
-        // pierre test comment out
-        BigInteger balance = BigInteger.valueOf(contractBalance.getUsable().getValue());
-        //BigInteger balance = BigInteger.valueOf(contractBalance.getBalance().getValue());
 
-        return Result.getSuccess().setData(balance);
+        return Result.getSuccess().setData(contractBalance);
     }
 
 }
