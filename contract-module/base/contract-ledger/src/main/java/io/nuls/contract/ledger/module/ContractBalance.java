@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.ledger.module;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
@@ -43,50 +44,62 @@ public class ContractBalance implements Serializable {
 
     private Na usable;
 
-    private LinkedHashMap<String, Coin> lockedCoins;
+    private Na usableConsensusReward;
+
+    private LinkedHashMap<String, Coin> consensusRewardCoins;
 
     public ContractBalance() {
-        this.balance = Na.ZERO;
         this.locked = Na.ZERO;
         this.usable = Na.ZERO;
-        this.lockedCoins = MapUtil.createLinkedHashMap(64);
+        this.usableConsensusReward = Na.ZERO;
+        this.consensusRewardCoins = MapUtil.createLinkedHashMap(64);
     }
 
-    public ContractBalance(Na usable, Na locked, LinkedHashMap<String, Coin> lockedCoins) {
-        if(usable == null) {
+    public ContractBalance(Na usable, Na locked, Na usableConsensusReward, LinkedHashMap<String, Coin> lockedCoins) {
+        if (usable == null) {
             usable = Na.ZERO;
         }
-        if(locked == null) {
+        if (locked == null) {
             locked = Na.ZERO;
         }
-        this.lockedCoins = lockedCoins;
+        if (usableConsensusReward == null) {
+            usableConsensusReward = Na.ZERO;
+        }
         this.usable = usable;
         this.locked = locked;
+        this.usableConsensusReward = usableConsensusReward;
+        this.consensusRewardCoins = lockedCoins;
+
     }
 
     public Na getBalance() {
-        this.balance = this.usable.add(locked);
+        this.balance = this.getRealUsable().add(locked);
         return balance;
-    }
-
-    public Na getLocked() {
-        return locked;
     }
 
     public void setLocked(Na locked) {
         this.locked = locked;
     }
 
+    public Na getLocked() {
+        return locked;
+    }
+
+    @JsonIgnore
+    public Na getRealUsable() {
+        if (usableConsensusReward == null) {
+            usableConsensusReward = Na.ZERO;
+        }
+        return usable.add(usableConsensusReward);
+    }
+
     public Na getUsable() {
         return usable;
     }
 
-    public void setUsable(Na usable) {
-        this.usable = usable;
-    }
-
-    public LinkedHashMap<String, Coin> getLockedCoins() {
-        return lockedCoins;
+    @JsonIgnore
+    public LinkedHashMap<String, Coin> getConsensusRewardCoins() {
+        return consensusRewardCoins;
     }
 
     public void addLocked(Na locked) {
@@ -97,11 +110,20 @@ public class ContractBalance implements Serializable {
         this.usable = this.usable.add(usable);
     }
 
-    public void minusLocked(Na locked) {
-        this.locked = this.locked.minus(locked);
-    }
-
     public void minusUsable(Na usable) {
         this.usable = this.usable.minus(usable);
     }
+
+    public Na getUsableConsensusReward() {
+        return usableConsensusReward;
+    }
+
+    public void setUsableConsensusReward(Na usableConsensusReward) {
+        this.usableConsensusReward = usableConsensusReward;
+    }
+
+    public void addUsableConsensusReward(Na usableConsensusReward) {
+        this.usableConsensusReward = this.usableConsensusReward.add(usableConsensusReward);
+    }
+
 }

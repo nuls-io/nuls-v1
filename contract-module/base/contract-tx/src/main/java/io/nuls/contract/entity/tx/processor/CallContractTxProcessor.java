@@ -104,7 +104,6 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 Log.error(e);
             }
             CallContractData txData = tx.getTxData();
-            byte[] sender = txData.getSender();
             byte[] contractAddress = txData.getContractAddress();
             Result<ContractAddressInfoPo> contractAddressInfo = contractAddressStorageService.getContractAddressInfo(contractAddress);
             ContractAddressInfoPo po = contractAddressInfo.getData();

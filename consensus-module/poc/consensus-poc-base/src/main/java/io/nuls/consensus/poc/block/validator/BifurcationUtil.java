@@ -139,9 +139,6 @@ public class BifurcationUtil {
                     int s = i * 2;
                     headers[s] = evidence.getBlockHeader1().serialize();
                     headers[++s] = evidence.getBlockHeader2().serialize();
-                   /* if(s == headers.length - 1){
-                        headerTime = evidence.getBlockHeader1().getTime();
-                    }*/
                 }
                 redPunishData.setEvidence(ArraysTool.concatenate(headers));
             } catch (Exception e) {

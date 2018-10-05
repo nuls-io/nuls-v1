@@ -415,7 +415,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (int i = 0; i < tos.size(); i++) {
                 Coin to = tos.get(i);
 
-                // 如果不是调用合约的类型，并且合约地址作为nuls接收者，则返回错误，非合约交易不能转入nuls
+                // 如果不是调用合约的类型，并且合约地址作为nuls接收者，则返回错误，非合约交易不能转入nuls(CoinBase交易不过此验证)
                 if(ContractConstant.TX_TYPE_CALL_CONTRACT != transaction.getType()
                         && AddressTool.validContractAddress(to.getOwner())) {
                     Log.error("Ledger verify error: {}.", ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER.getEnMsg());

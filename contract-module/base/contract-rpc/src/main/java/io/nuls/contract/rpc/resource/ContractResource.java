@@ -39,6 +39,7 @@ import io.nuls.contract.entity.txdata.ContractData;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.helper.VMHelper;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
+import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractTransactionInfoService;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.ledger.util.ContractLedgerUtil;
@@ -859,20 +860,6 @@ public class ContractResource implements InitializingBean {
                 Log.error("createTxHash parse error.", e);
             }
 
-            // tx count
-            Result<List<TransactionInfoPo>> txInfoPoListResult = contractTransactionInfoService.getTxInfoList(contractAddressBytes);
-            List<TransactionInfoPo> orginTxInfoPoList = txInfoPoListResult.getData();
-            List<TransactionInfoPo> txInfoPoList = new ArrayList<>();
-            do {
-                if(orginTxInfoPoList == null || orginTxInfoPoList.size() == 0) {
-                    break;
-                }
-
-                Stream<TransactionInfoPo> transactionInfoPoStream = orginTxInfoPoList.stream().filter(po -> po.getTxType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER);
-                txInfoPoList = transactionInfoPoStream.collect(Collectors.toList());
-            } while (false);
-
-
             if(hasAccountAddress) {
                 // 所有收藏的合约列表
                 boolean isCollect = false;
@@ -887,8 +874,6 @@ public class ContractResource implements InitializingBean {
             }
             resultMap.put("address", contractAddress);
             resultMap.put("creater", AddressTool.getStringAddressByBytes(contractAddressInfoPo.getSender()));
-            resultMap.put("balance", vmContext.getBalance(contractAddressBytes));
-            resultMap.put("txCount", txInfoPoList.size());
             resultMap.put("createTime", contractAddressInfoPo.getCreateTime());
             resultMap.put("blockHeight", contractAddressInfoPo.getBlockHeight());
             resultMap.put("isNrc20", contractAddressInfoPo.isNrc20());
@@ -930,11 +915,13 @@ public class ContractResource implements InitializingBean {
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
         }
 
-        Result<BigInteger> result = contractUtxoService.getBalance(contractAddressBytes);
-        BigInteger balance = (BigInteger) result.getData();
-        Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
+        Result<ContractBalance> result = contractUtxoService.getBalance(contractAddressBytes);
+        ContractBalance balance = (ContractBalance) result.getData();
+        Map<String, Object> resultMap = MapUtil.createLinkedHashMap(4);
         resultMap.put("address", contractAddress);
-        resultMap.put("balance", balance == null ? BigInteger.ZERO : balance);
+        resultMap.put("balance", balance == null ? Na.ZERO : balance.getBalance().toString());
+        resultMap.put("usable", balance == null ? Na.ZERO : balance.getRealUsable().toString());
+        resultMap.put("locked", balance == null ? Na.ZERO : balance.getLocked().toString());
         return Result.getSuccess().setData(resultMap).toRpcClientResult();
     }
 
