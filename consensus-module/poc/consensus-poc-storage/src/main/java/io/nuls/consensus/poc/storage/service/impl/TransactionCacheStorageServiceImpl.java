@@ -37,13 +37,15 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.TransactionManager;
 
 import java.io.IOException;
 
 @Component
 public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
 
-    private final static String TRANSACTION_CACHE_KEY_NAME = "transaction_cache";
+    private final static String TRANSACTION_CACHE_KEY_NAME = "transactions_cache";
     private final static byte[] LAST_KEY = "last_key".getBytes();
     private final static byte[] START_KEY = "start_key".getBytes();
     private int lastIndex = 0;
@@ -80,7 +82,13 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
             return false;
         }
         // 保存交易
-        Result result = dbService.putModel(TRANSACTION_CACHE_KEY_NAME, txHashBytes, tx);
+        Result result = null;
+        try {
+            result = dbService.put(TRANSACTION_CACHE_KEY_NAME, txHashBytes, tx.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return false;
+        }
 
 //        if(!result.isSuccess()) {
 //            return result.isSuccess();
@@ -99,7 +107,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
     @Override
     public int getStartIndex() {
         byte[] lastIndexBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, START_KEY);
-        if(lastIndexBytes == null) {
+        if (lastIndexBytes == null) {
             return 0;
         }
         return Util.byteToInt(lastIndexBytes);
@@ -111,11 +119,20 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         byte[] startIndexBytes = Util.intToBytes(startIndex);
 
         byte[] hashBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, startIndexBytes);
-        if(hashBytes == null) {
+        if (hashBytes == null) {
             return null;
         }
 
-        Transaction tx = dbService.getModel(TRANSACTION_CACHE_KEY_NAME, hashBytes, Transaction.class);
+        byte[] txBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, hashBytes);
+        Transaction tx = null;
+        if (null != txBytes) {
+            try {
+                tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
+            } catch (Exception e) {
+                Log.error(e);
+                return null;
+            }
+        }
 
         startIndex++;
 //        dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(startIndex));
@@ -135,13 +152,22 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        Transaction tx = dbService.getModel(TRANSACTION_CACHE_KEY_NAME, hashBytes, Transaction.class);
+        byte[] txBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, hashBytes);
+        Transaction tx = null;
+        if (null != txBytes) {
+            try {
+                tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
+            } catch (Exception e) {
+                Log.error(e);
+                return null;
+            }
+        }
         return tx;
     }
 
     @Override
     public boolean removeTx(NulsDigestData hash) {
-        if(hash == null) {
+        if (hash == null) {
             return false;
         }
         try {
