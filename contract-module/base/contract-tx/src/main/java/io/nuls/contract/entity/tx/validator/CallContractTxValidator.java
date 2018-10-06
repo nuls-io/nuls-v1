@@ -33,6 +33,7 @@ import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -51,6 +52,7 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
     @Override
     public ValidateResult validate(CallContractTransaction tx) throws NulsException {
         CallContractData txData = tx.getTxData();
+        Na transferNa = Na.valueOf(txData.getValue());
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
@@ -60,6 +62,7 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
+        Na contractReceivedNa = Na.ZERO;
         for (Coin coin : tx.getCoinData().getTo()) {
             byte[] owner = coin.getOwner();
             if (owner.length > 23) {
@@ -79,12 +82,18 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
             if (!ArraysTool.arrayEquals(owner, contractAddress)) {
                 Log.error("contract data error: The receiver is not the contract address.");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
+            } else {
+                contractReceivedNa = contractReceivedNa.add(coin.getNa());
             }
 
             if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
                 Log.error("contract data error: The amount of the transfer is too small.");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TOO_SMALL_AMOUNT);
             }
+        }
+        if (contractReceivedNa.isLessThan(transferNa)) {
+            Log.error("contract data error: Insufficient amount to transfer to the contract address.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.INVALID_AMOUNT);
         }
         return ValidateResult.getSuccessResult();
     }
