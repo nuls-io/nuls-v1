@@ -45,9 +45,48 @@ import java.util.List;
  * @date: 2018/10/5
  */
 public class ScriptTransactionTestTool extends BaseTest {
-
     //@Test
-    public void test() throws IOException {
+    public void test() throws Exception {
+        NulsContext.MAIN_NET_VERSION = 2;
+
+        TransferTransaction tx = new TransferTransaction();
+        tx.setRemark("test script".getBytes());
+
+
+        CoinData data = new CoinData();
+        Coin coin = new Coin();
+        coin.setOwner(ArraysTool.concatenate(Hex.decode("0020dab71b3cd376e2ccf2f290e384d2917cc0929f8de582f63a01fc15144fe38371"), new byte[]{0}));
+        coin.setNa(Na.parseNuls(9997));
+        coin.setLockTime(0);
+        List<Coin> from = new ArrayList<>();
+        from.add(coin);
+        data.setFrom(from);
+        Coin toCoin = new Coin();
+        toCoin.setLockTime(0);
+        Script script = ScriptBuilder.createOutputScript(AddressTool.getAddress("NsdvuzHyQJEJkz4LEKweDeCs97845xN9"),1);
+        toCoin.setOwner(script.getProgram());
+        toCoin.setNa(Na.parseNuls(9994));
+
+        List<Coin> to = new ArrayList<>();
+        to.add(toCoin);
+        data.setTo(to);
+        tx.setCoinData(data);
+
+//        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1,Hex.decode("00b491621168dffd80c4684f7445ef378ba4d381b2fe2a7b1fbf905864ed8fbeb9")));
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1,Hex.decode("4b19caef601a45531b7068430a5b0e380a004001f14bfec025ddf16d5d87fa8e")));
+        List<ECKey> signEckeys = new ArrayList<>();
+        signEckeys.add(ecKey);
+        List<ECKey> scriptEckeys = new ArrayList<>();
+        SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
+
+        String param = "{\"txHex\": \"" + Hex.encode(tx.serialize()) + "\"}";
+        String res = post("http://127.0.0.1:7001/api/accountledger/transaction/valiTransaction", param, "utf-8");
+        System.out.println(res);
+        res = post("http://127.0.0.1:7001/api/accountledger/transaction/broadcast", param, "utf-8");
+        System.out.println(res);
+    }
+    //@Test
+    public void test1() throws IOException {
 
         NulsContext.MAIN_NET_VERSION = 2;
 

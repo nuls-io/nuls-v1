@@ -41,7 +41,6 @@ import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -60,7 +59,6 @@ import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.validator.HeaderSignValidator;
 import io.nuls.protocol.service.BlockService;
-import sun.nio.cs.FastCharsetProvider;
 
 import java.io.IOException;
 import java.util.*;
@@ -256,7 +254,7 @@ public class ChainContainer implements Cloneable {
             return Result.getFailed();
         }
 
-        if(NulsContext.MAIN_NET_VERSION > 1) {
+        if (NulsContext.MAIN_NET_VERSION > 1) {
             //收到的区块头里不包含版本信息时，默认区块版本号为1.0
             if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
                 Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
@@ -346,7 +344,7 @@ public class ChainContainer implements Cloneable {
             return Result.getFailed();
         }
 
-        boolean success = verifyBaseTx(block, currentRound, member);
+        boolean success = verifyPunishTx(block, currentRound, member);
         if (!success) {
             Log.error("block height " + blockHeader.getHeight() + " verify tx error! hash :" + blockHeader.getHash());
             return Result.getFailed();
@@ -377,9 +375,9 @@ public class ChainContainer implements Cloneable {
         return true;
     }
 
-    // Verify conbase transactions and penalties
-    // 验证conbase交易和处罚交易
-    public boolean verifyBaseTx(Block block, MeetingRound currentRound, MeetingMember member) {
+    // Verify penalties
+    // 验证处罚交易
+    public boolean verifyPunishTx(Block block, MeetingRound currentRound, MeetingMember member) {
         List<Transaction> txs = block.getTxs();
         Transaction tx = txs.get(0);
         if (tx.getType() != ProtocolConstant.TX_TYPE_COINBASE) {
@@ -410,8 +408,8 @@ public class ChainContainer implements Cloneable {
         YellowPunishTransaction yellowPunishTransaction = null;
         try {
             yellowPunishTransaction = ConsensusTool.createYellowPunishTx(chain.getBestBlock(), member, currentRound);
-            if (yellowPunishTransaction == yellowPunishTx) {
-                return true;
+            if (yellowPunishTransaction == null && yellowPunishTx == null) {
+                //继续
             } else if (yellowPunishTransaction == null || yellowPunishTx == null) {
                 BlockLog.debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                Log.error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
@@ -427,10 +425,7 @@ public class ChainContainer implements Cloneable {
 //            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
             return false;
         }
-        if (null == yellowPunishTransaction && !redPunishTxList.isEmpty()) {
-            BlockLog.debug("the red punish is wrong!");
-            return false;
-        } else {
+        if (!redPunishTxList.isEmpty()) {
             List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
             Set<String> punishAddress = new HashSet<>();
             for (byte[] address : addressList) {
@@ -442,16 +437,16 @@ public class ChainContainer implements Cloneable {
                     punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
                 }
             }
-            if (punishAddress.size() != redPunishTxList.size()) {
-                BlockLog.debug("the count of red punishs is wrong!" + block.getHeader().getHash());
-                return false;
-            }
+            int countOfTooMuchYP = 0;
             for (RedPunishTransaction redTx : redPunishTxList) {
-                if (!punishAddress.contains(AddressTool.getStringAddressByBytes(redTx.getTxData().getAddress()))) {
-                    BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
-                    return false;
-                }
-                if (NulsContext.MAIN_NET_VERSION > 1 && redTx.getTime() != block.getHeader().getTime()) {
+                RedPunishData data = redTx.getTxData();
+                if (data.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
+                    countOfTooMuchYP++;
+                    if (!punishAddress.contains(AddressTool.getStringAddressByBytes(redTx.getTxData().getAddress()))) {
+                        BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
+                        return false;
+                    }
+                } else if (NulsContext.MAIN_NET_VERSION > 1 && redTx.getTime() != block.getHeader().getTime()) {
                     BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
                     return false;
                 }
@@ -460,7 +455,29 @@ public class ChainContainer implements Cloneable {
                     return result;
                 }
             }
+            if (countOfTooMuchYP != punishAddress.size()) {
+                BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
+                return false;
+            }
 
+        }
+        return true;
+    }
+
+    private boolean verifyYellowPunish(YellowPunishTransaction data) {
+        if (null == data || data.getTxData() == null || data.getTxData().getAddressList() == null || data.getTxData().getAddressList().isEmpty()) {
+            Log.warn(PocConsensusErrorCode.YELLOW_PUNISH_TX_WRONG.getMsg());
+            return false;
+        }
+        List<byte[]> list = data.getTxData().getAddressList();
+        for (byte[] address : list) {
+            if (ConsensusConfig.getSeedNodeStringList().contains(AddressTool.getStringAddressByBytes(address))) {
+                return false;
+            }
+        }
+        if (data.getCoinData() != null) {
+            Log.warn(PocConsensusErrorCode.YELLOW_PUNISH_TX_WRONG.getMsg());
+            return false;
         }
         return true;
     }
