@@ -118,6 +118,8 @@ public interface VersionManagerStorageService {
 
     Long getChangeTxHashBlockHeight();
 
+    void deleteChangeTxHashBlockHeight();
+
     void deleteBlockProtocol(long blockHeight);
 
     void deleteBlockTempProtocol(long blockHeight);
