@@ -492,6 +492,12 @@ public class NulsProtocolProcess {
                     Log.info("@@@@@@@ 回滚后协议块高度：" + blockProtocolInfoPo.getBlockHeight());
                 }
             }
+            //版本为2的时候的特殊处理
+            if (protocolContainer.getVersion() == 2 && protocolContainer.getStatus() != ProtocolContainer.VALID) {
+                getVersionManagerStorageService().deleteChangeTxHashBlockHeight();
+                NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = null;
+            }
+            rollbackMainVersion();
             saveProtocolInfo(protocolContainer);
 
             Log.info("@@@@@@@ 协议状态：" + protocolContainer.getStatus());
@@ -539,6 +545,19 @@ public class NulsProtocolProcess {
             Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolTempInfoPo.getAddressSet().toArray()));
             /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         }
+    }
+
+    private void rollbackMainVersion() {
+        int validVersion = 1;
+        for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+            if (container.getStatus() == ProtocolContainer.VALID) {
+                if (container.getVersion() > validVersion) {
+                    validVersion = container.getVersion();
+                }
+            }
+        }
+        NulsContext.MAIN_NET_VERSION = validVersion;
+        getVersionManagerStorageService().saveMainVersion(validVersion);
     }
 
 }

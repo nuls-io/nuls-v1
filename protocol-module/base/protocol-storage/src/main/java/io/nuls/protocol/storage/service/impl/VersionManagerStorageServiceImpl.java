@@ -277,4 +277,9 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         return height == null ? null : Long.valueOf(Util.byteToInt(height));
     }
 
+    @Override
+    public void deleteChangeTxHashBlockHeight() {
+        dbService.delete(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.CHANGE_HASH_HEIGHT_KEY);
+    }
+
 }
