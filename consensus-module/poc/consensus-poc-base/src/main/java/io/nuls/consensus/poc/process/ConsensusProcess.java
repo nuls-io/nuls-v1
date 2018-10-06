@@ -383,7 +383,7 @@ public class ConsensusProcess {
             }
             // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装消耗GAS智能合约交易
             if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                if(ContractUtil.isGasCostContractTransaction(tx)) {
+                if (ContractUtil.isGasCostContractTransaction(tx)) {
                     txMemoryPool.addInFirst(tx, false);
                     continue;
                 }
@@ -396,12 +396,9 @@ public class ConsensusProcess {
                 continue;
             }
 
-            ValidateResult result = ValidateResult.getSuccessResult();
-            if (!tx.isSystemTx()) {
-                start = System.nanoTime();
-                result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
-                verifyUse += (System.nanoTime() - start);
-            }
+            start = System.nanoTime();
+            ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+            verifyUse += (System.nanoTime() - start);
             start = System.nanoTime();
             if (result.isFailed()) {
                 if (tx == null) {

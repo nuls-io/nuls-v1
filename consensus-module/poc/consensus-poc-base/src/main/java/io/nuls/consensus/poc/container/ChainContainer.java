@@ -426,15 +426,17 @@ public class ChainContainer implements Cloneable {
             return false;
         }
         if (!redPunishTxList.isEmpty()) {
-            List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
             Set<String> punishAddress = new HashSet<>();
-            for (byte[] address : addressList) {
-                MeetingMember item = currentRound.getMemberByAgentAddress(address);
-                if (null == item) {
-                    item = currentRound.getPreRound().getMemberByAgentAddress(address);
-                }
-                if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
-                    punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
+            if (null != yellowPunishTx) {
+                List<byte[]> addressList = yellowPunishTx.getTxData().getAddressList();
+                for (byte[] address : addressList) {
+                    MeetingMember item = currentRound.getMemberByAgentAddress(address);
+                    if (null == item) {
+                        item = currentRound.getPreRound().getMemberByAgentAddress(address);
+                    }
+                    if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+                        punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
+                    }
                 }
             }
             int countOfTooMuchYP = 0;
@@ -446,9 +448,10 @@ public class ChainContainer implements Cloneable {
                         BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                         return false;
                     }
-                } else if (NulsContext.MAIN_NET_VERSION > 1 && redTx.getTime() != block.getHeader().getTime()) {
-                    BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
-                    return false;
+                    if (NulsContext.MAIN_NET_VERSION > 1 && redTx.getTime() != block.getHeader().getTime()) {
+                        BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
+                        return false;
+                    }
                 }
                 boolean result = verifyRedPunish(redTx);
                 if (!result) {
@@ -503,6 +506,9 @@ public class ChainContainer implements Cloneable {
                 return false;
             }
             BlockHeader header = smallBlock.getHeader();
+            if (header.getTime() != data.getTime()) {
+                return false;
+            }
             ValidateResult result = validator.validate(header);
             if (result.isFailed()) {
                 Log.warn(result.getMsg());
@@ -544,8 +550,11 @@ public class ChainContainer implements Cloneable {
                     Log.warn(KernelErrorCode.DATA_NOT_FOUND.getMsg());
                     return false;
                 }
-                if (header1.getHeight() != header2.getHeight()) {
+                if (i == NulsContext.REDPUNISH_BIFURCATION - 1 && header1.getHeight() != header2.getHeight()) {
                     Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                    return false;
+                }
+                if ((header1.getTime() + header2.getTime()) / 2 != data.getTime()) {
                     return false;
                 }
                 ValidateResult result = validator.validate(header1);

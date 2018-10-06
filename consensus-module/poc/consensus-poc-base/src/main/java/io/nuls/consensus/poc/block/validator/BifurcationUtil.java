@@ -147,7 +147,7 @@ public class BifurcationUtil {
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            redPunishTransaction.setTime(header.getTime());
+            redPunishTransaction.setTime((header.getTime() + otherBlockHeader.getTime()) / 2);
             CoinData coinData = null;
             try {
                 coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
