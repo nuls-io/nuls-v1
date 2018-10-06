@@ -129,7 +129,7 @@ public class BifurcationUtil {
             RedPunishData redPunishData = new RedPunishData();
             redPunishData.setAddress(agent.getAgentAddress());
 
-            //long headerTime = 0;
+            long txTime = 0;
             try {
                 //连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
                 byte[][] headers = new byte[NulsContext.REDPUNISH_BIFURCATION * 2][];
@@ -139,6 +139,7 @@ public class BifurcationUtil {
                     int s = i * 2;
                     headers[s] = evidence.getBlockHeader1().serialize();
                     headers[++s] = evidence.getBlockHeader2().serialize();
+                    txTime = (evidence.getBlockHeader1().getTime()+evidence.getBlockHeader2().getTime())/2;
                 }
                 redPunishData.setEvidence(ArraysTool.concatenate(headers));
             } catch (Exception e) {
@@ -147,7 +148,7 @@ public class BifurcationUtil {
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            redPunishTransaction.setTime((header.getTime() + otherBlockHeader.getTime()) / 2);
+            redPunishTransaction.setTime(txTime);
             CoinData coinData = null;
             try {
                 coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);

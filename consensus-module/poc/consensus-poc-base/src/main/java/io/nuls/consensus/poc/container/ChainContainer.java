@@ -550,11 +550,11 @@ public class ChainContainer implements Cloneable {
                     Log.warn(KernelErrorCode.DATA_NOT_FOUND.getMsg());
                     return false;
                 }
-                if (i == NulsContext.REDPUNISH_BIFURCATION - 1 && header1.getHeight() != header2.getHeight()) {
+                if (header1.getHeight() != header2.getHeight()) {
                     Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
                     return false;
                 }
-                if ((header1.getTime() + header2.getTime()) / 2 != data.getTime()) {
+                if (i == NulsContext.REDPUNISH_BIFURCATION - 1 && (header1.getTime() + header2.getTime()) / 2 != data.getTime()) {
                     return false;
                 }
                 ValidateResult result = validator.validate(header1);

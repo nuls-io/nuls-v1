@@ -25,6 +25,7 @@
  */
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -32,6 +33,7 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockExtendsData;
@@ -54,6 +56,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -356,6 +359,7 @@ public class ConsensusProcess {
         header.setTime(bd.getTime());
         tempBlock.setHeader(header);
         List<ContractResult> contractResultList = new ArrayList<>();
+        Set<String> redPunishAddress = new HashSet<>();
         while (true) {
 
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
@@ -382,11 +386,9 @@ public class ConsensusProcess {
                 break;
             }
             // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装消耗GAS智能合约交易
-            if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                if (ContractUtil.isGasCostContractTransaction(tx)) {
-                    txMemoryPool.addInFirst(tx, false);
-                    continue;
-                }
+            if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS && ContractUtil.isGasCostContractTransaction(tx)) {
+                txMemoryPool.addInFirst(tx, false);
+                continue;
             }
             count++;
             start = System.nanoTime();
@@ -396,9 +398,19 @@ public class ConsensusProcess {
                 continue;
             }
 
-            start = System.nanoTime();
-            ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
-            verifyUse += (System.nanoTime() - start);
+            ValidateResult result = ValidateResult.getSuccessResult();
+            if (tx.isSystemTx() && tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                RedPunishTransaction rpTx = (RedPunishTransaction) tx;
+                boolean con = redPunishAddress.add(AddressTool.getStringAddressByBytes(rpTx.getTxData().getAddress())) &&
+                        PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentByAddress(rpTx.getTxData().getAddress()) != null;
+                result.setSuccess(con);
+            } else if (tx.isSystemTx()) {
+                result = ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_NOT_EFFECTIVE);
+            } else {
+                start = System.nanoTime();
+                result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+                verifyUse += (System.nanoTime() - start);
+            }
             start = System.nanoTime();
             if (result.isFailed()) {
                 if (tx == null) {

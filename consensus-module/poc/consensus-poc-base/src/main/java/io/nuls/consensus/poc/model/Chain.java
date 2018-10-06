@@ -29,6 +29,7 @@ package io.nuls.consensus.poc.model;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -138,6 +139,18 @@ public class Chain implements Cloneable {
 
     public void setRedPunishList(List<PunishLogPo> redPunishList) {
         this.redPunishList = redPunishList;
+    }
+
+    public Agent getAgentByAddress(byte[] address) {
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (ArraysTool.arrayEquals(agent.getAgentAddress(), address)) {
+                return agent;
+            }
+        }
+        return null;
     }
 
     @Override

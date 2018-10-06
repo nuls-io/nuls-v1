@@ -116,6 +116,7 @@ public class ConsensusTool {
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         try {
+//            block.getHeader().setExtend(ArraysTool.concatenate(blockData.getExtendsData().serialize(),new byte[]{0,1,0,1,1}));
             block.getHeader().setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
             Log.error(e);
@@ -151,7 +152,7 @@ public class ConsensusTool {
         List<Coin> returnGasList = returnContractSenderNa(txList, unlockHeight);
 
         List<Coin> rewardList = calcReward(txList, member, localRound, unlockHeight);
-        if(!returnGasList.isEmpty()) {
+        if (!returnGasList.isEmpty()) {
             Coin agentReward = rewardList.remove(0);
             rewardList.addAll(returnGasList);
             rewardList.sort(new Comparator<Coin>() {
@@ -181,18 +182,18 @@ public class ConsensusTool {
         // 去重, 可能存在同一个sender发出的几笔合约交易，需要把退还的GasNa累加到一起
         Map<ByteArrayWrapper, Na> returnMap = new HashMap<>();
         List<Coin> returnList = new ArrayList<>();
-        if(txList != null && txList.size() > 0) {
+        if (txList != null && txList.size() > 0) {
             int txType;
             for (Transaction tx : txList) {
                 txType = tx.getType();
-                if(txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
                         || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
                         || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
                     ContractTransaction contractTx = (ContractTransaction) tx;
                     ContractResult contractResult = contractTx.getContractResult();
-                    if(contractResult == null) {
+                    if (contractResult == null) {
                         contractResult = contractService.getContractExecuteResult(tx.getHash());
-                        if(contractResult == null) {
+                        if (contractResult == null) {
                             Log.error("get contract tx contractResult error: " + tx.getHash().getDigestHex());
                             continue;
                         }
@@ -200,7 +201,7 @@ public class ConsensusTool {
                     contractTx.setContractResult(contractResult);
 
                     // 终止合约不消耗Gas，跳过
-                    if(txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+                    if (txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
                         continue;
                     }
                     // 减差额作为退还Gas
@@ -209,7 +210,7 @@ public class ConsensusTool {
                     long txGasUsed = contractData.getGasLimit();
                     long returnGas = 0;
                     Na returnNa = Na.ZERO;
-                    if(txGasUsed > realGasUsed) {
+                    if (txGasUsed > realGasUsed) {
                         returnGas = txGasUsed - realGasUsed;
                         returnNa = Na.valueOf(LongUtils.mul(returnGas, contractData.getPrice()));
                         // 用于计算本次矿工共识奖励 -> 需扣除退还给sender的Gas部分, Call,Create,DeleteContractTransaction 覆写getFee方法来处理
@@ -217,7 +218,7 @@ public class ConsensusTool {
 
                         ByteArrayWrapper sender = new ByteArrayWrapper(contractData.getSender());
                         Na senderNa = returnMap.get(sender);
-                        if(senderNa == null) {
+                        if (senderNa == null) {
                             senderNa = Na.ZERO.add(returnNa);
                         } else {
                             senderNa = senderNa.add(returnNa);
@@ -228,7 +229,7 @@ public class ConsensusTool {
             }
             Set<Map.Entry<ByteArrayWrapper, Na>> entries = returnMap.entrySet();
             Coin returnCoin;
-            for(Map.Entry<ByteArrayWrapper, Na> entry : entries) {
+            for (Map.Entry<ByteArrayWrapper, Na> entry : entries) {
                 returnCoin = new Coin(entry.getKey().getBytes(), entry.getValue(), unlockHeight);
                 returnList.add(returnCoin);
             }
@@ -368,10 +369,8 @@ public class ConsensusTool {
 
     /**
      * 获取停止节点的coinData
-     * @param agent
+     *
      * @param lockTime 锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长。Charlie
-     * @return
-     * @throws IOException
      */
     public static CoinData getStopAgentCoinData(Agent agent, long lockTime) throws IOException {
         return getStopAgentCoinData(agent, lockTime, null);
@@ -467,22 +466,22 @@ public class ConsensusTool {
     }
 
     public static byte[] getStateRoot(BlockHeader blockHeader) {
-        if(blockHeader == null || blockHeader.getExtend() == null) {
+        if (blockHeader == null || blockHeader.getExtend() == null) {
             return null;
         }
         byte[] stateRoot = blockHeader.getStateRoot();
-        if(stateRoot != null && stateRoot.length > 0) {
+        if (stateRoot != null && stateRoot.length > 0) {
             return stateRoot;
         }
         try {
             BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
             stateRoot = extendsData.getStateRoot();
-            if((stateRoot == null || stateRoot.length == 0) && NulsContext.MAIN_NET_VERSION > 1) {
+            if ((stateRoot == null || stateRoot.length == 0) && NulsContext.MAIN_NET_VERSION > 1) {
                 stateRoot = Hex.decode(NulsContext.INITIAL_STATE_ROOT);
             }
             blockHeader.setStateRoot(stateRoot);
             return stateRoot;
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error("parse stateRoot of blockHeader error.", e);
             return null;
         }
