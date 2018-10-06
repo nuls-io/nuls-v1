@@ -400,7 +400,7 @@ public class ChainContainer implements Cloneable {
                 BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                 return false;
-            } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH && ((RedPunishTransaction) transaction).getTxData().getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
+            } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 redPunishTxList.add((RedPunishTransaction) transaction);
             }
         }
