@@ -66,6 +66,7 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
+            System.setProperty("protostuff.runtime.allow_null_array_element", "true");
             System.setProperty("file.encoding", UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);

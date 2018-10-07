@@ -20,6 +20,21 @@
             <artifactId>db</artifactId>
             <version>1.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.nuls.db-module</groupId>
+            <artifactId>db-leveldb</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nuls.ledger-module</groupId>
+            <artifactId>ledger</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>${project.artifactId}-${project.version}</finalName>

@@ -118,7 +118,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
         for(byte i = 0; i < length; i++) {
             byte argCount = byteBuffer.readByte();
             if(argCount == 0) {
-                args[i] = null;
+                args[i] = new String[0];
             } else {
                 String[] arg = new String[argCount];
                 for(byte k = 0; k < argCount; k++) {

@@ -85,7 +85,7 @@ public class LevelDBManager {
                 initBaseDB(dataPath);
 
                 File[] areaFiles = dir.listFiles();
-                DB db = null;
+                DB db;
                 String dbPath = null;
                 for (File areaFile : areaFiles) {
                     if (BASE_AREA_NAME.equals(areaFile.getName())) {
@@ -151,7 +151,7 @@ public class LevelDBManager {
             //skip it
             max = 50;
         }
-        File dir = null;
+        File dir;
         String pathSeparator = System.getProperty("path.separator");
         String unixPathSeparator = ":";
         String rootPath;
@@ -511,7 +511,13 @@ public class LevelDBManager {
         }
         RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
         ModelWrapper modelWrapper = new ModelWrapper(value);
-        byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+        final byte[] bytes;
+        try {
+            bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, buffer);
+        } finally {
+            buffer.clear();
+        }
         return bytes;
     }
 
@@ -638,7 +644,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        Set<byte[]> keySet = null;
+        Set<byte[]> keySet;
         try {
             DB db = AREAS.get(area);
             keySet = new HashSet<>();
@@ -667,7 +673,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<byte[]> keyList = null;
+        List<byte[]> keyList;
         try {
             DB db = AREAS.get(area);
             keyList = new ArrayList<>();
@@ -701,7 +707,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        Set<Entry<byte[], byte[]>> entrySet = null;
+        Set<Entry<byte[], byte[]>> entrySet;
         try {
             DB db = AREAS.get(area);
             entrySet = new HashSet<>();
@@ -735,7 +741,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<byte[], byte[]>> entryList = null;
+        List<Entry<byte[], byte[]>> entryList;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
@@ -779,15 +785,15 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<byte[], T>> entryList = null;
+        List<Entry<byte[], T>> entryList;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
             iterator = db.iterator();
-            byte[] key, bytes;
+            byte[] key;
             Map.Entry<byte[], byte[]> entry;
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
-            T t = null;
+            T t;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
@@ -847,14 +853,13 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<T> list = null;
+        List<T> list;
         try {
             DB db = AREAS.get(area);
             list = new ArrayList<>();
             iterator = db.iterator();
-            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
-            T t = null;
+            T t;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
@@ -882,7 +887,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<byte[]> list = null;
+        List<byte[]> list;
         try {
             DB db = AREAS.get(area);
             list = new ArrayList<>();

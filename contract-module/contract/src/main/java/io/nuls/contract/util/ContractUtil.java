@@ -67,14 +67,14 @@ public class ContractUtil {
             for (int i = 0; i < length; i++) {
                 arg = args[i];
                 if(arg == null) {
-                    two[i] = null;
+                    two[i] = new String[0];
                     continue;
                 }
                 if(arg instanceof String) {
                     String argStr = (String) arg;
-                    // 非String类型参数，若传参是空字符串，则赋值为null，避免数字类型转化异常 -> 空字符串转化为数字
+                    // 非String类型参数，若传参是空字符串，则赋值为空一维数组，避免数字类型转化异常 -> 空字符串转化为数字
                     if(types != null && StringUtils.isBlank(argStr) && !STRING.equalsIgnoreCase(types[i])) {
-                        two[i] = null;
+                        two[i] = new String[0];
                     } else {
                         two[i] = new String[]{argStr};
                     }
@@ -120,7 +120,7 @@ public class ContractUtil {
         if(StringUtils.isBlank(event)) {
             return null;
         }
-        ContractTokenTransferInfoPo po = null;
+        ContractTokenTransferInfoPo po;
         try {
             Map<String, Object> eventMap = JSONUtils.json2map(event);
             String eventName = (String) eventMap.get(CONTRACT_EVENT);
