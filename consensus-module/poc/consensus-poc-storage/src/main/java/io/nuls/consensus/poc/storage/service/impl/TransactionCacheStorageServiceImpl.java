@@ -41,6 +41,7 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionManager;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
@@ -49,7 +50,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
     private final static byte[] LAST_KEY = "last_key".getBytes();
     private final static byte[] START_KEY = "start_key".getBytes();
     private int lastIndex = 0;
-    private int startIndex = 0;
+    private AtomicInteger startIndex = new AtomicInteger(0);
 
     /**
      * 通用数据存储服务
@@ -66,7 +67,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-        startIndex = 1;
+        startIndex.set(1);
     }
 
     @Override
@@ -116,7 +117,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
     @Override
     public Transaction pollTx() {
 
-        byte[] startIndexBytes = Util.intToBytes(startIndex);
+        byte[] startIndexBytes = Util.intToBytes(startIndex.get());
 
         byte[] hashBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, startIndexBytes);
         if (hashBytes == null) {
@@ -134,7 +135,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
             }
         }
 
-        startIndex++;
+        startIndex.incrementAndGet();
 //        dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(startIndex));
 
         return tx;

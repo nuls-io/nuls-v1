@@ -215,6 +215,7 @@ public class NulsProtocolProcess {
                 container.setStatus(ProtocolContainer.VALID);
                 container.setEffectiveHeight(blockHeader.getHeight() + 1);
                 upgradeProtocol(container);
+                clearIncompatibleTx();
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
@@ -321,6 +322,7 @@ public class NulsProtocolProcess {
                     container.setStatus(ProtocolContainer.VALID);
                     container.setEffectiveHeight(blockHeader.getHeight() + 1);
                     upgradeProtocol(container);
+                    clearIncompatibleTx();
                     Log.info("********** 协议生效了！！！！！！！！！ **********");
                     Log.info("********** 协议生效了！！！！！！！！！ **********");
                     Log.info("********** 协议生效了！！！！！！！！！ **********");
