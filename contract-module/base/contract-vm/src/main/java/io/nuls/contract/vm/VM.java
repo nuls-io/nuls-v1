@@ -214,7 +214,7 @@ public class VM {
                     throw new RuntimeException(String.format("parameter %s required", programMethodArg.getName()));
                 }
             }
-            if (arg == null) {
+            if (arg == null || arg.length == 0) {
                 runArgs.add(null);
             } else if (variableType.isArray()) {
                 if (arg.length < 1) {

@@ -118,6 +118,18 @@ public class VMContext {
         return BigInteger.ZERO;
     }
 
+    /**
+     * @param address
+     */
+    public BigInteger getTotalBalance(byte[] address, Long blockHeight) {
+        Result<ContractBalance> result = contractUtxoService.getBalance(address, blockHeight);
+        if(result.isSuccess()) {
+            ContractBalance balance = result.getData();
+            return BigInteger.valueOf(balance.getBalance().getValue());
+        }
+        return BigInteger.ZERO;
+    }
+
     public static Map<String, ProgramMethod> getNrc20Methods() {
         return NRC20_METHODS;
     }
