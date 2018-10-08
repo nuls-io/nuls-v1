@@ -211,7 +211,7 @@ public class BlockProcess {
                             public Boolean call() throws Exception {
                                 ValidateResult verify = tx.verify();
                                 /** ************************************************************/
-                                if(verify.isFailed()){
+                                if (verify.isFailed()) {
                                     Log.error(JSONUtils.obj2json(verify.getErrorCode()));
                                 }
                                 /** ************************************************************/
@@ -252,7 +252,7 @@ public class BlockProcess {
 
                         // 区块中可以消耗的最大Gas总量，超过这个值，如果还有消耗GAS的合约交易，则本区块中不再继续验证区块
                         if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                            if(ContractUtil.isGasCostContractTransaction(tx)) {
+                            if (ContractUtil.isGasCostContractTransaction(tx)) {
                                 Log.info("verify block failed: Excess contract transaction detected.");
                                 success = false;
                                 break;

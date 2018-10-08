@@ -262,12 +262,11 @@ public class ChainContainer implements Cloneable {
             } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
                 Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
                 return Result.getFailed();
-            } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < 60) {
+            } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < ProtocolConstant.MIN_PROTOCOL_UPGRADE_RATE) {
                 //最低覆盖率不能小于60%
                 Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
                 return Result.getFailed();
-            } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 20) {// pierre test comment out
-                //todo 改成配置文件
+            } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < ProtocolConstant.MIN_PROTOCOL_UPGRADE_DELAY) {
                 //延迟块数不能小于1000
                 Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
                 return Result.getFailed();

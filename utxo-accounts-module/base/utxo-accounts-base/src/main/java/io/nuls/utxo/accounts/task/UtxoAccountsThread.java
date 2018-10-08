@@ -23,6 +23,7 @@
  *
  */
 package io.nuls.utxo.accounts.task;
+
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -33,7 +34,7 @@ import io.nuls.utxo.accounts.storage.service.UtxoAccountsStorageService;
 
 @Component
 public class UtxoAccountsThread implements Runnable {
-   @Autowired
+    @Autowired
     private UtxoAccountsService utxoAccountsService;
     @Autowired
     private UtxoAccountsStorageService utxoAccountsStorageService;
@@ -41,19 +42,18 @@ public class UtxoAccountsThread implements Runnable {
     @Override
     public void run() {
         Lockers.SYN_UTXO_ACCOUNTS_LOCK.lock();
-        try{
-            long hadSynBlockHeight=utxoAccountsStorageService.getHadSynBlockHeight();
+        try {
+            long hadSynBlockHeight = utxoAccountsStorageService.getHadSynBlockHeight();
             long end = NulsContext.getInstance().getBestHeight();
-            for(long i=hadSynBlockHeight+1;i<=end;i++){
-                if(!utxoAccountsService.synBlock(i)){
+            for (long i = hadSynBlockHeight + 1; i <= end; i++) {
+                if (!utxoAccountsService.synBlock(i)) {
                     Log.error("utxoAccounts block syn fail!");
                     break;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
-        }
-        finally{
+        } finally {
             Lockers.SYN_UTXO_ACCOUNTS_LOCK.unlock();
         }
     }

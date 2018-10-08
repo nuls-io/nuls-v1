@@ -57,8 +57,8 @@ public class TransferTest extends BaseTest {
 //        List<String> addressList = getAddressList();
 //
 //        for (String toAddress : addressList) {
-            String address = "Nse7e3BJ4pZGVsfMMA2hmWqYmwZYW1RX";
-            String toAddress = "Nse2Jiw9YNSZqm7oecuK1H7cNPH7LaLQ";//01385ef69371c8fe003d2339158333e6b383eaf7a93a38a77d022cf06024c82a
+            String address = "Nse64QEsc4yEHNfeds5Gk3rftGmCvssc";
+            String toAddress = "Nsdw4KD2ERFax2j7vL2w8NZmtkxb9aiW";//01385ef69371c8fe003d2339158333e6b383eaf7a93a38a77d022cf06024c82a
             long amount = 1001000L;
             String password = "";
             String remark = "test";
@@ -75,7 +75,7 @@ public class TransferTest extends BaseTest {
                 }
                 System.out.println(successCount + "  " + res);
                 try {
-                    Thread.sleep(20L);
+                    Thread.sleep(10L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
