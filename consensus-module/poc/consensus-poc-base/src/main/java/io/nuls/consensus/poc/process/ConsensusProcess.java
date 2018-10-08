@@ -278,18 +278,18 @@ public class ConsensusProcess {
         /** ******************************************************************************************************** */
 
         // pierre test comment out
-        try {
-            Log.info("");
-            Log.info("****************************************************");
-            Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
-            Log.info("开始打包，获取当前EndBlockHeader, height:{}，- {}", chainManager.getMasterChain().getChain().getEndBlockHeader().getHeight(),
-                    chainManager.getMasterChain().getChain().getEndBlockHeader().getHash());
-            Log.info("****************************************************");
-            Log.info("");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //try {
+        //    Log.info("");
+        //    Log.info("****************************************************");
+        //    Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+        //    Log.info("开始打包，获取当前EndBlockHeader, height:{}，- {}", chainManager.getMasterChain().getChain().getEndBlockHeader().getHeight(),
+        //            chainManager.getMasterChain().getChain().getEndBlockHeader().getHash());
+        //    Log.info("****************************************************");
+        //    Log.info("");
+        //
+        //} catch (Exception e) {
+        //    e.printStackTrace();
+        //}
         /** ******************************************************************************************************** */
 
         BlockData bd = new BlockData();
@@ -502,7 +502,7 @@ public class ConsensusProcess {
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
         // pierre test comment out
-        Log.info("\ncheck count:" + count + "\ngetTxUse:" + getTxUse / 1000000 + " ,\nledgerExistUse:" + ledgerUse / 1000000 + ", \nverifyUse:" + verifyUse / 1000000 + " ,\noutHashSetUse:" + outHashSetUse / 1000000 + " ,\nfailedTimes:" + failedCount + ", \nfailedUse:" + failedUse / 1000000
+        Log.debug("\ncheck count:" + count + "\ngetTxUse:" + getTxUse / 1000000 + " ,\nledgerExistUse:" + ledgerUse / 1000000 + ", \nverifyUse:" + verifyUse / 1000000 + " ,\noutHashSetUse:" + outHashSetUse / 1000000 + " ,\nfailedTimes:" + failedCount + ", \nfailedUse:" + failedUse / 1000000
                 + " ,\nconsensusTx:" + consensusTxUse / 1000000 + ", \nblockUse:" + createBlockUser / 1000000 + ", \nsleepTIme:" + sleepTIme + ",\nwhileTime:" + whileTime
                 + ", \naddTime:" + addTime / 1000000 + " ,\nsizeTime:" + sizeTime / 1000000 + " ,\nfailed1Use:" + failed1Use / 1000000);
         return newBlock;
