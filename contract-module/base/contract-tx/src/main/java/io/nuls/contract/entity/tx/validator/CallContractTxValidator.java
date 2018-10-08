@@ -25,8 +25,10 @@
 
 package io.nuls.contract.entity.tx.validator;
 
+import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.txdata.CallContractData;
+import io.nuls.contract.ledger.util.ContractLedgerUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -56,6 +58,11 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
+
+        if(!ContractLedgerUtil.isExistContractAddress(contractAddress)) {
+            Log.error("contract data error: The contract does not exist.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+        }
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract data error: The contract caller is not the transaction creator.");

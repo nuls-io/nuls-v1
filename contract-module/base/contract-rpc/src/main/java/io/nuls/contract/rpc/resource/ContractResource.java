@@ -564,7 +564,7 @@ public class ContractResource implements InitializingBean {
             ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, viewCall.getMethodDesc(),
                     viewCall.getArgs(method.argsType2Array()));
 
-            Result result = null;
+            Result result;
             if(!programResult.isSuccess()) {
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -680,7 +680,6 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
 
-            boolean isFilterAccountAddress = false;
             Result<Account> accountResult = accountService.getAccount(address);
             if (accountResult.isFailed()) {
                 return accountResult.toRpcClientResult();
@@ -706,7 +705,6 @@ public class ContractResource implements InitializingBean {
         if (delete == null) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-
         if (!AddressTool.validAddress(delete.getSender())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -714,11 +712,6 @@ public class ContractResource implements InitializingBean {
         String contractAddress = delete.getContractAddress();
         if (!AddressTool.validAddress(contractAddress)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-
-        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-        if(!ContractLedgerUtil.isExistContractAddress(contractAddressBytes)) {
-            return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
         }
 
         return contractTxService.contractDeleteTx(delete.getSender(),

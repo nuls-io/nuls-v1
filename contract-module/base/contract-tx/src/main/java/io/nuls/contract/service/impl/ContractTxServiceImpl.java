@@ -41,6 +41,7 @@ import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.entity.txdata.DeleteContractData;
 import io.nuls.contract.helper.VMHelper;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
+import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
@@ -948,6 +949,33 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
             AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
 
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+            Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+            if(contractAddressInfoPoResult.isFailed()) {
+                return contractAddressInfoPoResult;
+            }
+            ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
+            if(contractAddressInfoPo == null) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+            }
+
+            byte[] senderBytes = AddressTool.getAddress(sender);
+            if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
+            }
+
+            Result<ContractBalance> result = contractBalanceManager.getBalance(contractAddressBytes);
+            ContractBalance balance = (ContractBalance) result.getData();
+            if(balance == null) {
+                return result;
+            }
+
+            Na totalBalance = balance.getBalance();
+            if(totalBalance.compareTo(Na.ZERO) != 0) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
+            }
+
             Result<Account> accountResult = accountService.getAccount(sender);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -972,9 +1000,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 }
             }
             tx.setTime(TimeService.currentTimeMillis());
-
-            byte[] senderBytes = AddressTool.getAddress(sender);
-            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
             // 组装txData
             DeleteContractData deleteContractData = new DeleteContractData();

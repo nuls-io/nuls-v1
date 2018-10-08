@@ -25,12 +25,20 @@
 
 package io.nuls.contract.entity.tx.validator;
 
+import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.entity.tx.DeleteContractTransaction;
 import io.nuls.contract.entity.txdata.DeleteContractData;
+import io.nuls.contract.ledger.module.ContractBalance;
+import io.nuls.contract.ledger.service.ContractUtxoService;
+import io.nuls.contract.storage.po.ContractAddressInfoPo;
+import io.nuls.contract.storage.service.ContractAddressStorageService;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -45,16 +53,50 @@ import java.util.Set;
 @Component
 public class DeleteContractTxValidator implements NulsDataValidator<DeleteContractTransaction> {
 
+    private ContractAddressStorageService contractAddressStorageService;
+
+    private ContractUtxoService contractUtxoService;
+
     @Override
     public ValidateResult validate(DeleteContractTransaction tx) throws NulsException {
+
         DeleteContractData txData = tx.getTxData();
         byte[] sender = txData.getSender();
+        byte[] contractAddressBytes = txData.getContractAddress();
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
             Log.error("contract data error: The contract deleter is not the transaction creator.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
+
+        Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+        if(contractAddressInfoPoResult.isFailed()) {
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), contractAddressInfoPoResult.getErrorCode());
+        }
+        ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
+        if(contractAddressInfoPo == null) {
+            Log.error("contract data error: The contract does not exist.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+        }
+        if(!ArraysTool.arrayEquals(sender, contractAddressInfoPo.getSender())) {
+            Log.error("contract data error: The contract deleter is not the contract creator.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+
+        Result<ContractBalance> result = contractUtxoService.getBalance(contractAddressBytes);
+        ContractBalance balance = (ContractBalance) result.getData();
+        if(balance == null) {
+            Log.error("contract data error: That balance of the contract is abnormal.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+
+        Na totalBalance = balance.getBalance();
+        if(totalBalance.compareTo(Na.ZERO) != 0) {
+            Log.error("contract data error: The balance of the contract is not 0.");
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_DELETE_BALANCE);
+        }
+
 
         return ValidateResult.getSuccessResult();
     }

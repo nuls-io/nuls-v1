@@ -66,4 +66,8 @@ public interface ContractErrorCode extends TransactionErrorCode, KernelErrorCode
     ErrorCode CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY = ErrorCode.init("100015");
 
     ErrorCode CONTRACT_MINIMUM_PRICE = ErrorCode.init("100016");
+
+    ErrorCode CONTRACT_DELETE_BALANCE = ErrorCode.init("100017");
+
+    ErrorCode CONTRACT_DELETE_CREATER = ErrorCode.init("100018");
 }
