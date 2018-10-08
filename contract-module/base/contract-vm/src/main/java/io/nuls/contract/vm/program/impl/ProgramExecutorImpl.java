@@ -420,7 +420,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (!FastByteComparisons.equal(sender, accountState.getOwner())) {
             return revert("only the owner can stop the contract");
         }
-        if (BigInteger.ZERO.compareTo(accountState.getBalance()) != 0) {
+        BigInteger balance = getBalance(address, null);
+        if (BigInteger.ZERO.compareTo(balance) != 0) {
             return revert("contract balance is not zero");
         }
         if (BigInteger.ZERO.compareTo(accountState.getNonce()) >= 0) {
@@ -456,14 +457,19 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
         ProgramAccount account = accounts.get(addressWrapper);
         if (account == null) {
-            BigInteger balance = BigInteger.ZERO;
-            if (vmContext != null) {
-                balance = vmContext.getBalance(address, blockNumber);
-            }
+            BigInteger balance = getBalance(address, blockNumber);
             account = new ProgramAccount(address, balance);
             accounts.put(addressWrapper, account);
         }
         return account;
+    }
+
+    private BigInteger getBalance(byte[] address, Long blockNumber) {
+        BigInteger balance = BigInteger.ZERO;
+        if (vmContext != null) {
+            balance = vmContext.getBalance(address, blockNumber);
+        }
+        return balance;
     }
 
     @Override
