@@ -24,14 +24,18 @@
  */
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
+import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.base.version.ProtocolContainer;
@@ -558,6 +562,18 @@ public class NulsProtocolProcess {
         }
         NulsContext.MAIN_NET_VERSION = validVersion;
         getVersionManagerStorageService().saveMainVersion(validVersion);
+    }
+
+    public void clearIncompatibleTx(){
+        TransactionQueueStorageService tqs = NulsContext.getServiceBean(TransactionQueueStorageService.class);
+        while (tqs.pollTx() != null) {
+        }
+        TransactionCacheStorageService tcs = NulsContext.getServiceBean(TransactionCacheStorageService.class);
+        Transaction tx = null;
+        while ((tx = tcs.pollTx()) != null) {
+            tcs.removeTx(tx.getHash());
+        }
+        TxMemoryPool.getInstance().clear();
     }
 
 }
