@@ -106,7 +106,9 @@ public class VMContext {
     }
 
     /**
-     * @param address
+     * 查询可用余额
+     * @param address 合约地址
+     * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
      */
     public BigInteger getBalance(byte[] address, Long blockHeight) {
         Result<ContractBalance> result = contractUtxoService.getBalance(address, blockHeight);
@@ -119,7 +121,9 @@ public class VMContext {
     }
 
     /**
-     * @param address
+     * 查询总余额
+     * @param address 合约地址
+     * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
      */
     public BigInteger getTotalBalance(byte[] address, Long blockHeight) {
         Result<ContractBalance> result = contractUtxoService.getBalance(address, blockHeight);
