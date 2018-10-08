@@ -118,17 +118,7 @@ public class NativeAddress {
         if (Arrays.equals(from, to)) {
             throw new ErrorException(String.format("Cannot transfer from %s to %s", NativeAddress.toString(from), address), frame.vm.getGasUsed(), null);
         }
-        if (value == null || value.compareTo(BigInteger.ZERO) <= 0) {
-            throw new ErrorException(String.format("transfer amount error, value=%s", value), frame.vm.getGasUsed(), null);
-        }
-        BigInteger balance = frame.vm.getProgramExecutor().getAccount(from).getBalance();
-        if (balance.compareTo(value) < 0) {
-            if (frame.vm.getProgramContext().isEstimateGas()) {
-                balance = value;
-            } else {
-                throw new ErrorException("Not enough balance", frame.vm.getGasUsed(), null);
-            }
-        }
+        checkBalance(from, value, frame);
 
         frame.vm.addGasUsed(GasCost.TRANSFER);
 
@@ -214,6 +204,7 @@ public class NativeAddress {
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
+            checkBalance(programCall.getSender(), programCall.getValue(), frame);
             frame.vm.getProgramExecutor().getAccount(programCall.getSender()).addBalance(programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
@@ -233,6 +224,20 @@ public class NativeAddress {
             throw new RuntimeException("error contract status");
         }
 
+    }
+
+    private static void checkBalance(byte[] address, BigInteger value, Frame frame) {
+        if (value == null || value.compareTo(BigInteger.ZERO) <= 0) {
+            throw new ErrorException(String.format("transfer amount error, value=%s", value), frame.vm.getGasUsed(), null);
+        }
+        BigInteger balance = frame.vm.getProgramExecutor().getAccount(address).getBalance();
+        if (balance.compareTo(value) < 0) {
+            if (frame.vm.getProgramContext().isEstimateGas()) {
+                balance = value;
+            } else {
+                throw new ErrorException("Not enough balance", frame.vm.getGasUsed(), null);
+            }
+        }
     }
 
     public static final String valid = TYPE + "." + "valid" + "(Ljava/lang/String;)V";
