@@ -30,6 +30,7 @@ import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,12 @@ public class MethodArea {
     }
 
     public MethodCode loadMethod(String className, String methodName, String methodDesc) {
-        final String fullName = className + "." + methodName + methodDesc;
+        String fullName;
+        if (StringUtils.isNotEmpty(methodDesc)) {
+            fullName = className + "." + methodName + methodDesc;
+        } else {
+            fullName = className + "." + methodName;
+        }
         if (INIT_METHOD_CODES.containsKey(fullName)) {
             return INIT_METHOD_CODES.get(fullName);
         }

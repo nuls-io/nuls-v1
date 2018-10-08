@@ -278,7 +278,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
 
             if (methodCode == null) {
-                return revert(String.format("can't find method %s.%s", programInvoke.getMethodName(), programInvoke.getMethodDesc()));
+                return revert(String.format("can't find method %s%s", programInvoke.getMethodName(), programInvoke.getMethodDesc() == null ? "" : programInvoke.getMethodDesc()));
             }
             if (!methodCode.isPublic) {
                 return revert("can only invoke public method");
