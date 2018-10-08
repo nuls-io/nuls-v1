@@ -170,7 +170,7 @@ public class Frame {
     }
 
     public void nonsupportMethod(MethodCode methodCode) {
-        throw new RuntimeException("nonsupport method: " + methodCode.className + "." + methodCode.name + methodCode.desc);
+        throw new RuntimeException("nonsupport method: " + methodCode.fullName);
     }
 
     public InsnNode insnNode() {
