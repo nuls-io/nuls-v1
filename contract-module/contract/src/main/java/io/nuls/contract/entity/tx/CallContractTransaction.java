@@ -166,6 +166,7 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
             List<ContractTransfer> transfers = contractResult.getTransfers();
             if(transfers != null && transfers.size() > 0) {
                 for(ContractTransfer transfer : transfers) {
+                    addressesSet.add(new ByteArrayWrapper(transfer.getFrom()));
                     addressesSet.add(new ByteArrayWrapper(transfer.getTo()));
                 }
             }

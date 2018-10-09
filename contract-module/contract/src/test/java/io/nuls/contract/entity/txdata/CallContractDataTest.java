@@ -92,4 +92,19 @@ public class CallContractDataTest {
             Assert.fail();
         }
     }
+
+    //@Override
+    //public String toString() {
+    //    return "CallContractData{" +
+    //            "sender=" + AddressTool.getStringAddressByBytes(sender) +
+    //            ",\n contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
+    //            ",\n value=" + value +
+    //            ",\n gasLimit=" + gasLimit +
+    //            ",\n price=" + price +
+    //            ",\n methodName='" + methodName + '\'' +
+    //            ",\n methodDesc='" + methodDesc + '\'' +
+    //            ",\n argsCount=" + argsCount +
+    //            //", args=" + Arrays.toString(args) +
+    //            '}';
+    //}
 }
