@@ -75,7 +75,7 @@ public class TransferTest extends BaseTest {
                 }
                 System.out.println(successCount + "  " + res);
                 try {
-                    Thread.sleep(10L);
+                    Thread.sleep(50L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
