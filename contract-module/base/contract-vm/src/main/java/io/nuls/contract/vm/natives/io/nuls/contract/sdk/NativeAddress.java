@@ -65,6 +65,12 @@ public class NativeAddress {
                 } else {
                     return call(methodCode, methodArgs, frame);
                 }
+            case callWithReturnValue:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return callWithReturnValue(methodCode, methodArgs, frame);
+                }
             case valid:
                 if (check) {
                     return SUCCESS;
@@ -147,6 +153,10 @@ public class NativeAddress {
      * @see Address#call(String, String, String[][], BigInteger)
      */
     private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        return call(methodCode, methodArgs, frame, false);
+    }
+
+    private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean returnResult) {
         ObjectRef addressRef = methodArgs.objectRef;
         ObjectRef methodNameRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef methodDescRef = (ObjectRef) methodArgs.invokeArgs[1];
@@ -162,10 +172,20 @@ public class NativeAddress {
             value = BigInteger.ZERO;
         }
 
-        call(address, methodName, methodDesc, args, value, frame);
+        String callResult = call(address, methodName, methodDesc, args, value, frame);
+        Object resultValue = null;
+        if (returnResult) {
+            resultValue = frame.heap.newString(callResult);
+        }
 
-        Result result = NativeMethod.result(methodCode, null, frame);
+        Result result = NativeMethod.result(methodCode, resultValue, frame);
         return result;
+    }
+
+    public static final String callWithReturnValue = TYPE + "." + "callWithReturnValue" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;)Ljava/lang/String;";
+
+    private static Result callWithReturnValue(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        return call(methodCode, methodArgs, frame, true);
     }
 
     private static String[][] getArgs(ObjectRef argsRef, Frame frame) {
@@ -184,7 +204,7 @@ public class NativeAddress {
         return array;
     }
 
-    private static void call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
+    private static String call(String address, String methodName, String methodDesc, String[][] args, BigInteger value, Frame frame) {
         if (value.compareTo(BigInteger.ZERO) < 0) {
             throw new ErrorException(String.format("amount less than zero, value=%s", value), frame.vm.getGasUsed(), null);
         }
@@ -216,6 +236,7 @@ public class NativeAddress {
         if (programResult.isSuccess()) {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getEvents().addAll(programResult.getEvents());
+            return programResult.getResult();
         } else if (programResult.isError()) {
             throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
         } else if (programResult.isRevert()) {
@@ -235,7 +256,7 @@ public class NativeAddress {
             if (frame.vm.getProgramContext().isEstimateGas()) {
                 balance = value;
             } else {
-                throw new ErrorException("Not enough balance", frame.vm.getGasUsed(), null);
+                throw new ErrorException(String.format("contract[%s] not enough balance", toString(address)), frame.vm.getGasUsed(), null);
             }
         }
     }

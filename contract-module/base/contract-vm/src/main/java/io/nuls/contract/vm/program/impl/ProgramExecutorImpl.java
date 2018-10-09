@@ -36,6 +36,7 @@ import io.nuls.contract.vm.code.ClassCodes;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.exception.RevertException;
+import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
@@ -241,7 +242,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("check code");
                 AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
                 if (accountState != null) {
-                    return revert("contract already exists");
+                    return revert(String.format("contract[%s] already exists", NativeAddress.toString(programInvoke.getContractAddress())));
                 }
                 accountState = repository.createAccount(programInvoke.getContractAddress(), programInvoke.getSender());
                 logTime("new account state");
@@ -253,11 +254,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
                 AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
                 if (accountState == null) {
-                    return revert("contract does not exist");
+                    return revert(String.format("contract[%s] does not exist", NativeAddress.toString(programInvoke.getContractAddress())));
                 }
                 logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
-                    return revert("contract has stopped");
+                    return revert(String.format("contract[%s] has stopped", NativeAddress.toString(programInvoke.getContractAddress())));
                 }
                 byte[] codes = repository.getCode(programInvoke.getContractAddress());
                 classCodes = ClassCodeLoader.loadJarCache(codes);
