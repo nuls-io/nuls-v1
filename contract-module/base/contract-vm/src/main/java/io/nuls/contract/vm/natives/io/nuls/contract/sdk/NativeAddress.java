@@ -235,7 +235,7 @@ public class NativeAddress {
             if (frame.vm.getProgramContext().isEstimateGas()) {
                 balance = value;
             } else {
-                throw new ErrorException("Not enough balance", frame.vm.getGasUsed(), null);
+                throw new ErrorException(String.format("contract[%s] not enough balance", toString(address)), frame.vm.getGasUsed(), null);
             }
         }
     }
