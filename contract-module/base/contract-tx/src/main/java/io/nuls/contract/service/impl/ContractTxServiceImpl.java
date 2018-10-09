@@ -48,10 +48,7 @@ import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramCreate;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.crypto.ECKey;
@@ -630,7 +627,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
                 ProgramExecutor track = programExecutor.begin(prevStateRoot);
                 ProgramResult programResult = track.call(programCall);
-                Result result = null;
+                Result result;
                 if (!programResult.isSuccess()) {
                     result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -958,6 +955,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
             if(contractAddressInfoPo == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+            }
+
+            BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块状态根
+            byte[] stateRoot = ContractUtil.getStateRoot(blockHeader);
+            // 获取合约当前状态
+            ProgramStatus status = vmHelper.getContractStatus(stateRoot, contractAddressBytes);
+            boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
+            if(isTerminatedContract) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
             }
 
             byte[] senderBytes = AddressTool.getAddress(sender);

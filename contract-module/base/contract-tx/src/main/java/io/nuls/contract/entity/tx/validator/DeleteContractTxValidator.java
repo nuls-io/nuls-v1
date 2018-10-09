@@ -36,6 +36,7 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
@@ -53,8 +54,10 @@ import java.util.Set;
 @Component
 public class DeleteContractTxValidator implements NulsDataValidator<DeleteContractTransaction> {
 
+    @Autowired
     private ContractAddressStorageService contractAddressStorageService;
 
+    @Autowired
     private ContractUtxoService contractUtxoService;
 
     @Override

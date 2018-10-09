@@ -822,13 +822,20 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(value > 0) {
             contractBalanceManager.addTempBalance(contractAddress, value);
         }
-        // 扣除转出
+        // 增加转入, 扣除转出
         List<ContractTransfer> transfers = contractExecutedResult.getTransfers();
         if(transfers != null && transfers.size() > 0) {
             Na outAmount = Na.ZERO;
+            Na inAmount = Na.ZERO;
             for(ContractTransfer transfer : transfers) {
-                outAmount = outAmount.add(transfer.getValue());
+                if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
+                    outAmount = outAmount.add(transfer.getValue());
+                }
+                if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
+                    inAmount = inAmount.add(transfer.getValue());
+                }
             }
+            contractBalanceManager.addTempBalance(contractAddress, inAmount.getValue());
             contractBalanceManager.minusTempBalance(contractAddress, outAmount.getValue());
         }
     }
@@ -838,14 +845,21 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
             byte[] contractAddress = callContractData.getContractAddress();
-            // 增加转出
+            // 增加转出, 扣除转入
             List<ContractTransfer> transfers = contractResult.getTransfers();
             if(transfers != null && transfers.size() > 0) {
                 Na outAmount = Na.ZERO;
+                Na inAmount = Na.ZERO;
                 for(ContractTransfer transfer : transfers) {
-                    outAmount = outAmount.add(transfer.getValue());
+                    if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
+                        outAmount = outAmount.add(transfer.getValue());
+                    }
+                    if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
+                        inAmount = inAmount.add(transfer.getValue());
+                    }
                 }
                 contractBalanceManager.addTempBalance(contractAddress, outAmount.getValue());
+                contractBalanceManager.minusTempBalance(contractAddress, inAmount.getValue());
             }
             // 扣除转入
             long value = callContractData.getValue();

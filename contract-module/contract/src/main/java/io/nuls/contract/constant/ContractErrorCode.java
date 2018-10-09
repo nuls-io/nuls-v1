@@ -70,4 +70,6 @@ public interface ContractErrorCode extends TransactionErrorCode, KernelErrorCode
     ErrorCode CONTRACT_DELETE_BALANCE = ErrorCode.init("100017");
 
     ErrorCode CONTRACT_DELETE_CREATER = ErrorCode.init("100018");
+
+    ErrorCode CONTRACT_DELETED = ErrorCode.init("100019");
 }

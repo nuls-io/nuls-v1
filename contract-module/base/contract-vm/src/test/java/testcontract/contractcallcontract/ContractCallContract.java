@@ -25,6 +25,7 @@ package testcontract.contractcallcontract;
 
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
+import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.sdk.annotation.Payable;
 
 import java.math.BigInteger;
@@ -44,14 +45,18 @@ public class ContractCallContract implements Contract {
     @Payable
     public String callContract(Address contract, String methodName, String[] args, BigInteger value) {
         try {
-            String[][] args2 = new String[args.length][];
-            int i = 0;
-            for (String arg : args) {
-                args2[i++] = new String[]{arg};
+            String[][] args2 = null;
+            if(args != null) {
+                args2 = new String[args.length][];
+                int i = 0;
+                for (String arg : args) {
+                    args2[i++] = new String[]{arg};
+                }
             }
             contract.call(methodName, null, args2, value);
             return "success";
         } catch (Exception e) {
+            Utils.revert("exception: " + e.getMessage());
             return e.getMessage();
         }
     }
