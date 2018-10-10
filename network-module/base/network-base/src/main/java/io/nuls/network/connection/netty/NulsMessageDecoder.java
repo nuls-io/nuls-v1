@@ -50,28 +50,21 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         long sysMagicNumber = NetworkParam.getInstance().getPacketMagic();
         long readMagicNumber = in.getUnsignedIntLE(0);
-        try {
+        if (sysMagicNumber == readMagicNumber) {
+            // 新版本
+            Object decoded = newDecoder.decode(ctx, in);
+            if (decoded != null) {
+                out.add(decoded);
+            }
+        } else {
+            readMagicNumber = in.getUnsignedIntLE(8);
             if (sysMagicNumber == readMagicNumber) {
-                // 新版本
-                Object decoded = newDecoder.decode(ctx, in);
+                // 老版本
+                Object decoded = oldDecoder.decode(ctx, in);
                 if (decoded != null) {
                     out.add(decoded);
                 }
-            } else {
-                readMagicNumber = in.getUnsignedIntLE(8);
-                if (sysMagicNumber == readMagicNumber) {
-                    // 老版本
-                    Object decoded = oldDecoder.decode(ctx, in);
-                    if (decoded != null) {
-                        out.add(decoded);
-                    }
-                }
             }
-        } catch (Exception e) {
-            Log.error("-------------------------sysMagicNumber:" + sysMagicNumber);
-            Log.error("-------------------------readMagicNumber:" + readMagicNumber);
-            Log.error(e);
-            throw e;
         }
     }
 }
