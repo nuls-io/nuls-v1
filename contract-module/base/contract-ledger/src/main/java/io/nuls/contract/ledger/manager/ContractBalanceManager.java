@@ -276,23 +276,23 @@ public class ContractBalanceManager {
         return result;
     }
 
-    public void addTempBalance(byte[] address, long amount) {
+    public void addTempBalance(byte[] address, Na amount) {
         Map<String, ContractBalance> tempBalanceMap = tempBalanceMapManager.get();
         String addressKey = asString(address);
         ContractBalance contractBalance = tempBalanceMap.get(addressKey);
 
         if(contractBalance != null) {
-            contractBalance.addUsable(Na.valueOf(amount));
+            contractBalance.addUsable(amount);
         }
     }
 
-    public void minusTempBalance(byte[] address, long amount) {
+    public void minusTempBalance(byte[] address, Na amount) {
         Map<String, ContractBalance> tempBalanceMap = tempBalanceMapManager.get();
         String addressKey = asString(address);
         ContractBalance contractBalance = tempBalanceMap.get(addressKey);
 
         if(contractBalance != null) {
-            contractBalance.minusUsable(Na.valueOf(amount));
+            contractBalance.minusUsable(amount);
         }
     }
 

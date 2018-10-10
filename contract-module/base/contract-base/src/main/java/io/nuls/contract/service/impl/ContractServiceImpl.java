@@ -78,6 +78,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.ledger.util.LedgerUtil.asBytes;
+import static io.nuls.ledger.util.LedgerUtil.asString;
 
 /**
  * @Desription:
@@ -820,25 +821,76 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         // 增加转入
         long value = callContractData.getValue();
         if(value > 0) {
-            contractBalanceManager.addTempBalance(contractAddress, value);
+            contractBalanceManager.addTempBalance(contractAddress, Na.valueOf(value));
         }
         // 增加转入, 扣除转出
         List<ContractTransfer> transfers = contractExecutedResult.getTransfers();
         if(transfers != null && transfers.size() > 0) {
-            Na outAmount = Na.ZERO;
-            Na inAmount = Na.ZERO;
-            for(ContractTransfer transfer : transfers) {
-                if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
-                    outAmount = outAmount.add(transfer.getValue());
-                }
-                if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
-                    inAmount = inAmount.add(transfer.getValue());
-                }
+            //Na outAmount = Na.ZERO;
+            //Na inAmount = Na.ZERO;
+            LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
+            LinkedHashMap<String, Na> contractOutNa = contracts[0];
+            LinkedHashMap<String, Na> contractInNa = contracts[1];
+            byte[] contractBytes;
+            Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
+            for(Map.Entry<String, Na> out : outs) {
+                contractBytes = asBytes(out.getKey());
+                vmContext.getBalance(contractBytes, height);
+                contractBalanceManager.minusTempBalance(contractBytes, out.getValue());
             }
-            contractBalanceManager.addTempBalance(contractAddress, inAmount.getValue());
-            contractBalanceManager.minusTempBalance(contractAddress, outAmount.getValue());
+            Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
+            for(Map.Entry<String, Na> in : ins) {
+                contractBytes = asBytes(in.getKey());
+                vmContext.getBalance(contractBytes, height);
+                contractBalanceManager.addTempBalance(contractBytes, in.getValue());
+            }
+            //contractBalanceManager.addTempBalance(contractAddress, inAmount.getValue());
+            //contractBalanceManager.minusTempBalance(contractAddress, outAmount.getValue());
         }
     }
+
+    private LinkedHashMap<String, Na>[] filterContractNa(List<ContractTransfer> transfers) {
+        LinkedHashMap<String, Na> contractOutNa = MapUtil.createLinkedHashMap(4);
+        LinkedHashMap<String, Na> contractInNa = MapUtil.createLinkedHashMap(4);
+        LinkedHashMap<String, Na>[] contracts = new LinkedHashMap[2];
+        contracts[0] = contractOutNa;
+        contracts[1] = contractInNa;
+
+        byte[] from,to;
+        Na transferValue;
+        for(ContractTransfer transfer : transfers) {
+            from = transfer.getFrom();
+            to = transfer.getTo();
+            transferValue = transfer.getValue();
+            if(ContractUtil.isLegalContractAddress(from)) {
+                String contract = asString(from);
+                Na na = contractOutNa.get(contract);
+                if(na == null) {
+                    contractOutNa.put(contract, transferValue);
+                } else {
+                    contractOutNa.put(contract, na.add(transferValue));
+                }
+            }
+            if(ContractUtil.isLegalContractAddress(to)) {
+                String contract = asString(to);
+                Na na = contractInNa.get(contract);
+                if(na == null) {
+                    contractInNa.put(contract, transferValue);
+                } else {
+                    contractInNa.put(contract, na.add(transferValue));
+                }
+            }
+            //if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
+            //    outAmount = outAmount.add(transfer.getValue());
+            //}
+            //if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
+            //    inAmount = inAmount.add(transfer.getValue());
+            //}
+        }
+        return contracts;
+    }
+
+
 
     private void rollbackContractTempBalance(Transaction tx, ContractResult contractResult) {
         if(tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
@@ -848,23 +900,30 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 增加转出, 扣除转入
             List<ContractTransfer> transfers = contractResult.getTransfers();
             if(transfers != null && transfers.size() > 0) {
-                Na outAmount = Na.ZERO;
-                Na inAmount = Na.ZERO;
-                for(ContractTransfer transfer : transfers) {
-                    if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
-                        outAmount = outAmount.add(transfer.getValue());
-                    }
-                    if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
-                        inAmount = inAmount.add(transfer.getValue());
-                    }
+                //Na outAmount = Na.ZERO;
+                //Na inAmount = Na.ZERO;
+                LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
+                LinkedHashMap<String, Na> contractOutNa = contracts[0];
+                LinkedHashMap<String, Na> contractInNa = contracts[1];
+                byte[] contractBytes;
+                Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
+                for(Map.Entry<String, Na> in : ins) {
+                    contractBytes = asBytes(in.getKey());
+                    contractBalanceManager.minusTempBalance(contractBytes, in.getValue());
                 }
-                contractBalanceManager.addTempBalance(contractAddress, outAmount.getValue());
-                contractBalanceManager.minusTempBalance(contractAddress, inAmount.getValue());
+                Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
+                for(Map.Entry<String, Na> out : outs) {
+                    contractBytes = asBytes(out.getKey());
+                    contractBalanceManager.addTempBalance(contractBytes, out.getValue());
+                }
+
+                //contractBalanceManager.addTempBalance(contractAddress, outAmount.getValue());
+                //contractBalanceManager.minusTempBalance(contractAddress, inAmount.getValue());
             }
             // 扣除转入
             long value = callContractData.getValue();
             if(value > 0) {
-                contractBalanceManager.minusTempBalance(contractAddress, value);
+                contractBalanceManager.minusTempBalance(contractAddress, Na.valueOf(value));
             }
         }
     }
