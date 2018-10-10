@@ -199,7 +199,7 @@ public class VMHelper implements InitializingBean {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
 
-        ProgramExecutor track = null;
+        ProgramExecutor track;
         if(executor == null) {
             track = programExecutor.begin(stateRoot);
         } else {
@@ -252,7 +252,7 @@ public class VMHelper implements InitializingBean {
                     if(tokenTransferInfoPo == null) {
                         continue;
                     }
-                    byte[] txHashBytes = null;
+                    byte[] txHashBytes;
                     byte[] from = tokenTransferInfoPo.getFrom();
                     byte[] to = tokenTransferInfoPo.getTo();
                     tokenTransferInfoPo.setName(po.getNrc20TokenName());
@@ -290,12 +290,9 @@ public class VMHelper implements InitializingBean {
     }
 
     private void refreshTokenBalance(ProgramExecutor executor, byte[] stateRoot, ContractAddressInfoPo po, String address, String contractAddress) {
-        long blockHeight = po.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
-        String tokenName = po.getNrc20TokenName();
         byte[] contractAddressBytes = po.getContractAddress();
         ProgramResult programResult = this.invokeViewMethod(executor, stateRoot, bestBlockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
-        Result<ContractTokenInfo> result = null;
         if(!programResult.isSuccess()) {
             return;
         } else {
@@ -360,7 +357,6 @@ public class VMHelper implements InitializingBean {
         CreateContractData createContractData = tx.getTxData();
         byte[] stateRoot = contractResult.getStateRoot();
         byte[] contractAddress = contractResult.getContractAddress();
-        long blockHeight = tx.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
         List<ProgramMethod> methods = this.getAllMethods(createContractData.getCode());
         boolean isNrc20 = this.checkNrc20Contract(methods);

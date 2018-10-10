@@ -73,7 +73,6 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
         }
 
         ContractTokenTransferInfoPo tokenTransferInfoPo;
-        byte[] values;
         for (byte[] key : keyList) {
             if (isAddressEquals(key, address)) {
                 tokenTransferInfoPo = dbService.getModel(this.area, key, ContractTokenTransferInfoPo.class);
@@ -102,7 +101,6 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
         }
 
         ContractTokenTransferInfoPo tokenTransferInfoPo;
-        byte[] values;
         for (byte[] key : keyList) {
             if (isAddressAndHashEquals(key, address, txHash)) {
                 tokenTransferInfoPo = dbService.getModel(this.area, key, ContractTokenTransferInfoPo.class);
