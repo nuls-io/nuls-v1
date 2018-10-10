@@ -959,10 +959,10 @@ public class ContractResource implements InitializingBean {
 
         try {
             ContractResultDto contractResultDto = null;
-            ContractResult contractExecuteResult = null;
+            ContractResult contractExecuteResult;
             boolean flag = true;
             String msg = EMPTY;
-            long confirmCount = 0L;
+            //long confirmCount = 0L;
             do {
                 NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
                 Transaction tx = ledgerService.getTx(txHash);
@@ -979,8 +979,8 @@ public class ContractResource implements InitializingBean {
                 }
                 contractExecuteResult = contractService.getContractExecuteResult(txHash);
                 if(contractExecuteResult != null) {
-                    long bestBlockHeight = NulsContext.getInstance().getBestHeight();
-                    confirmCount = bestBlockHeight - tx.getBlockHeight() + 1;
+                    //long bestBlockHeight = NulsContext.getInstance().getBestHeight();
+                    //confirmCount = bestBlockHeight - tx.getBlockHeight() + 1;
                     Result<ContractAddressInfoPo> contractAddressInfoResult =
                             contractAddressStorageService.getContractAddressInfo(contractExecuteResult.getContractAddress());
                     ContractAddressInfoPo po = contractAddressInfoResult.getData();
@@ -1012,7 +1012,7 @@ public class ContractResource implements InitializingBean {
                 resultMap.put("msg", msg);
             }
             if(flag && contractResultDto != null) {
-                resultMap.put("confirmCount", confirmCount);
+                //resultMap.put("confirmCount", confirmCount);
                 resultMap.put("data", contractResultDto);
             }
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
@@ -1038,7 +1038,7 @@ public class ContractResource implements InitializingBean {
             return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
-        Result result = null;
+        Result result;
         try {
             NulsDigestData txHashObj = NulsDigestData.fromDigestHex(hash);
             Transaction tx = ledgerService.getTx(txHashObj);
@@ -1081,7 +1081,7 @@ public class ContractResource implements InitializingBean {
                     List<Coin> tos = coinData.getTo();
                     if(tos != null && tos.size() > 0) {
                         String txHash = hash;
-                        OutputDto outputDto = null;
+                        OutputDto outputDto;
                         Coin to, temp;
                         long bestHeight = NulsContext.getInstance().getBestHeight();
                         long currentTime = TimeService.currentTimeMillis();
@@ -1217,7 +1217,7 @@ public class ContractResource implements InitializingBean {
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
         }
 
-        Result result = null;
+        Result result;
         try {
             boolean isLoadAll = (limit == null);
             List<Coin> coinList = getAllUtxoByAddress(address);
@@ -1276,7 +1276,7 @@ public class ContractResource implements InitializingBean {
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
         }
 
-        Result result = null;
+        Result result;
         try {
             List<Coin> coinList = getAllUtxoByAddress(address);
             Na amountNa = Na.valueOf(amount.longValue());
@@ -1738,7 +1738,7 @@ public class ContractResource implements InitializingBean {
             // 该账户创建的未确认的合约
             LinkedList<Map<String, String>> list = contractTxService.getLocalUnconfirmedCreateContractTransaction(address);
             if(list != null) {
-                String contractAddress, txHash;
+                String contractAddress;
                 Long time;
                 ContractAddressDto dto;
                 String success;
@@ -1765,8 +1765,8 @@ public class ContractResource implements InitializingBean {
             byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
 
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
-            byte[] contractAddressBytes = null;
-            String contractAddress = null;
+            byte[] contractAddressBytes;
+            String contractAddress;
 
             // 获取该账户创建的合约地址
             Result<List<ContractAddressInfoPo>> contractInfoListResult = contractAddressStorageService.getContractInfoList(addressBytes);
@@ -1872,7 +1872,6 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
 
-            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             contractTxService.removeLocalFailedUnconfirmedCreateContractTransaction(address, contractAddress);
             return Result.getSuccess().toRpcClientResult();
         } catch (Exception e) {
