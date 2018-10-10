@@ -49,7 +49,7 @@ public class AliasTransaction extends Transaction<Alias> {
 
     @Override
     public String getInfo(byte[] address) {
-        return "-" + AccountConstant.ALIAS_NA.toCoinString();
+        return "-" + AccountConstant.ALIAS_NA.add(getCoinData().getFee()).toCoinString();
     }
 
     @Override
