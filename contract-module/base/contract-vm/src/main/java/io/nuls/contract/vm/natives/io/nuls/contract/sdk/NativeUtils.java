@@ -98,7 +98,7 @@ public class NativeUtils {
         Map<String, Object> jsonMap = toJson(objectRef, frame);
         EventJson eventJson = new EventJson();
         eventJson.setContractAddress(frame.vm.getProgramInvoke().getAddress());
-        eventJson.setBlockNumber(frame.vm.getProgramInvoke().getNumber());
+        eventJson.setBlockNumber(frame.vm.getProgramInvoke().getNumber() + 1);
         eventJson.setEvent(classCode.simpleName);
         eventJson.setPayload(jsonMap);
         String json = JsonUtils.toJson(eventJson);
