@@ -1089,8 +1089,8 @@ public class VM {
 
 //    public BlockHeaderDto getBlockHeader(long number) {
 //        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
-//        blockHeaderDto.setHash("afafaf");
-//        blockHeaderDto.setHeight(100);
+//        blockHeaderDto.setHash("hash" + number);
+//        blockHeaderDto.setHeight(number);
 //        blockHeaderDto.setTxCount(100);
 //        blockHeaderDto.setPackingAddress(AddressTool.getAddress("NsdwCuCKs2AXFfUT7PxXXJPm2XxybX6H"));
 //        blockHeaderDto.setTime(1535012808001L);
