@@ -130,7 +130,7 @@ public class ContractResultDto {
         this.txSizeFee = this.totalFee.subtract(contractFee);
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
-        this.stateRoot = result.getStateRoot() != null ? Hex.encode(result.getStateRoot()) : null;
+        this.stateRoot = (result.getStateRoot() != null ? Hex.encode(result.getStateRoot()) : null);
         this.value = result.getValue();
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
@@ -140,14 +140,14 @@ public class ContractResultDto {
         this.setOrginTransfers(result.getTransfers());
         this.events = result.getEvents();
         this.remark = result.getRemark();
+        if(result.isSuccess()) {
+            this.makeTokenTransfers(result.getEvents());
+        }
     }
 
     public ContractResultDto(ContractResult result, Transaction tx, ContractAddressInfoPo po) {
         this(result, tx);
         if(result.isNrc20()) {
-            if(result.isSuccess()) {
-                this.makeTokenTransfers(result.getEvents());
-            }
             this.name = po.getNrc20TokenName();
             this.symbol = po.getNrc20TokenSymbol();
             this.decimals = po.getDecimals();
