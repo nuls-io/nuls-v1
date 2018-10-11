@@ -23,9 +23,11 @@
  */
 package io.nuls.ledger.rpc.resource;
 
+import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.model.Entry;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -35,8 +37,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.rpc.model.AccountUtxoDto;
-import io.nuls.ledger.rpc.model.UtxoDto;
+import io.nuls.ledger.rpc.model.*;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.ledger.storage.util.CoinComparator;
 import io.swagger.annotations.*;
@@ -181,4 +182,52 @@ public class UtxoResource {
         return coinList;
     }
 
+    @GET
+    @Path("/info")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询代币情况")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = TokenInfoDto.class)
+    })
+    public RpcClientResult getInfo() throws NulsException {
+        long height = NulsContext.getInstance().getBestHeight();
+        List<Entry<byte[], byte[]>> coinBytesList = utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
+        double totalNuls = 0d;
+        double lockedNuls = 0d;
+        Map<String, Holder> map = new HashMap<>();
+        Coin coin = new Coin();
+        int index = 0;
+        for (Entry<byte[], byte[]> coinEntryBytes : coinBytesList) {
+            coin.parse(coinEntryBytes.getValue(), 0);
+            double value = coin.getNa().toDouble();
+            String address = AddressTool.getStringAddressByBytes(coin.getOwner());
+            Holder holder = map.get(address);
+            if (null == holder) {
+                holder = new Holder();
+                holder.setAddress(address);
+                map.put(address, holder);
+            }
+            holder.addTotal(value);
+            totalNuls = DoubleUtils.sum(totalNuls, value);
+            if (coin.getLockTime() == -1 || coin.getLockTime() > System.currentTimeMillis()||(coin.getLockTime()<1531152000000L&&coin.getLockTime()>height)) {
+                holder.addLocked(value);
+                lockedNuls = DoubleUtils.sum(lockedNuls, value);
+            }
+            System.out.println(index++);
+        }
+        Result<TokenInfoDto> result = Result.getSuccess();
+        TokenInfoDto info = new TokenInfoDto();
+        info.setTotalNuls(DoubleUtils.getRoundStr(totalNuls, 8, true));
+        info.setLockedNuls(DoubleUtils.getRoundStr(lockedNuls, 8, true));
+        List<Holder> holderList = new ArrayList<>(map.values());
+        Collections.sort(holderList);
+        List<HolderDto> dtoList = new ArrayList<>();
+        for (Holder holder : holderList) {
+            HolderDto dto = new HolderDto(holder);
+            dtoList.add(dto);
+        }
+        info.setAddressList(dtoList);
+        result.setData(info);
+        return result.toRpcClientResult();
+    }
 }
