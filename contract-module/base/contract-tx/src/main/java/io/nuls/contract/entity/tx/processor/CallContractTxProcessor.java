@@ -106,15 +106,6 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 Log.error(e);
             }
 
-            //byte[] newestStateRoot = null;
-            //BlockHeader blockHeader = tx.getBlockHeader();
-            //if(blockHeader != null) {
-            //    newestStateRoot = blockHeader.getStateRoot();
-            //}
-            //if(newestStateRoot == null) {
-            //    newestStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
-            //}
-
             CallContractData txData = tx.getTxData();
             byte[] senderContractAddressBytes = txData.getContractAddress();
             Result<ContractAddressInfoPo> senderContractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(senderContractAddressBytes);
@@ -167,17 +158,10 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                                 continue;
                             }
 
-                            byte[] from = tokenTransferInfoPo.getFrom();
-                            byte[] to = tokenTransferInfoPo.getTo();
-                            //TODO pierre 回滚后token余额刷新
-                            //if(from != null) {
-                            //    vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
-                            //}
-                            //if(to != null) {
-                            //    vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
-                            //}
-                            contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(from, txHashBytes, new VarInt(i).encode()));
-                            contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(to, txHashBytes, new VarInt(i).encode()));
+                            // 回滚token余额
+                            this.rollbackContractToken(tokenTransferInfoPo);
+                            contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(tokenTransferInfoPo.getFrom(), txHashBytes, new VarInt(i).encode()));
+                            contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(tokenTransferInfoPo.getTo(), txHashBytes, new VarInt(i).encode()));
                         }
                     }
                 }
@@ -315,34 +299,17 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
 
                         // 刷新token余额
                         if(isTerminatedContract) {
-                            try {
-                                byte[] from = po.getFrom();
-                                byte[] to = po.getTo();
-                                BigInteger token = po.getValue();
-                                String fromStr = null;
-                                String toStr = null;
-                                if(from != null) {
-                                    fromStr = AddressTool.getStringAddressByBytes(from);
-                                }
-                                if(to != null) {
-                                    toStr = AddressTool.getStringAddressByBytes(to);
-                                }
-                                String contractAddressStr = AddressTool.getStringAddressByBytes(to);
-                                contractBalanceManager.addContractToken(fromStr, contractAddressStr, token);
-                                contractBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
-                            } catch (Exception e) {
-                                // skip it
-                            } finally {
-                                contractResult.setError(true);
-                                contractResult.setErrorMessage("this contract has been terminated");
-                            }
+                            // 终止的合约，回滚token余额
+                            this.rollbackContractToken(po);
+                            contractResult.setError(true);
+                            contractResult.setErrorMessage("this contract has been terminated");
                         } else {
-                            String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
+
                             if(po.getFrom() != null) {
-                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), contractAddressStr);
+                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
                             }
                             if(po.getTo() != null) {
-                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), contractAddressStr);
+                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
                             }
                         }
                     }
@@ -362,6 +329,27 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             return Result.getFailed();
         }
         return Result.getSuccess();
+    }
+
+    private void rollbackContractToken(ContractTokenTransferInfoPo po) {
+        try {
+            String contractAddressStr = po.getContractAddress();
+            byte[] from = po.getFrom();
+            byte[] to = po.getTo();
+            BigInteger token = po.getValue();
+            String fromStr = null;
+            String toStr = null;
+            if(from != null) {
+                fromStr = AddressTool.getStringAddressByBytes(from);
+            }
+            if(to != null) {
+                toStr = AddressTool.getStringAddressByBytes(to);
+            }
+            contractBalanceManager.addContractToken(fromStr, contractAddressStr, token);
+            contractBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
+        } catch (Exception e) {
+            // skip it
+        }
     }
 
     @Override

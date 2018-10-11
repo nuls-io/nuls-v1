@@ -115,7 +115,7 @@ public class VMContext {
     public BlockHeaderDto getCurrentBlockHeader()  {
         BlockHeader blockHeader = currentBlockHeader.get();
         if(blockHeader == null) {
-            blockHeader = new BlockHeader();
+            blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
         }
         return new BlockHeaderDto(blockHeader);
     }
