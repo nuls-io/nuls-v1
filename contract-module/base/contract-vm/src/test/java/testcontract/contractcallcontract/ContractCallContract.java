@@ -25,10 +25,13 @@ package testcontract.contractcallcontract;
 
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
+import io.nuls.contract.sdk.Msg;
 import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.sdk.annotation.Payable;
 
 import java.math.BigInteger;
+
+import static io.nuls.contract.sdk.Utils.require;
 
 /**
  * @author: PierreLuo
@@ -61,12 +64,51 @@ public class ContractCallContract implements Contract {
         }
     }
 
-    @Payable
-    public String test(Address contract, String methodName, String[] args, BigInteger value) {
-        try {
-            return "success";
-        } catch (Exception e) {
-            return e.getMessage();
-        }
+    //@Payable
+    //public String callContractWithReturnValue(Address contract, String methodName, String[] args, BigInteger value) {
+    //    try {
+    //        String[][] args2 = null;
+    //        if(args != null) {
+    //            args2 = new String[args.length][];
+    //            int i = 0;
+    //            for (String arg : args) {
+    //                args2[i++] = new String[]{arg};
+    //            }
+    //        }
+    //        String returnValue = contract.callWithReturnValue(methodName, null, args2, value);
+    //        return "success, inner contract call return value: " + returnValue;
+    //    } catch (Exception e) {
+    //        Utils.revert("exception: " + e.getMessage());
+    //        return e.getMessage();
+    //    }
+    //}
+    //
+    //@Payable
+    //public String multyForAddressAndcallContractWithReturnValue(Address add1, BigInteger add1_na, String add3ForString, BigInteger add3_na,
+    //                                                            Address contract, String methodName, String[] args, BigInteger value) {
+    //    try {
+    //        String multy = multyForAddress(add1, add1_na, add3ForString, add3_na);
+    //        String[][] args2 = null;
+    //        if(args != null) {
+    //            args2 = new String[args.length][];
+    //            int i = 0;
+    //            for (String arg : args) {
+    //                args2[i++] = new String[]{arg};
+    //            }
+    //        }
+    //        String returnValue = contract.callWithReturnValue(methodName, null, args2, value);
+    //        return "success, multy:" + multy + ", inner contract call return value: " + returnValue;
+    //    } catch (Exception e) {
+    //        Utils.revert("exception: " + e.getMessage());
+    //        return e.getMessage();
+    //    }
+    //}
+
+    private String multyForAddress(Address add1, BigInteger add1_na, String add3ForString, BigInteger add3_na) {
+        require(add1 != null && add3ForString != null, "Address cannot be empty.");
+        add1.transfer(add1_na);
+        Address address_3 = new Address(add3ForString);
+        address_3.transfer(add3_na);
+        return "multyForAddress: " + Msg.address().balance().toString();
     }
 }

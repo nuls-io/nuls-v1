@@ -162,6 +162,7 @@ public interface ProtocolConstant extends NulsConstant {
     int MIN_PROTOCOL_UPGRADE_RATE = 60;
     //协议升级要求最低延迟块数
     int MIN_PROTOCOL_UPGRADE_DELAY = 20;
+    // pierre test comment out
 
     /**
      * 最小转账金额
