@@ -97,6 +97,8 @@ public class NativeUtils {
         ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
         Map<String, Object> jsonMap = toJson(objectRef, frame);
         EventJson eventJson = new EventJson();
+        eventJson.setAddress(frame.vm.getProgramInvoke().getAddress());
+        eventJson.setBlockNumber(frame.vm.getProgramInvoke().getNumber());
         eventJson.setEvent(classCode.simpleName);
         eventJson.setPayload(jsonMap);
         String json = JsonUtils.toJson(eventJson);
@@ -155,9 +157,29 @@ public class NativeUtils {
 
     static class EventJson {
 
+        private String address;
+
+        private long blockNumber;
+
         private String event;
 
         private Map<String, Object> payload;
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public long getBlockNumber() {
+            return blockNumber;
+        }
+
+        public void setBlockNumber(long blockNumber) {
+            this.blockNumber = blockNumber;
+        }
 
         public String getEvent() {
             return event;

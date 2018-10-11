@@ -160,7 +160,7 @@ public class VM {
         this.programInvoke = programInvoke;
 
         programContext = new ProgramContext();
-        programContext.setAddress(this.heap.newAddress(NativeAddress.toString(programInvoke.getContractAddress())));
+        programContext.setAddress(this.heap.newAddress(programInvoke.getAddress()));
         if (programInvoke.getSender() != null) {
             programContext.setSender(this.heap.newAddress(NativeAddress.toString(programInvoke.getSender())));
         }

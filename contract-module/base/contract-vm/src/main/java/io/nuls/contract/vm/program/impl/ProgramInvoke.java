@@ -34,6 +34,8 @@ public class ProgramInvoke {
      */
     private byte[] contractAddress;
 
+    private String address;
+
     /**
      * 交易发起者地址
      */
@@ -94,6 +96,14 @@ public class ProgramInvoke {
 
     public void setContractAddress(byte[] contractAddress) {
         this.contractAddress = contractAddress;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public byte[] getSender() {
