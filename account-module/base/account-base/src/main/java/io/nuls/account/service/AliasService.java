@@ -151,7 +151,7 @@ public class AliasService {
                 coinData.setTo(toList);
             }
 
-            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, AccountConstant.ALIAS_NA, 0);
             coinData.addTo(coin);
 
             tx.setCoinData(coinData);
