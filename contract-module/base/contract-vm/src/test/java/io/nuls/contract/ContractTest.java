@@ -333,7 +333,7 @@ public class ContractTest {
         }
     }
 
-    public void sleep() {
+    public static void sleep() {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
