@@ -43,6 +43,8 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
@@ -103,11 +105,21 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             } catch (IOException e) {
                 Log.error(e);
             }
+
+            //byte[] newestStateRoot = null;
+            //BlockHeader blockHeader = tx.getBlockHeader();
+            //if(blockHeader != null) {
+            //    newestStateRoot = blockHeader.getStateRoot();
+            //}
+            //if(newestStateRoot == null) {
+            //    newestStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
+            //}
+
             CallContractData txData = tx.getTxData();
-            byte[] contractAddress = txData.getContractAddress();
-            Result<ContractAddressInfoPo> contractAddressInfo = contractAddressStorageService.getContractAddressInfo(contractAddress);
-            ContractAddressInfoPo po = contractAddressInfo.getData();
-            if(po != null && po.isNrc20()) {
+            byte[] senderContractAddressBytes = txData.getContractAddress();
+            Result<ContractAddressInfoPo> senderContractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(senderContractAddressBytes);
+            ContractAddressInfoPo po = senderContractAddressInfoResult.getData();
+            if(po != null) {
                 ContractResult contractResult = tx.getContractResult();
                 if(contractResult == null) {
                     contractResult = contractService.getContractExecuteResult(tx.getHash());
@@ -123,6 +135,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                     int size = events.size();
                     // 目前只处理Transfer事件
                     String event;
+                    ContractAddressInfoPo contractAddressInfo;
                     if(events != null && size > 0) {
                         for(int i = 0; i < size; i++) {
                             event = events.get(i);
@@ -131,8 +144,38 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                             if(tokenTransferInfoPo == null) {
                                 continue;
                             }
+                            String contractAddress = tokenTransferInfoPo.getContractAddress();
+                            if (StringUtils.isBlank(contractAddress)) {
+                                continue;
+                            }
+                            if (!AddressTool.validAddress(contractAddress)) {
+                                continue;
+                            }
+                            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+                            if(ArraysTool.arrayEquals(senderContractAddressBytes, contractAddressBytes)) {
+                                contractAddressInfo = po;
+                            } else {
+                                Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+                                contractAddressInfo = contractAddressInfoResult.getData();
+                            }
+
+                            if(contractAddressInfo == null) {
+                                continue;
+                            }
+                            // 事件不是NRC20合约的事件
+                            if(!contractAddressInfo.isNrc20()) {
+                                continue;
+                            }
+
                             byte[] from = tokenTransferInfoPo.getFrom();
                             byte[] to = tokenTransferInfoPo.getTo();
+                            //TODO pierre 回滚后token余额刷新
+                            //if(from != null) {
+                            //    vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
+                            //}
+                            //if(to != null) {
+                            //    vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
+                            //}
                             contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(from, txHashBytes, new VarInt(i).encode()));
                             contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(to, txHashBytes, new VarInt(i).encode()));
                         }
@@ -240,7 +283,6 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             // 保存代币交易
             CallContractData callContractData = tx.getTxData();
             byte[] contractAddress = callContractData.getContractAddress();
-            byte[] sender = callContractData.getSender();
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddress);
             if(contractAddressInfoPoResult.isFailed()) {

@@ -37,6 +37,8 @@ import java.math.BigInteger;
 @ApiModel(value = "ContractTokenTransferDtoJSON")
 public class ContractTokenTransferDto {
 
+    @ApiModelProperty(name = "contractAddress", value = "合约地址")
+    private String contractAddress;
     @ApiModelProperty(name = "from", value = "付款方")
     private String from;
     @ApiModelProperty(name = "to", value = "收款方")
@@ -45,6 +47,7 @@ public class ContractTokenTransferDto {
     private String value;
 
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
+        this.contractAddress = po.getContractAddress();
         if(po.getFrom() != null) {
             this.from = AddressTool.getStringAddressByBytes(po.getFrom());
         }
@@ -52,6 +55,14 @@ public class ContractTokenTransferDto {
             this.to = AddressTool.getStringAddressByBytes(po.getTo());
         }
         this.value = ContractUtil.bigInteger2String(po.getValue());
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
     }
 
     public String getFrom() {

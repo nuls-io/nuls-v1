@@ -27,13 +27,13 @@ import io.nuls.account.service.AccountService;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
-import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.entity.ContractInfoDto;
 import io.nuls.contract.entity.tx.CreateContractTransaction;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
+import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
@@ -74,6 +74,8 @@ public class VMHelper implements InitializingBean {
     private AccountService accountService;
     @Autowired
     private ContractBalanceManager contractBalanceManager;
+    @Autowired
+    private ContractAddressStorageService contractAddressStorageService;
     @Autowired
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
 
@@ -233,17 +235,12 @@ public class VMHelper implements InitializingBean {
         if(po == null) {
             return;
         }
-        // 非代币事件不处理
-        if(!po.isNrc20()) {
-            return;
-        }
         try {
-            byte[] contractAddress = contractResult.getContractAddress();
-            String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
             List<String> events = contractResult.getEvents();
             int size = events.size();
             // 目前只处理Transfer事件, 为了刷新账户的token余额
             String event;
+            ContractAddressInfoPo contractAddressInfo;
             if(events != null && size > 0) {
                 for(int i = 0; i < size; i++) {
                     event = events.get(i);
@@ -252,26 +249,46 @@ public class VMHelper implements InitializingBean {
                     if(tokenTransferInfoPo == null) {
                         continue;
                     }
+                    String contractAddress = tokenTransferInfoPo.getContractAddress();
+                    if (StringUtils.isBlank(contractAddress)) {
+                        continue;
+                    }
+                    if (!AddressTool.validAddress(contractAddress)) {
+                        continue;
+                    }
+                    byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+                    if(ArraysTool.arrayEquals(po.getContractAddress(), contractAddressBytes)) {
+                        contractAddressInfo = po;
+                    } else {
+                        Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+                        contractAddressInfo = contractAddressInfoResult.getData();
+                    }
+
+                    if(contractAddressInfo == null) {
+                        continue;
+                    }
+                    // 事件不是NRC20合约的事件
+                    if(!contractAddressInfo.isNrc20()) {
+                        continue;
+                    }
                     byte[] txHashBytes;
                     byte[] from = tokenTransferInfoPo.getFrom();
                     byte[] to = tokenTransferInfoPo.getTo();
-                    tokenTransferInfoPo.setName(po.getNrc20TokenName());
-                    tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
-                    tokenTransferInfoPo.setDecimals(po.getDecimals());
+                    tokenTransferInfoPo.setName(contractAddressInfo.getNrc20TokenName());
+                    tokenTransferInfoPo.setSymbol(contractAddressInfo.getNrc20TokenSymbol());
+                    tokenTransferInfoPo.setDecimals(contractAddressInfo.getDecimals());
                     tokenTransferInfoPo.setTime(tx.getTime());
-                    tokenTransferInfoPo.setContractAddress(contractAddress);
                     tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
                     txHashBytes = tx.getHash().serialize();
                     tokenTransferInfoPo.setTxHash(txHashBytes);
                     tokenTransferInfoPo.setStatus((byte) (contractResult.isSuccess() ? 1 : 2));
 
-                    // byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                     if(from != null) {
-                        this.refreshTokenBalance(newestStateRoot, po, AddressTool.getStringAddressByBytes(from), contractAddressStr);
+                        this.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(from), contractAddress);
                         this.saveTokenTransferInfo(from, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
                     if(to != null) {
-                        this.refreshTokenBalance(newestStateRoot, po, AddressTool.getStringAddressByBytes(to), contractAddressStr);
+                        this.refreshTokenBalance(newestStateRoot, contractAddressInfo, AddressTool.getStringAddressByBytes(to), contractAddress);
                         this.saveTokenTransferInfo(to, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
                 }
