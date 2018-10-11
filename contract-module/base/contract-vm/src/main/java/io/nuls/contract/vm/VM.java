@@ -1070,7 +1070,11 @@ public class VM {
         if (this.vmContext != null) {
             BlockHeaderDto blockHeader = null;
             try {
-                blockHeader = this.vmContext.getBlockHeader(number);
+                if (number == programInvoke.getNumber() + 1) {
+                    blockHeader = this.vmContext.getCurrentBlockHeader();
+                } else {
+                    blockHeader = this.vmContext.getBlockHeader(number);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -83,8 +83,8 @@ public class NativeBlock {
      * @see Block#currentBlockHeader()
      */
     private static Result currentBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        long blockNumber = frame.vm.getProgramContext().getNumber();
-        ObjectRef objectRef = getBlockHeader(blockNumber, frame);
+        long blockNumber = frame.vm.getProgramInvoke().getNumber();
+        ObjectRef objectRef = getBlockHeader(blockNumber + 1, frame);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }
