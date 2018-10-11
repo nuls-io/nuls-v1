@@ -57,6 +57,8 @@ public class VMContext {
     @Autowired
     private ContractUtxoService contractUtxoService;
 
+    private ThreadLocal<BlockHeader> currentBlockHeader = new ThreadLocal<>();
+
     public static Map<String, ProgramMethod> NRC20_METHODS = null;
 
     /**
@@ -106,6 +108,19 @@ public class VMContext {
     }
 
     /**
+     * get the current block header
+     * @return
+     * @throws IOException
+     */
+    public BlockHeaderDto getCurrentBlockHeader()  {
+        BlockHeader blockHeader = currentBlockHeader.get();
+        if(blockHeader == null) {
+            blockHeader = new BlockHeader();
+        }
+        return new BlockHeaderDto(blockHeader);
+    }
+
+    /**
      * 查询可用余额
      * @param address 合约地址
      * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
@@ -140,5 +155,14 @@ public class VMContext {
 
     public static void setNrc20Methods(Map<String, ProgramMethod> nrc20Methods) {
         NRC20_METHODS = nrc20Methods;
+    }
+
+    public void createCurrentBlockHeader(BlockHeader tempHeader) {
+        currentBlockHeader.remove();
+        currentBlockHeader.set(tempHeader);
+    }
+
+    public void removeCurrentBlockHeader() {
+        currentBlockHeader.remove();
     }
 }

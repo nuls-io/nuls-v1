@@ -51,8 +51,8 @@ public class BlockHeaderDto implements Serializable {
     public BlockHeaderDto() {}
 
     public BlockHeaderDto(BlockHeader header) {
-        this.hash = header.getHash().getDigestHex();
-        this.preHash = header.getPreHash().getDigestHex();
+        this.hash = (header.getHash() == null ? null : header.getHash().getDigestHex());
+        this.preHash = (header.getPreHash() == null ? null : header.getPreHash().getDigestHex());
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();

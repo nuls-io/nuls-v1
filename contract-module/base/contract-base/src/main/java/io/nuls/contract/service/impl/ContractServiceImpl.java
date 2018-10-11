@@ -1463,4 +1463,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     public void removeBatchExecute() {
         localProgramExecutor.remove();
     }
+
+    @Override
+    public void createCurrentBlockHeader(BlockHeader tempHeader) {
+        vmContext.createCurrentBlockHeader(tempHeader);
+    }
+
+    @Override
+    public void removeCurrentBlockHeader() {
+        vmContext.removeCurrentBlockHeader();
+    }
 }
