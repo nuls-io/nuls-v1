@@ -333,8 +333,7 @@ public class ConsensusProcess {
         // 更新世界状态根
         bd.setStateRoot(stateRoot);
         long height = bestBlock.getHeader().getHeight();
-        Result<ContractResult> invokeContractResult = null;
-        ContractResult contractResult = null;
+        ContractResult contractResult;
         Map<String, Coin> contractUsedCoinMap = new HashMap<>();
         int totalGasUsed = 0;
 
@@ -350,14 +349,21 @@ public class ConsensusProcess {
         long sizeTime = 0;
         long failed1Use = 0;
         long addTime = 0;
+
+        Block tempBlock = new Block();
+        BlockHeader tempHeader = new BlockHeader();
+        tempHeader.setTime(bd.getTime());
+        tempHeader.setHeight(bd.getHeight());
+        tempHeader.setPackingAddress(round.getLocalPacker().getAddress().getAddressBytes());
+        tempBlock.setHeader(tempHeader);
+
         // 为本次打包区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
         contractService.createContractTempBalance();
         // 为本次打包区块创建一个批量执行合约的执行器
         contractService.createBatchExecute(stateRoot);
-        Block tempBlock = new Block();
-        BlockHeader header = new BlockHeader();
-        header.setTime(bd.getTime());
-        tempBlock.setHeader(header);
+        // 为本地打包区块存储当前块的部分区块头信息(高度、时间、打包者地址)
+        contractService.createCurrentBlockHeader(tempHeader);
+
         List<ContractResult> contractResultList = new ArrayList<>();
         Set<String> redPunishAddress = new HashSet<>();
         while (true) {
@@ -451,6 +457,8 @@ public class ConsensusProcess {
         stateRoot = contractService.commitBatchExecute().getData();
         // 打包结束后移除批量执行合约的执行器
         contractService.removeBatchExecute();
+        // 打包结束后移除当前区块头信息
+        contractService.removeCurrentBlockHeader();
         tempBlock.getHeader().setStateRoot(stateRoot);
         for (ContractResult result : contractResultList) {
             result.setStateRoot(stateRoot);

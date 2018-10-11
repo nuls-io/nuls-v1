@@ -160,7 +160,7 @@ public class VM {
         this.programInvoke = programInvoke;
 
         programContext = new ProgramContext();
-        programContext.setAddress(this.heap.newAddress(NativeAddress.toString(programInvoke.getContractAddress())));
+        programContext.setAddress(this.heap.newAddress(programInvoke.getAddress()));
         if (programInvoke.getSender() != null) {
             programContext.setSender(this.heap.newAddress(NativeAddress.toString(programInvoke.getSender())));
         }
@@ -1070,7 +1070,11 @@ public class VM {
         if (this.vmContext != null) {
             BlockHeaderDto blockHeader = null;
             try {
-                blockHeader = this.vmContext.getBlockHeader(number);
+                if (number == programInvoke.getNumber() + 1) {
+                    blockHeader = this.vmContext.getCurrentBlockHeader();
+                } else {
+                    blockHeader = this.vmContext.getBlockHeader(number);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1085,8 +1089,8 @@ public class VM {
 
 //    public BlockHeaderDto getBlockHeader(long number) {
 //        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
-//        blockHeaderDto.setHash("afafaf");
-//        blockHeaderDto.setHeight(100);
+//        blockHeaderDto.setHash("hash" + number);
+//        blockHeaderDto.setHeight(number);
 //        blockHeaderDto.setTxCount(100);
 //        blockHeaderDto.setPackingAddress(AddressTool.getAddress("NsdwCuCKs2AXFfUT7PxXXJPm2XxybX6H"));
 //        blockHeaderDto.setTime(1535012808001L);

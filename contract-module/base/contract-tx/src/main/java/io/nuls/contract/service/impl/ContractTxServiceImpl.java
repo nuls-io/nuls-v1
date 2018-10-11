@@ -838,7 +838,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
                 tokenTransferInfoPo.setDecimals(po.getDecimals());
                 tokenTransferInfoPo.setTime(tx.getTime());
-                tokenTransferInfoPo.setContractAddress(contractAddressBytes);
+                tokenTransferInfoPo.setContractAddress(contractAddress);
                 tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
                 tokenTransferInfoPo.setTxHash(txHashBytes);
                 tokenTransferInfoPo.setStatus((byte) 0);

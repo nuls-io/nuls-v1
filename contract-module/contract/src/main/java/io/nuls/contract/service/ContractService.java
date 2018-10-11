@@ -177,4 +177,8 @@ public interface ContractService {
     Result<byte[]> commitBatchExecute();
 
     void removeBatchExecute();
+
+    void createCurrentBlockHeader(BlockHeader tempHeader);
+
+    void removeCurrentBlockHeader();
 }

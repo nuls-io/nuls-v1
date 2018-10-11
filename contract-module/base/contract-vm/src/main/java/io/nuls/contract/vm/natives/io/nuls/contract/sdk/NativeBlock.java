@@ -83,8 +83,8 @@ public class NativeBlock {
      * @see Block#currentBlockHeader()
      */
     private static Result currentBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        long blockNumber = frame.vm.getProgramContext().getNumber();
-        ObjectRef objectRef = getBlockHeader(blockNumber, frame);
+        long blockNumber = frame.vm.getProgramInvoke().getNumber();
+        ObjectRef objectRef = getBlockHeader(blockNumber + 1, frame);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }
@@ -105,7 +105,10 @@ public class NativeBlock {
             frame.heap.putField(objectRef, "time", blockHeaderDto.getTime());
             frame.heap.putField(objectRef, "height", blockHeaderDto.getHeight());
             frame.heap.putField(objectRef, "txCount", blockHeaderDto.getTxCount());
-            ObjectRef packingAddress = frame.heap.newAddress(NativeAddress.toString(blockHeaderDto.getPackingAddress()));
+            ObjectRef packingAddress = null;
+            if (blockHeaderDto.getPackingAddress() != null) {
+                packingAddress = frame.heap.newAddress(NativeAddress.toString(blockHeaderDto.getPackingAddress()));
+            }
             frame.heap.putField(objectRef, "packingAddress", packingAddress);
             String stateRoot = null;
             if (blockHeaderDto.getStateRoot() != null) {

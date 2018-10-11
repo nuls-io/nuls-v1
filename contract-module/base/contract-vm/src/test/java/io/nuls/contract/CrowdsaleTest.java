@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 
+import static io.nuls.contract.ContractTest.sleep;
+
 public class CrowdsaleTest {
 
     private VMContext vmContext;
@@ -73,10 +75,10 @@ public class CrowdsaleTest {
         programCreate.setGasLimit(1000000);
         programCreate.setNumber(1);
         programCreate.setContractCode(contractCode);
-        programCreate.args("0", "20000", "10", WALLET_ADDRESS, "20000000", TOKEN_ADDRESS, "10000000");
+        programCreate.args("1535012808001", "1635012808001", "10", WALLET_ADDRESS, "20000000", TOKEN_ADDRESS, "10000000");
         System.out.println(programCreate);
 
-        byte[] prevStateRoot = Hex.decode("be6bf2471a4d13177a399ff0201f1d737749aa78979490486cd758fa8d05535b");
+        byte[] prevStateRoot = Hex.decode("35a4804159e6d95e546e558d8fce7bb5924a2a8e058ae1e854cf3ad099b6d7f8");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.create(programCreate);
@@ -85,10 +87,15 @@ public class CrowdsaleTest {
         System.out.println(programResult);
         System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
         System.out.println();
+        sleep();
     }
 
     @Test
     public void testBuyTokens() throws IOException {
+        byte[] prevStateRoot = Hex.decode("87b890ccdbcae7ec892e94f4ad29250ca8ba3b0288515a9a742ee3bb8d7238b4");
+
+        balanceOf(prevStateRoot);
+
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(NativeAddress.toBytes(CROWDSALE_ADDRESS));
         programCall.setSender(NativeAddress.toBytes(SENDER));
@@ -101,8 +108,6 @@ public class CrowdsaleTest {
         programCall.args(BUYER);
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("ed205428a6562ce1680d6b4f0bdca19261791986e078ab6767b60c51da68316f");
-
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
@@ -111,23 +116,30 @@ public class CrowdsaleTest {
         System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
         System.out.println();
 
-        ProgramCall programCall1 = new ProgramCall();
-        programCall1.setContractAddress(NativeAddress.toBytes(TOKEN_ADDRESS));
-        programCall1.setSender(NativeAddress.toBytes(SENDER));
-        programCall1.setPrice(1);
-        programCall1.setGasLimit(1000000);
-        programCall1.setNumber(1);
-        programCall1.setMethodName("balanceOf");
-        programCall1.setMethodDesc("");
-        programCall1.args(BUYER);
+        balanceOf(track.getRoot());
 
-        track = programExecutor.begin(track.getRoot());
-        programResult = track.call(programCall1);
+        sleep();
+    }
+
+    public void balanceOf(byte[] prevStateRoot) throws IOException {
+        ProgramCall programCall = new ProgramCall();
+        programCall.setContractAddress(NativeAddress.toBytes(TOKEN_ADDRESS));
+        programCall.setSender(NativeAddress.toBytes(SENDER));
+        programCall.setPrice(1);
+        programCall.setGasLimit(1000000);
+        programCall.setNumber(1);
+        programCall.setMethodName("balanceOf");
+        programCall.setMethodDesc("");
+        programCall.args(BUYER);
+
+        ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        ProgramResult programResult = track.call(programCall);
         track.commit();
 
         System.out.println(programResult);
         System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
         System.out.println();
+        sleep();
     }
 
 }

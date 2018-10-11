@@ -39,7 +39,7 @@ public class ContractTokenTransferInfoPo implements Serializable {
     private byte[] from;
     private byte[] to;
     private BigInteger value;
-    private byte[] contractAddress;
+    private String contractAddress;
     private String name;
     private String symbol;
     private long decimals;
@@ -72,11 +72,11 @@ public class ContractTokenTransferInfoPo implements Serializable {
         this.value = value;
     }
 
-    public byte[] getContractAddress() {
+    public String getContractAddress() {
         return contractAddress;
     }
 
-    public void setContractAddress(byte[] contractAddress) {
+    public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
     }
 

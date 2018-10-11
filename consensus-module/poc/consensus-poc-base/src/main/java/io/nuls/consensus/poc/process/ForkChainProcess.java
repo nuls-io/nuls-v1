@@ -536,7 +536,8 @@ public class ForkChainProcess {
             long bestHeight = preBlock.getHeader().getHeight();
             byte[] stateRoot = ConsensusTool.getStateRoot(preBlock.getHeader());
             preBlock = newBlock;
-            byte[] receiveStateRoot = ConsensusTool.getStateRoot(newBlock.getHeader());
+            BlockHeader verifyHeader = newBlock.getHeader();
+            byte[] receiveStateRoot = ConsensusTool.getStateRoot(verifyHeader);
             ContractResult contractResult;
             Map<String, Coin> contractUsedCoinMap = new HashMap<>();
             int totalGasUsed = 0;
@@ -545,6 +546,13 @@ public class ForkChainProcess {
             contractService.createContractTempBalance();
             // 为本次验证区块创建一个批量执行合约的执行器
             contractService.createBatchExecute(stateRoot);
+            // 为本次验证区块存储当前块的部分区块头信息(高度、时间、打包者地址)
+            BlockHeader tempHeader = new BlockHeader();
+            tempHeader.setTime(verifyHeader.getTime());
+            tempHeader.setHeight(verifyHeader.getHeight());
+            tempHeader.setPackingAddress(verifyHeader.getPackingAddress());
+            contractService.createCurrentBlockHeader(tempHeader);
+
             List<ContractResult> contractResultList = new ArrayList<>();
             // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
             byte[] tempStateRoot = null;
@@ -609,6 +617,8 @@ public class ForkChainProcess {
             stateRoot = contractService.commitBatchExecute().getData();
             // 验证结束后移除批量执行合约的执行器
             contractService.removeBatchExecute();
+            // 验证结束后移除当前区块头信息
+            contractService.removeCurrentBlockHeader();
 
             // 如果不为空，则说明验证、打包的区块是同一个节点
             if (tempStateRoot != null) {
@@ -666,6 +676,7 @@ public class ForkChainProcess {
         if (!changeSuccess) {
             contractService.removeContractTempBalance();
             contractService.removeBatchExecute();
+            contractService.removeCurrentBlockHeader();
         }
         return changeSuccess;
     }

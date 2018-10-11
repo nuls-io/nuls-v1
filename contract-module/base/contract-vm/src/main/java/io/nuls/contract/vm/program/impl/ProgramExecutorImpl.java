@@ -180,6 +180,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         checkThread();
         ProgramInvoke programInvoke = new ProgramInvoke();
         programInvoke.setContractAddress(programCreate.getContractAddress());
+        programInvoke.setAddress(NativeAddress.toString(programInvoke.getContractAddress()));
         programInvoke.setSender(programCreate.getSender());
         programInvoke.setPrice(programCreate.getPrice());
         programInvoke.setGasLimit(programCreate.getGasLimit());
@@ -199,6 +200,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         checkThread();
         ProgramInvoke programInvoke = new ProgramInvoke();
         programInvoke.setContractAddress(programCall.getContractAddress());
+        programInvoke.setAddress(NativeAddress.toString(programInvoke.getContractAddress()));
         programInvoke.setSender(programCall.getSender());
         programInvoke.setPrice(programCall.getPrice());
         programInvoke.setGasLimit(programCall.getGasLimit());
@@ -242,7 +244,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("check code");
                 AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
                 if (accountState != null) {
-                    return revert(String.format("contract[%s] already exists", NativeAddress.toString(programInvoke.getContractAddress())));
+                    return revert(String.format("contract[%s] already exists", programInvoke.getAddress()));
                 }
                 accountState = repository.createAccount(programInvoke.getContractAddress(), programInvoke.getSender());
                 logTime("new account state");
@@ -254,11 +256,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
                 AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
                 if (accountState == null) {
-                    return revert(String.format("contract[%s] does not exist", NativeAddress.toString(programInvoke.getContractAddress())));
+                    return revert(String.format("contract[%s] does not exist", programInvoke.getAddress()));
                 }
                 logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
-                    return revert(String.format("contract[%s] has stopped", NativeAddress.toString(programInvoke.getContractAddress())));
+                    return revert(String.format("contract[%s] has stopped", programInvoke.getAddress()));
                 }
                 byte[] codes = repository.getCode(programInvoke.getContractAddress());
                 classCodes = ClassCodeLoader.loadJarCache(codes);

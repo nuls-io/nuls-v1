@@ -656,8 +656,7 @@ public class AccountLedgerResource {
                 if (!isEmptyAssetType) {
                     String contractAddress = assetType;
                     if (AddressTool.validAddress(contractAddress)) {
-                        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                        tokenInfoList = list.stream().filter(po -> Arrays.areEqual(contractAddressBytes, po.getContractAddress())).collect(Collectors.toList());
+                        tokenInfoList = list.stream().filter(po -> contractAddress.equals(po.getContractAddress())).collect(Collectors.toList());
                     }
                 } else {
                     tokenInfoList = list;
@@ -675,7 +674,7 @@ public class AccountLedgerResource {
                         //skip it
                     }
                     info.setTxHash(hashData);
-                    info.setContractAddress(po.getContractAddress());
+                    info.setContractAddress(AddressTool.getAddress(po.getContractAddress()));
                     info.setTime(po.getTime());
                     info.setBlockHeight(po.getBlockHeight());
                     info.setStatus(po.getStatus());

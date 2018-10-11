@@ -1012,7 +1012,9 @@ public class ContractResource implements InitializingBean {
                 resultMap.put("msg", msg);
             }
             if(flag && contractResultDto != null) {
-                //resultMap.put("confirmCount", confirmCount);
+                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(tokenTransfers);
+                contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put("data", contractResultDto);
             }
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
@@ -1020,6 +1022,35 @@ public class ContractResource implements InitializingBean {
             Log.error(e);
             return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
+    }
+
+    private List<ContractTokenTransferDto> filterRealTokenTransfers(List<ContractTokenTransferDto> tokenTransfers) {
+        if(tokenTransfers == null || tokenTransfers.isEmpty()) {
+            return tokenTransfers;
+        }
+        List<ContractTokenTransferDto> resultDto = new ArrayList<>();
+        Map<String, ContractAddressInfoPo> cache = MapUtil.createHashMap(tokenTransfers.size());
+        for(ContractTokenTransferDto tokenTransfer : tokenTransfers) {
+            try {
+                if(StringUtils.isBlank(tokenTransfer.getName())) {
+                    String contractAddress = tokenTransfer.getContractAddress();
+                    ContractAddressInfoPo po = cache.get(contractAddress);
+                    if(po == null) {
+                        po = contractAddressStorageService.getContractAddressInfo(
+                                AddressTool.getAddress(contractAddress)).getData();
+                        cache.put(contractAddress, po);
+                    }
+                    if(po == null || !po.isNrc20()) {
+                        continue;
+                    }
+                    tokenTransfer.setNrc20Info(po);
+                    resultDto.add(tokenTransfer);
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
+        return resultDto;
     }
 
     @GET
@@ -1152,6 +1183,10 @@ public class ContractResource implements InitializingBean {
                         } else {
                             txDto.setContractResult(new ContractResultDto(contractExecuteResult, tx));
                         }
+                        ContractResultDto contractResultDto = txDto.getContractResult();
+                        List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                        List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(tokenTransfers);
+                        contractResultDto.setTokenTransfers(realTokenTransfers);
                     }
                 }
                 result = Result.getSuccess();

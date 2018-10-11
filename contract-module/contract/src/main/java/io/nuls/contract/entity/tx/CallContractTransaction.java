@@ -25,11 +25,11 @@ package io.nuls.contract.entity.tx;
 
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
-import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.entity.txdata.CallContractData;
 import io.nuls.contract.service.ContractService;
-import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.json.JSONUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -37,10 +37,13 @@ import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.ByteArrayWrapper;
 import io.nuls.kernel.utils.NulsByteBuffer;
 
 import java.util.*;
+
+import static io.nuls.contract.constant.ContractConstant.CONTRACT_EVENT_ADDRESS;
 
 /**
  * @Desription:
@@ -170,6 +173,12 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
                     addressesSet.add(new ByteArrayWrapper(transfer.getTo()));
                 }
             }
+            // 解析合约事件中的合约地址
+            List<byte[]> parseEventContractList = this.parseEventContract(contractResult.getEvents());
+            for(byte[] contract : parseEventContractList) {
+                addressesSet.add(new ByteArrayWrapper(contract));
+            }
+
 
             List<byte[]> resultList = new ArrayList<>();
             for(ByteArrayWrapper wrapper : addressesSet) {
@@ -179,6 +188,23 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
         } else {
             return super.getAllRelativeAddress();
         }
+    }
+
+    private List<byte[]> parseEventContract(List<String> events) {
+        List<byte[]> result = new ArrayList<>();
+        if(events == null || events.isEmpty()) {
+            return result;
+        }
+        for(String event : events) {
+            try {
+                Map<String, Object> eventMap = JSONUtils.json2map(event);
+                String contractAddress = (String) eventMap.get(CONTRACT_EVENT_ADDRESS);
+                result.add(AddressTool.getAddress(contractAddress));
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
+        return result;
     }
 
     public void setContractTransferTxs(Collection<ContractTransferTransaction> contractTransferTxs) {

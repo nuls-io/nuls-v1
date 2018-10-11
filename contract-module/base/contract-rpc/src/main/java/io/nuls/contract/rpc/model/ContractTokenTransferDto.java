@@ -24,6 +24,7 @@
 package io.nuls.contract.rpc.model;
 
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.ApiModel;
@@ -37,14 +38,23 @@ import java.math.BigInteger;
 @ApiModel(value = "ContractTokenTransferDtoJSON")
 public class ContractTokenTransferDto {
 
+    @ApiModelProperty(name = "contractAddress", value = "合约地址")
+    private String contractAddress;
     @ApiModelProperty(name = "from", value = "付款方")
     private String from;
     @ApiModelProperty(name = "to", value = "收款方")
     private String to;
     @ApiModelProperty(name = "value", value = "转账金额")
     private String value;
+    @ApiModelProperty(name = "name", value = "token名称")
+    private String name;
+    @ApiModelProperty(name = "symbol", value = "token符号")
+    private String symbol;
+    @ApiModelProperty(name = "decimals", value = "token支持的小数位数")
+    private long decimals;
 
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
+        this.contractAddress = po.getContractAddress();
         if(po.getFrom() != null) {
             this.from = AddressTool.getStringAddressByBytes(po.getFrom());
         }
@@ -52,6 +62,23 @@ public class ContractTokenTransferDto {
             this.to = AddressTool.getStringAddressByBytes(po.getTo());
         }
         this.value = ContractUtil.bigInteger2String(po.getValue());
+        this.name = po.getName();
+        this.symbol = po.getSymbol();
+        this.decimals = po.getDecimals();
+    }
+
+    public void setNrc20Info(ContractAddressInfoPo po) {
+        this.name = po.getNrc20TokenName();
+        this.symbol = po.getNrc20TokenSymbol();
+        this.decimals = po.getDecimals();
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
     }
 
     public String getFrom() {
@@ -76,5 +103,29 @@ public class ContractTokenTransferDto {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
     }
 }

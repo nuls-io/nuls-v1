@@ -124,8 +124,10 @@ public class ContractUtil {
         try {
             Map<String, Object> eventMap = JSONUtils.json2map(event);
             String eventName = (String) eventMap.get(CONTRACT_EVENT);
+            String contractAddress = (String) eventMap.get(CONTRACT_EVENT_ADDRESS);
+            po = new ContractTokenTransferInfoPo();
+            po.setContractAddress(contractAddress);
             if(NRC20_EVENT_TRANSFER.equals(eventName)) {
-                po = new ContractTokenTransferInfoPo();
                 Map<String, Object> data = (Map<String, Object>) eventMap.get(CONTRACT_EVENT_DATA);
                 Collection<Object> values = data.values();
                 int i = 0;

@@ -229,10 +229,11 @@ public class BlockProcess {
                      * pierre add 智能合约相关
                      */
                     BlockHeader bestBlockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+                    BlockHeader verifyHeader = block.getHeader();
                     long bestHeight = bestBlockHeader.getHeight();
-                    byte[] receiveStateRoot = ConsensusTool.getStateRoot(block.getHeader());
+                    byte[] receiveStateRoot = ConsensusTool.getStateRoot(verifyHeader);
                     byte[] stateRoot = ConsensusTool.getStateRoot(bestBlockHeader);
-                    ContractResult contractResult = null;
+                    ContractResult contractResult;
                     Map<String, Coin> contractUsedCoinMap = new HashMap<>();
                     int totalGasUsed = 0;
 
@@ -240,6 +241,13 @@ public class BlockProcess {
                     contractService.createContractTempBalance();
                     // 为本次验证区块创建一个批量执行合约的执行器
                     contractService.createBatchExecute(stateRoot);
+                    // 为本次验证区块存储当前块的部分区块头信息(高度、时间、打包者地址)
+                    BlockHeader tempHeader = new BlockHeader();
+                    tempHeader.setTime(verifyHeader.getTime());
+                    tempHeader.setHeight(verifyHeader.getHeight());
+                    tempHeader.setPackingAddress(verifyHeader.getPackingAddress());
+                    contractService.createCurrentBlockHeader(tempHeader);
+
                     List<ContractResult> contractResultList = new ArrayList<>();
                     // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
                     byte[] tempStateRoot = null;
@@ -287,6 +295,8 @@ public class BlockProcess {
                     stateRoot = contractService.commitBatchExecute().getData();
                     // 验证结束后移除批量执行合约的执行器
                     contractService.removeBatchExecute();
+                    // 验证结束后移除当前区块头信息
+                    contractService.removeCurrentBlockHeader();
                     // 如果不为空，则说明验证、打包的区块是同一个节点
                     if (tempStateRoot != null) {
                         stateRoot = tempStateRoot;
@@ -366,6 +376,7 @@ public class BlockProcess {
             } else {
                 contractService.removeContractTempBalance();
                 contractService.removeBatchExecute();
+                contractService.removeCurrentBlockHeader();
 
                 chainManager.getMasterChain().rollback(block);
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
