@@ -5,14 +5,14 @@
     <parent>
         <artifactId>account-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.2</version>
+        <version>1.1.2-beta</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.account-module</groupId>
     <artifactId>account-rpc</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.2-beta</version>
 
 
     <dependencies>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account-base</artifactId>
-            <version>1.1.2</version>
+            <version>1.1.2-beta</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>

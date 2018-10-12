@@ -68,8 +68,10 @@ public enum PunishReasonEnum {
                 return PunishReasonEnum.BIFURCATION;
             case 2:
                 return PunishReasonEnum.DOUBLE_SPEND;
+            case 3:
+                return PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH;
             default:
-                return null;
+                return PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH;
         }
 
     }

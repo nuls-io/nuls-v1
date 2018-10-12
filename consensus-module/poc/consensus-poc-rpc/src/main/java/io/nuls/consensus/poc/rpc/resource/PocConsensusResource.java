@@ -118,8 +118,10 @@ public class PocConsensusResource {
     })
     public RpcClientResult getWholeInfo() {
         Result result = Result.getSuccess();
-
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
+        if (null == PocConsensusContext.getChainManager() || null == PocConsensusContext.getChainManager().getMasterChain()) {
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+        }
 
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
@@ -1657,5 +1659,41 @@ public class PocConsensusResource {
             return Result.getSuccess().setData(valueMap).toRpcClientResult();
         }
         return resultData.toRpcClientResult();
+    }
+
+
+    @GET
+    @Path("/punish/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "获取惩罚记录", notes = "获取惩罚记录")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getPunishList(@ApiParam(name = "address", value = "查询地址", required = true)
+                                         @PathParam("address") String address,
+                                         @ApiParam(name = "type", value = "惩罚类型:yellow:0,red:1", required = true)
+                                         @QueryParam("type") int type) {
+        byte[] addressByte = AddressTool.getAddress(address);
+        if (!AddressTool.validNormalAddress(addressByte)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        List<PunishLogPo> punishList = null;
+        if (type == 0) {
+            punishList = PocConsensusContext.getChainManager().getMasterChain().getChain().getYellowPunishList();
+        } else if (1 == type) {
+            punishList = PocConsensusContext.getChainManager().getMasterChain().getChain().getRedPunishList();
+        } else {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        List<PunishLogDTO> list = new ArrayList<>();
+        for (PunishLogPo po : punishList) {
+            if (!ArraysTool.arrayEquals(po.getAddress(), addressByte)) {
+                continue;
+            }
+            list.add(new PunishLogDTO(po));
+        }
+        Result result = Result.getSuccess();
+        result.setData(list);
+        return result.toRpcClientResult();
     }
 }

@@ -94,7 +94,7 @@ public class PunishLogPo extends BaseNulsData {
         this.roundIndex = roundIndex;
     }
 
-    public int getType() {
+    public byte getType() {
         return type;
     }
 
@@ -152,5 +152,13 @@ public class PunishLogPo extends BaseNulsData {
             return false;
         }
         return Arrays.equals(this.getKey(), ((PunishLogPo) obj).getKey());
+    }
+
+    public short getReasonCode() {
+        return reasonCode;
+    }
+
+    public byte[] getEvidence() {
+        return evidence;
     }
 }
