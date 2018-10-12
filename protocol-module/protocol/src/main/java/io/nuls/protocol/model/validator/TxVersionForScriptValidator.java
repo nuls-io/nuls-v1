@@ -61,10 +61,6 @@ public class TxVersionForScriptValidator implements NulsDataValidator<Transactio
             if (coin.getOwner()[2] != NulsContext.DEFAULT_ADDRESS_TYPE) {
                 return failed;
             }
-            byte[] chainId = SerializeUtils.shortToBytes(NulsContext.DEFAULT_CHAIN_ID);
-            if (chainId[0] != coin.getOwner()[0] || chainId[1] != coin.getOwner()[1]) {
-                return failed;
-            }
         }
         return ValidateResult.getSuccessResult();
     }
