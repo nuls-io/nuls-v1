@@ -100,17 +100,21 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
                 long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
                 Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
                 if (consensusVersionHeight == null) {
-                    consensusVersionHeight = 680000L;
+//                    consensusVersionHeight = 680000L;
+                    consensusVersionHeight = 1L;
                 } else {
                     long height = consensusVersionHeight + 1;
                     BlockProtocolInfoPo infoPo = null;
                     while (true) {
                         height--;
-                        if(height == 680000L) {
-                            break;
-                        }
+//                        if(height == 680000L) {
+//                            break;
+//                        }
                         infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
                         if (infoPo != null) {
+                            break;
+                        }
+                        if(height <= 0) {
                             break;
                         }
                     }

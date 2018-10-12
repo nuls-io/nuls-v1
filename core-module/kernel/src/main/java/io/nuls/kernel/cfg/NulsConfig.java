@@ -41,7 +41,7 @@ public class NulsConfig {
      * nuls底层代码的版本号
      * The version number of the underlying code for nuls.
      */
-    public static String VERSION = "1.1.0";
+    public static String VERSION = "1.1.2";
 
     /**
      * 系统使用的编码方式
