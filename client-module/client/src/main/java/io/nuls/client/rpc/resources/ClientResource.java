@@ -120,7 +120,12 @@ public class ClientResource {
     public RpcClientResult startUpdate(@PathParam("version") String version) {
         AssertUtil.canNotEmpty(version);
         SyncVersionRunner syncor = SyncVersionRunner.getInstance();
-        if (!version.equals(syncor.getNewestVersion())) {
+        String newestVersion = syncor.getNewestVersion();
+        if(VersionUtils.equalsWith(NulsConfig.VERSION, newestVersion) || VersionUtils.higherThan(NulsConfig.VERSION, newestVersion)){
+            Result result = Result.getFailed(KernelErrorCode.NONEWVER);
+            return result.toRpcClientResult();
+        }
+        if (!version.equals(newestVersion)) {
             Result result = Result.getFailed(KernelErrorCode.VERSION_NOT_NEWEST);
             return result.toRpcClientResult();
         }

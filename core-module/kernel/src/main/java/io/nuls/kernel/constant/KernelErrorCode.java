@@ -67,4 +67,5 @@ public interface KernelErrorCode {
     ErrorCode VERSION_TOO_LOW = ErrorCode.init("10032");
     ErrorCode PUBKEY_REPEAT = ErrorCode.init("10033");
     ErrorCode COIN_OWNER_ERROR = ErrorCode.init("10034");
+    ErrorCode NONEWVER = ErrorCode.init("10035");
 }
