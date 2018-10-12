@@ -1634,6 +1634,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
             tx.setTime(TimeService.currentTimeMillis());
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                }
+            }
             CoinData coinData = new CoinData();
             Na values = Na.ZERO;
             for (MultipleAddressTransferModel to : outputs) {
