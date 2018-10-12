@@ -67,7 +67,7 @@ public class NulsContext {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".8964.
      */
-    public static short DEFAULT_CHAIN_ID = 8964;
+    public static short DEFAULT_CHAIN_ID = 261;
 
     /**
      * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
