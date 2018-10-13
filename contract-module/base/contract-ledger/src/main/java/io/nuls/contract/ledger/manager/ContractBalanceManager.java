@@ -282,7 +282,7 @@ public class ContractBalanceManager {
         ContractBalance contractBalance = tempBalanceMap.get(addressKey);
 
         if(contractBalance != null) {
-            contractBalance.addUsable(amount);
+            contractBalance.addTempUsable(amount);
         }
     }
 
@@ -292,7 +292,7 @@ public class ContractBalanceManager {
         ContractBalance contractBalance = tempBalanceMap.get(addressKey);
 
         if(contractBalance != null) {
-            contractBalance.minusUsable(amount);
+            contractBalance.minusTempUsable(amount);
         }
     }
 
@@ -307,8 +307,7 @@ public class ContractBalanceManager {
                 Log.info("parse coin form db error");
                 continue;
             }
-            if (Arrays.equals(coin.getAddress(), address))
-            {
+            if (Arrays.equals(coin.getAddress(), address)) {
                 coin.setOwner(coinEntry.getKey());
                 coin.setKey(asString(coinEntry.getKey()));
                 coinList.add(coin);

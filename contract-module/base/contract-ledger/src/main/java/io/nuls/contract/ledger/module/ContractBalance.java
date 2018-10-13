@@ -126,4 +126,15 @@ public class ContractBalance implements Serializable {
         this.usableConsensusReward = this.usableConsensusReward.add(usableConsensusReward);
     }
 
+    public void minusTempUsable(Na amount) {
+        Na realUsable = this.getRealUsable();
+        Na tempUsable = realUsable.minus(amount);
+        this.usableConsensusReward = Na.ZERO;
+        this.consensusRewardCoins.clear();
+        this.usable = tempUsable;
+    }
+
+    public void addTempUsable(Na amount) {
+        this.addUsable(amount);
+    }
 }
