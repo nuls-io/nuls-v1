@@ -121,7 +121,7 @@ public class ClientResource {
         AssertUtil.canNotEmpty(version);
         SyncVersionRunner syncor = SyncVersionRunner.getInstance();
         String newestVersion = syncor.getNewestVersion();
-        if(VersionUtils.equalsWith(NulsConfig.VERSION, newestVersion) || VersionUtils.higherThan(NulsConfig.VERSION, newestVersion)){
+        if(!VersionUtils.higherThan(newestVersion,NulsConfig.VERSION )){
             Result result = Result.getFailed(KernelErrorCode.NONEWVER);
             return result.toRpcClientResult();
         }
