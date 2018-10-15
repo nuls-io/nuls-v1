@@ -68,6 +68,7 @@ public class ProgramConstants {
             Map.class,
             Map.Entry.class,
             HashMap.class,
+            LinkedHashMap.class,
             Set.class,
             HashSet.class,
             Exception.class,
