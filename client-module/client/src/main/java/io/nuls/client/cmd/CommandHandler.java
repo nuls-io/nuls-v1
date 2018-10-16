@@ -190,7 +190,7 @@ public class CommandHandler {
         register(new CreateContractProcessor());
         register(new CallContractProcessor());
         register(new ViewContractProcessor());
-        register(new ContractTransferProcessor());
+        register(new TransferToContractProcessor());
         register(new TokenTransferProcessor());
         register(new DeleteContractProcessor());
         register(new GetContractConstructorProcessor());

@@ -41,7 +41,7 @@ import java.util.Map;
  * Transfer to contract address
  * Created by wangkun23 on 2018/9/25.
  */
-public class ContractTransferProcessor implements CommandProcessor {
+public class TransferToContractProcessor implements CommandProcessor {
     /**
      * rest utils
      */
@@ -49,7 +49,7 @@ public class ContractTransferProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "contracttransfer";
+        return "transfertocontract";
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ContractTransferProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "contracttransfer <address> <toAddress> <gasLimit> <price> <amount> --create transfer to contract address";
+        return "transfertocontract <address> <toAddress> <gasLimit> <price> <amount> --create transfer to contract address";
     }
 
     @Override
