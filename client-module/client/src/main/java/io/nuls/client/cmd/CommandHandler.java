@@ -244,7 +244,7 @@ public class CommandHandler {
             List<Completer> completers = new ArrayList<Completer>();
             completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
             CONSOLE_READER.addCompleter(new ArgumentCompleter(completers));
-            String line = null;
+            String line;
             do {
                 line = CONSOLE_READER.readLine(CommandConstant.COMMAND_PS1);
                 if (StringUtils.isBlank(line)) {
