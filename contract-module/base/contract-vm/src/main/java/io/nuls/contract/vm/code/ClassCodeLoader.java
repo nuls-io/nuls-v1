@@ -68,10 +68,6 @@ public class ClassCodeLoader {
         RESOURCE_CLASS_CODES = loadFromResource();
     }
 
-    public static void init() {
-
-    }
-
     public static ClassCode load(String className) {
         try {
             ClassReader classReader = new ClassReader(className);

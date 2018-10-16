@@ -36,7 +36,7 @@ public class VMFactory {
 
     public static final Map<String, ClassCode> VM_INIT_CLASS_CODES = new LinkedHashMap(1024);
 
-    public static VM VM;
+    public static final VM VM;
 
     private static final String[] IGNORE_CLINIT = new String[]{
             "java/io/File",
@@ -58,7 +58,6 @@ public class VMFactory {
             "java/lang/invoke/MethodType",
             "java/lang/ref/Reference",
             "java/lang/reflect/AccessibleObject",
-            "java/math/BigDecimal",
             "java/net/InetAddress",
             "java/net/NetworkInterface",
             "java/nio/charset/Charset",
@@ -82,7 +81,7 @@ public class VMFactory {
             "java/lang/Long$LongCache",
     };
 
-    public static void init() {
+    static {
         String[] classes = ArrayUtils.addAll(ProgramConstants.VM_INIT_CLASS_NAMES, ProgramConstants.CONTRACT_USED_CLASS_NAMES);
         classes = ArrayUtils.addAll(classes, ProgramConstants.CONTRACT_LAZY_USED_CLASS_NAMES);
         classes = ArrayUtils.addAll(classes, ProgramConstants.SDK_CLASS_NAMES);
