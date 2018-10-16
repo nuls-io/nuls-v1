@@ -60,7 +60,7 @@ public class ViewContractProcessor implements CommandProcessor {
         builder.newLine(getCommandDescription())
                 .newLine("\t<contractAddress>   contract address    -required")
                 .newLine("\t<methodName>        the method to call    -required")
-                .newLine("\t[methodDesc]        the method description    -not required");
+                .newLine("\t[-d methodDesc]        the method description    -not required");
         return builder.toString();
     }
 
@@ -96,7 +96,7 @@ public class ViewContractProcessor implements CommandProcessor {
     }
 
     private ContractViewCall getContractViewCall(String[] args) {
-        ContractViewCall call = null;
+        ContractViewCall call;
         try {
             call = new ContractViewCall();
             call.setContractAddress(args[1].trim());

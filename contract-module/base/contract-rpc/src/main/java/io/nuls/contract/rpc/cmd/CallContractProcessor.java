@@ -72,8 +72,8 @@ public class CallContractProcessor implements CommandProcessor {
                 .newLine("\t<contractAddress>   contract address    -required")
                 .newLine("\t<methodName>        the method to call    -required")
                 .newLine("\t<value>             transfer nuls to the contract (Unit: Nuls)    -required")
-                .newLine("\t[methodDesc]        the method description    -not required")
-                .newLine("\t[remark]            remark    -not required");
+                .newLine("\t[-d methodDesc]        the method description    -not required")
+                .newLine("\t[-r remark]            remark    -not required");
         return builder.toString();
     }
 

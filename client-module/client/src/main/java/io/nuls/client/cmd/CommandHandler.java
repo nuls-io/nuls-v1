@@ -190,10 +190,10 @@ public class CommandHandler {
         register(new CreateContractProcessor());
         register(new CallContractProcessor());
         register(new ViewContractProcessor());
+        register(new ContractTransferProcessor());
         register(new TokenTransferProcessor());
         register(new DeleteContractProcessor());
         register(new GetContractConstructorProcessor());
-        register(new ContractViewProcessor());
         JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }
