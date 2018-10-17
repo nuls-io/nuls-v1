@@ -1106,6 +1106,9 @@ public class VM {
         Object resultValue = getResult().getValue();
         if (resultValue != null) {
             if (resultValue instanceof ObjectRef) {
+                if (getResult().isError() || getResult().isException()) {
+                    setResult(new Result());
+                }
                 result = this.heap.runToString((ObjectRef) resultValue);
             } else {
                 result = resultValue.toString();
