@@ -26,13 +26,16 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.BlockExtendsData;
+import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -46,9 +49,7 @@ import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class NulsProtocolProcess {
 
@@ -90,17 +91,55 @@ public class NulsProtocolProcess {
             ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
             if (protocolContainer != null) {
                 calcNewProtocolCoverageRate(protocolContainer, extendsData, blockHeader);
+                //遍历所有临时协议的tempInfo，如果当前block的packing地址在其addressSet中，则将其删除
+                for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+                    if (tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                            tempInfoPo.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
+                //针对其他能识别但未生效的协议Container，做同样的操作
+                for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+                    if (container.getStatus() != ProtocolContainer.VALID
+                            && container.getVersion().intValue() != protocolContainer.getVersion().intValue()) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (container.getAddressSet().contains(packingAddress)) {
+                            container.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
             } else {
                 //如果没有,则存入临时的协议容器里
-                ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
-                if (tempInfoPo == null) {
-                    tempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
+                ProtocolTempInfoPo protocolTempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
+                if (protocolTempInfoPo == null) {
+                    protocolTempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
                 }
-                calcTempProtocolCoverageRate(tempInfoPo, extendsData, blockHeader);
+                calcTempProtocolCoverageRate(protocolTempInfoPo, extendsData, blockHeader);
+                //遍历所有能识别的协议Container，如果当前block的packing地址在其中，则将其删除
+                for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+                    if (container.getStatus() != ProtocolContainer.VALID) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (container.getAddressSet().contains(packingAddress)) {
+                            container.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
+                //针对未识别的临时协议tempInfo，做同样的操作
+                for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+                    if (tempInfoPo.getStatus() != ProtocolContainer.VALID
+                            && tempInfoPo.getVersion() != protocolTempInfoPo.getVersion()) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                            tempInfoPo.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
             }
         } else {
-            calcDelay(blockHeader);
-            calcTempDelay(blockHeader);
+            calcDelay(blockHeader, extendsData);
+            calcTempDelay(blockHeader, extendsData);
         }
         getVersionManagerStorageService().saveConsensusVersionHeight(blockHeader.getHeight());
         //处理完所有流程后还原数据
@@ -120,6 +159,19 @@ public class NulsProtocolProcess {
             if (container.getStatus() != ProtocolContainer.VALID) {
                 //如果容器的轮次小于当前出块节点的轮次，说明是新的一轮开始
                 if (container.getRoundIndex() < extendsData.getRoundIndex()) {
+                    MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                    List<MeetingMember> memberList = currentRound.getMemberList();
+                    Set<String> memberAddressSet = new HashSet<>();
+                    for (MeetingMember member : memberList) {
+                        memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                    }
+                    Iterator<String> iterator = container.getAddressSet().iterator();
+                    while (iterator.hasNext()) {
+                        String address = iterator.next();
+                        if (!memberAddressSet.contains(address)) {
+                            iterator.remove();
+                        }
+                    }
                     if (container.getStatus() == ProtocolContainer.INVALID) {
                         container.setCurrentDelay(0);
                     } else {
@@ -128,6 +180,7 @@ public class NulsProtocolProcess {
                         Result<BlockHeader> result = getBlockService().getBlockHeader(header.getPreHash());
                         BlockHeader preHeader = result.getData();
                         BlockExtendsData preExtendsData = new BlockExtendsData(preHeader.getExtend());
+
                         int rate = calcRate(container, preExtendsData);
                         container.setCurrentPercent(rate);
                         if (rate < container.getPercent()) {
@@ -136,7 +189,7 @@ public class NulsProtocolProcess {
                         }
                     }
                     container.setPrePercent(container.getCurrentPercent());
-                    container.getAddressSet().clear();
+                    //container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
                     saveProtocolInfo(container);
                 }
@@ -152,11 +205,26 @@ public class NulsProtocolProcess {
     private void refreshTempProtocolCoverageRate(BlockExtendsData extendsData, BlockHeader header) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
             if (tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+
                 //如果容器的轮次小于当前出块节点的轮次，说明是新的一轮开始
                 if (tempInfoPo.getRoundIndex() < extendsData.getRoundIndex()) {
                     if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
                         tempInfoPo.setCurrentDelay(0);
                     } else {
+
+                        MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                        List<MeetingMember> memberList = currentRound.getMemberList();
+                        Set<String> memberAddressSet = new HashSet<>();
+                        for (MeetingMember member : memberList) {
+                            memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                        }
+                        Iterator<String> iterator = tempInfoPo.getAddressSet().iterator();
+                        while (iterator.hasNext()) {
+                            String address = iterator.next();
+                            if (!memberAddressSet.contains(address)) {
+                                iterator.remove();
+                            }
+                        }
                         //已经开始统计延迟块的协议，由于存在新的一轮出块节点地址的变化，因此需要重新计算覆盖率
                         //如果覆盖率未达到，则清零延迟块数量，重新计算
                         Result<BlockHeader> result = getBlockService().getBlockHeader(header.getPreHash());
@@ -170,7 +238,7 @@ public class NulsProtocolProcess {
                         }
                     }
                     tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
-                    tempInfoPo.getAddressSet().clear();
+                    //tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
                 }
@@ -311,8 +379,15 @@ public class NulsProtocolProcess {
     }
 
 
-    private void calcDelay(BlockHeader blockHeader) {
+    private void calcDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+            if (container.getVersion().intValue() != extendsData.getCurrentVersion().intValue()
+                    && container.getStatus() != ProtocolContainer.VALID) {
+                String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                if (container.getAddressSet().contains(packingAddress)) {
+                    container.getAddressSet().remove(packingAddress);
+                }
+            }
             if (container.getStatus() == ProtocolContainer.DELAY_LOCK) {
                 //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
                 container.setCurrentDelay(container.getCurrentDelay() + 1);
@@ -349,8 +424,15 @@ public class NulsProtocolProcess {
         }
     }
 
-    private void calcTempDelay(BlockHeader blockHeader) {
+    private void calcTempDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+            if (tempInfoPo.getVersion() != extendsData.getCurrentVersion().intValue()
+                    && tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+                String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                    tempInfoPo.getAddressSet().remove(packingAddress);
+                }
+            }
             if (tempInfoPo.getStatus() == ProtocolContainer.DELAY_LOCK) {
                 //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
                 tempInfoPo.setCurrentDelay(tempInfoPo.getCurrentDelay() + 1);
@@ -566,7 +648,7 @@ public class NulsProtocolProcess {
         getVersionManagerStorageService().saveMainVersion(validVersion);
     }
 
-    public void clearIncompatibleTx(){
+    public void clearIncompatibleTx() {
         TransactionQueueStorageService tqs = NulsContext.getServiceBean(TransactionQueueStorageService.class);
         while (tqs.pollTx() != null) {
         }

@@ -25,6 +25,11 @@
 
 package io.nuls.core.tools.str;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Niels
  */
@@ -39,33 +44,46 @@ public class VersionUtils {
         if (StringUtils.isBlank(version0) || StringUtils.isBlank(version1)) {
             throw new RuntimeException("version is null");
         }
-        version0 = version0.replace("-SNAPSHOT", "");
-        version1 = version1.replace("-SNAPSHOT", "");
-        version0 = version0.replace("-BETA", "");
-        version1 = version1.replace("-BETA", "");
-        String[] array0 = version0.split("\\.");
-        String[] array1 = version1.split("\\.");
-        if (array0.length != 3 || array1.length != 3) {
-            throw new RuntimeException("version format is wrong");
+        Integer[] intArr0 = strArrayToInt(version0);
+        Integer[] intArr1 = strArrayToInt(version1);
+        boolean result = false;
+        for (int i = 0; i < intArr0.length; i++) {
+            Integer val1 = intArr0[i];
+            if (intArr1.length <= i && val1 > 0) {
+                result = true;
+                break;
+            }
+            Integer val2 = intArr1[i];
+            if (val1 > val2) {
+                result = true;
+                break;
+            }
         }
-        int[] intArr0 = strArrayToInt(array0);
-        int[] intArr1 = strArrayToInt(array1);
-        boolean result = intArr0[0] > intArr1[0];
-        if (result) {
-            return true;
+        //当version1版本号位数更多时
+        if (!result && intArr1.length > intArr0.length) {
+            result = intArr1[intArr0.length] > 0;
         }
-        result = intArr0[0] == intArr1[0] && intArr0[1] > intArr1[1];
-        if (result) {
-            return true;
-        }
-        return intArr0[0] == intArr1[0] && intArr0[1] == intArr1[1] && intArr0[2] > intArr1[2];
+        return result;
     }
 
     public static boolean equalsWith(String version0, String version1) {
         if (StringUtils.isBlank(version0) || StringUtils.isBlank(version1)) {
             throw new RuntimeException("version is null");
         }
-        return version0.equals(version1);
+        Integer[] intArr0 = strArrayToInt(version0);
+        Integer[] intArr1 = strArrayToInt(version1);
+        boolean result = intArr0.length == intArr1.length;
+        if (!result) {
+            return false;
+        }
+        for (int i = 0; i < intArr0.length; i++) {
+            Integer val1 = intArr0[i];
+            Integer val2 = intArr1[i];
+            if (val1 != val2) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -77,37 +95,37 @@ public class VersionUtils {
         if (StringUtils.isBlank(version0) || StringUtils.isBlank(version1)) {
             throw new RuntimeException("version is null");
         }
-        version0 = version0.replace("-SNAPSHOT", "");
-        version1 = version1.replace("-SNAPSHOT", "");
-        version0 = version0.replace("-BETA", "");
-        version1 = version1.replace("-BETA", "");
-        String[] array0 = version0.split("\\.");
-        String[] array1 = version1.split("\\.");
-        if (array0.length != 3 || array1.length != 3) {
-            throw new RuntimeException("version format is wrong");
+        Integer[] intArr0 = strArrayToInt(version0);
+        Integer[] intArr1 = strArrayToInt(version1);
+        boolean result = false;
+        for (int i = 0; i < intArr0.length; i++) {
+            Integer val1 = intArr0[i];
+            if (intArr1.length <= i && val1 > 0) {
+                break;
+            }
+            Integer val2 = intArr1[i];
+            if (val1 < val2) {
+                result = true;
+                break;
+            }
         }
-        int[] intArr0 = strArrayToInt(array0);
-        int[] intArr1 = strArrayToInt(array1);
-        boolean result = intArr0[0] < intArr1[0];
-        if (result) {
-            return true;
+        if (!result && intArr1.length > intArr0.length && intArr1[intArr0.length] > 0) {
+            result = true;
         }
-        result = intArr0[0] == intArr1[0] && intArr0[1] < intArr1[1];
-        if (result) {
-            return true;
-        }
-        return intArr0[0] == intArr1[0] && intArr0[1] == intArr1[1] && intArr0[2] < intArr1[2];
+        return result;
     }
 
-    private static int[] strArrayToInt(String[] array) {
-        if (null == array || array.length == 0) {
+    private static Integer[] strArrayToInt(String version) {
+        if (StringUtils.isBlank(version)) {
             return null;
         }
-        int[] intArr = new int[array.length];
-        for (int i = 0; i < array.length; i++) {
-            String str = array[i];
-            intArr[i] = Integer.parseInt(str);
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(version);
+        List<Integer> list = new ArrayList<>();
+        while (matcher.find()) {
+            list.add(Integer.parseInt(matcher.group(0)));
         }
-        return intArr;
+        return list.toArray(new Integer[list.size()]);
     }
+
 }
