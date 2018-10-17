@@ -41,7 +41,7 @@ import java.util.Map;
  * Transfer to contract address
  * Created by wangkun23 on 2018/9/25.
  */
-public class ContractTransferProcessor implements CommandProcessor {
+public class TransferToContractProcessor implements CommandProcessor {
     /**
      * rest utils
      */
@@ -49,7 +49,7 @@ public class ContractTransferProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "contracttransfer";
+        return "transfertocontract";
     }
 
     @Override
@@ -60,19 +60,23 @@ public class ContractTransferProcessor implements CommandProcessor {
                 .newLine("\t<toAddress> toAddress -required")
                 .newLine("\t<gasLimit> gasLimit -required")
                 .newLine("\t<price> contract price -required")
-                .newLine("\t<amount> transfer amount -required");
+                .newLine("\t<amount> transfer amount -required")
+                .newLine("\t[remark] remark not -required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "contracttransfer <address> <toAddress> <gasLimit> <price> <amount> --create transfer to contract address";
+        return "transfertocontract <address> <toAddress> <gasLimit> <price> <amount> [remark] --create transfer to contract address";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length != 6) {
+        if (length <6) {
+            return false;
+        }
+        if (length >7) {
             return false;
         }
         return true;
@@ -98,21 +102,27 @@ public class ContractTransferProcessor implements CommandProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        String password = CommandHelper.getPwd();
-
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
+        }
+        String password = (String) res.getData();
         /**
          * assemble request body JSON
          */
-        Map<String, Object> parameters = new HashMap<>(6);
+        Map<String, Object> parameters = new HashMap<>(7);
         parameters.put("address", address);
         parameters.put("toAddress", args[2]);
         parameters.put("gasLimit", args[3]);
         parameters.put("price", args[4]);
         parameters.put("amount", args[5]);
+        if (args.length==7){
+            parameters.put("remark",args[6]);
+        }
         //password
         parameters.put("password", password);
 
-        String url = "/contract/transfer/";
+        String url = "/contract/transfer";
         RpcClientResult result = restFul.post(url, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

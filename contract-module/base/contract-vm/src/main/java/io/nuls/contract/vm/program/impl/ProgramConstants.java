@@ -29,6 +29,7 @@ import io.nuls.contract.sdk.annotation.Payable;
 import io.nuls.contract.sdk.annotation.Required;
 import io.nuls.contract.sdk.annotation.View;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -63,6 +64,7 @@ public class ProgramConstants {
             String.class,
             StringBuilder.class,
             BigInteger.class,
+            BigDecimal.class,
             List.class,
             ArrayList.class,
             Map.class,

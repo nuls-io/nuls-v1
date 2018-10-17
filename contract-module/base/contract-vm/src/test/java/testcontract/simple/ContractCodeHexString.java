@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract;
+package testcontract.simple;
 
 import org.apache.commons.io.IOUtils;
 import org.spongycastle.util.encoders.Hex;

@@ -39,7 +39,6 @@ import io.nuls.contract.vm.exception.RevertException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
-import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.config.CommonConfig;
@@ -88,12 +87,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private boolean revert;
 
     private Thread thread;
-
-    static {
-        ClassCodeLoader.init();
-        VMFactory.init();
-        JsonUtils.init();
-    }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
         this(vmContext, stateSource(dbService), null, null, null);

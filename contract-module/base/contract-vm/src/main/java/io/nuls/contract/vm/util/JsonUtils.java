@@ -42,13 +42,6 @@ public class JsonUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    public static void init() {
-        Map<String, String> map = new LinkedHashMap<>();
-        String json = toJson(map);
-        toObject(json, Map.class);
-        toArray("[1]", Integer.TYPE);
-    }
-
     public static String toJson(Object value) {
         try {
             return OBJECT_MAPPER.writeValueAsString(value);

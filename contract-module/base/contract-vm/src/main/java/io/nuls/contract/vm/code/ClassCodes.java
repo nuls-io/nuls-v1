@@ -38,8 +38,13 @@ public class ClassCodes {
         if (classCode.interfaces.contains(interfaceName)) {
             return true;
         } else {
-            if (classCode.superName != null && classCodeMap.containsKey(classCode.superName)) {
-                return instanceOf(classCodeMap.get(classCode.superName), interfaceName);
+            if (classCode.superName != null) {
+                final ClassCode superClassCode = classCodeMap.get(classCode.superName);
+                if (superClassCode != null) {
+                    return instanceOf(superClassCode, interfaceName);
+                } else {
+                    return false;
+                }
             } else {
                 return false;
             }

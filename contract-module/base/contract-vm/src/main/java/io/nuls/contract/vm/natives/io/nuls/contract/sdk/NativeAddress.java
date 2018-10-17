@@ -273,7 +273,7 @@ public class NativeAddress {
         String str = frame.heap.runToString(objectRef);
         boolean valided = validAddress(str);
         if (!valided) {
-            frame.throwRuntimeException("address error");
+            frame.throwRuntimeException(String.format("address[%s] error", str));
         }
         Result result = NativeMethod.result(methodCode, null, frame);
         return result;
