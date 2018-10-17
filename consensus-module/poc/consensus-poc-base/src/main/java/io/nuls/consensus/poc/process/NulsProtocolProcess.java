@@ -90,17 +90,55 @@ public class NulsProtocolProcess {
             ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
             if (protocolContainer != null) {
                 calcNewProtocolCoverageRate(protocolContainer, extendsData, blockHeader);
+                //遍历所有临时协议的tempInfo，如果当前block的packing地址在其addressSet中，则将其删除
+                for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+                    if (tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                            tempInfoPo.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
+                //针对其他能识别但未生效的协议Container，做同样的操作
+                for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+                    if (container.getStatus() != ProtocolContainer.VALID
+                            && container.getVersion().intValue() != protocolContainer.getVersion().intValue()) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (container.getAddressSet().contains(packingAddress)) {
+                            container.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
             } else {
                 //如果没有,则存入临时的协议容器里
-                ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
-                if (tempInfoPo == null) {
-                    tempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
+                ProtocolTempInfoPo protocolTempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
+                if (protocolTempInfoPo == null) {
+                    protocolTempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
                 }
-                calcTempProtocolCoverageRate(tempInfoPo, extendsData, blockHeader);
+                calcTempProtocolCoverageRate(protocolTempInfoPo, extendsData, blockHeader);
+                //遍历所有能识别的协议Container，如果当前block的packing地址在其中，则将其删除
+                for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+                    if (container.getStatus() != ProtocolContainer.VALID) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (container.getAddressSet().contains(packingAddress)) {
+                            container.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
+                //针对未识别的临时协议tempInfo，做同样的操作
+                for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+                    if (tempInfoPo.getStatus() != ProtocolContainer.VALID
+                            && tempInfoPo.getVersion() != protocolTempInfoPo.getVersion()) {
+                        String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                        if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                            tempInfoPo.getAddressSet().remove(packingAddress);
+                        }
+                    }
+                }
             }
         } else {
-            calcDelay(blockHeader);
-            calcTempDelay(blockHeader);
+            calcDelay(blockHeader, extendsData);
+            calcTempDelay(blockHeader, extendsData);
         }
         getVersionManagerStorageService().saveConsensusVersionHeight(blockHeader.getHeight());
         //处理完所有流程后还原数据
@@ -136,7 +174,7 @@ public class NulsProtocolProcess {
                         }
                     }
                     container.setPrePercent(container.getCurrentPercent());
-                    container.getAddressSet().clear();
+                    //container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
                     saveProtocolInfo(container);
                 }
@@ -170,7 +208,7 @@ public class NulsProtocolProcess {
                         }
                     }
                     tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
-                    tempInfoPo.getAddressSet().clear();
+                    //tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
                 }
@@ -311,8 +349,15 @@ public class NulsProtocolProcess {
     }
 
 
-    private void calcDelay(BlockHeader blockHeader) {
+    private void calcDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+            if (container.getVersion().intValue() != extendsData.getCurrentVersion().intValue()
+                    && container.getStatus() != ProtocolContainer.VALID) {
+                String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                if (container.getAddressSet().contains(packingAddress)) {
+                    container.getAddressSet().remove(packingAddress);
+                }
+            }
             if (container.getStatus() == ProtocolContainer.DELAY_LOCK) {
                 //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
                 container.setCurrentDelay(container.getCurrentDelay() + 1);
@@ -349,8 +394,15 @@ public class NulsProtocolProcess {
         }
     }
 
-    private void calcTempDelay(BlockHeader blockHeader) {
+    private void calcTempDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+            if (tempInfoPo.getVersion() != extendsData.getCurrentVersion().intValue()
+                    && tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+                String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
+                if (tempInfoPo.getAddressSet().contains(packingAddress)) {
+                    tempInfoPo.getAddressSet().remove(packingAddress);
+                }
+            }
             if (tempInfoPo.getStatus() == ProtocolContainer.DELAY_LOCK) {
                 //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
                 tempInfoPo.setCurrentDelay(tempInfoPo.getCurrentDelay() + 1);
