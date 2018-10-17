@@ -25,11 +25,13 @@
 package io.nuls.contract.vm.instructions.references;
 
 import io.nuls.contract.vm.Frame;
+import io.nuls.contract.vm.ObjectRef;
 
 public class Monitorenter {
 
     public static void monitorenter(Frame frame) {
-        frame.nonsupportOpCode();
+        ObjectRef objectRef = frame.operandStack.popRef();
+        //frame.nonsupportOpCode();
     }
 
 }

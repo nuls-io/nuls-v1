@@ -25,11 +25,13 @@
 package io.nuls.contract.vm.instructions.references;
 
 import io.nuls.contract.vm.Frame;
+import io.nuls.contract.vm.ObjectRef;
 
 public class Monitorexit {
 
     public static void monitorexit(Frame frame) {
-        frame.nonsupportOpCode();
+        ObjectRef objectRef = frame.operandStack.popRef();
+        //frame.nonsupportOpCode();
     }
 
 }
