@@ -26,13 +26,16 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.BlockExtendsData;
+import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -46,9 +49,7 @@ import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class NulsProtocolProcess {
 
@@ -158,6 +159,19 @@ public class NulsProtocolProcess {
             if (container.getStatus() != ProtocolContainer.VALID) {
                 //如果容器的轮次小于当前出块节点的轮次，说明是新的一轮开始
                 if (container.getRoundIndex() < extendsData.getRoundIndex()) {
+                    MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                    List<MeetingMember> memberList = currentRound.getMemberList();
+                    Set<String> memberAddressSet = new HashSet<>();
+                    for (MeetingMember member : memberList) {
+                        memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                    }
+                    Iterator<String> iterator = container.getAddressSet().iterator();
+                    while (iterator.hasNext()) {
+                        String address = iterator.next();
+                        if (!memberAddressSet.contains(address)) {
+                            iterator.remove();
+                        }
+                    }
                     if (container.getStatus() == ProtocolContainer.INVALID) {
                         container.setCurrentDelay(0);
                     } else {
@@ -166,6 +180,7 @@ public class NulsProtocolProcess {
                         Result<BlockHeader> result = getBlockService().getBlockHeader(header.getPreHash());
                         BlockHeader preHeader = result.getData();
                         BlockExtendsData preExtendsData = new BlockExtendsData(preHeader.getExtend());
+
                         int rate = calcRate(container, preExtendsData);
                         container.setCurrentPercent(rate);
                         if (rate < container.getPercent()) {
@@ -190,11 +205,26 @@ public class NulsProtocolProcess {
     private void refreshTempProtocolCoverageRate(BlockExtendsData extendsData, BlockHeader header) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
             if (tempInfoPo.getStatus() != ProtocolContainer.VALID) {
+
                 //如果容器的轮次小于当前出块节点的轮次，说明是新的一轮开始
                 if (tempInfoPo.getRoundIndex() < extendsData.getRoundIndex()) {
                     if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
                         tempInfoPo.setCurrentDelay(0);
                     } else {
+
+                        MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                        List<MeetingMember> memberList = currentRound.getMemberList();
+                        Set<String> memberAddressSet = new HashSet<>();
+                        for (MeetingMember member : memberList) {
+                            memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                        }
+                        Iterator<String> iterator = tempInfoPo.getAddressSet().iterator();
+                        while (iterator.hasNext()) {
+                            String address = iterator.next();
+                            if (!memberAddressSet.contains(address)) {
+                                iterator.remove();
+                            }
+                        }
                         //已经开始统计延迟块的协议，由于存在新的一轮出块节点地址的变化，因此需要重新计算覆盖率
                         //如果覆盖率未达到，则清零延迟块数量，重新计算
                         Result<BlockHeader> result = getBlockService().getBlockHeader(header.getPreHash());
@@ -618,7 +648,7 @@ public class NulsProtocolProcess {
         getVersionManagerStorageService().saveMainVersion(validVersion);
     }
 
-    public void clearIncompatibleTx(){
+    public void clearIncompatibleTx() {
         TransactionQueueStorageService tqs = NulsContext.getServiceBean(TransactionQueueStorageService.class);
         while (tqs.pollTx() != null) {
         }
