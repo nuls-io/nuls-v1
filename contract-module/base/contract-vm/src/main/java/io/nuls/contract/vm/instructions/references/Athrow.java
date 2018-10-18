@@ -31,9 +31,7 @@ import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Athrow {
 
@@ -46,9 +44,8 @@ public class Athrow {
         //Log.opcode(frame.getCurrentOpCode(), objectRef);
         while (frame.vm.isNotEmptyFrame()) {
             final Frame lastFrame = frame.vm.lastFrame();
-            List<TryCatchBlockNode> tryCatchBlockNodes = getTryCatchBlockNodes(lastFrame, objectRef);
-            if (tryCatchBlockNodes.size() > 0) {
-                TryCatchBlockNode tryCatchBlockNode = tryCatchBlockNodes.get(0);
+            TryCatchBlockNode tryCatchBlockNode = getTryCatchBlockNode(lastFrame, objectRef);
+            if (tryCatchBlockNode != null) {
                 lastFrame.operandStack.clear();
                 lastFrame.operandStack.pushRef(objectRef);
                 lastFrame.jump(tryCatchBlockNode.handler);
@@ -60,23 +57,22 @@ public class Athrow {
         frame.vm.getResult().exception(objectRef);
     }
 
-    private static List<TryCatchBlockNode> getTryCatchBlockNodes(Frame frame, ObjectRef objectRef) {
-        return frame.methodCode.tryCatchBlocks.stream().filter(tryCatchBlockNode -> {
+    private static TryCatchBlockNode getTryCatchBlockNode(Frame frame, ObjectRef objectRef) {
+        for (TryCatchBlockNode tryCatchBlockNode : frame.methodCode.tryCatchBlocks) {
             String type = tryCatchBlockNode.type;
-            if (type != null) {
-                int line = frame.getLine();
-                int start = frame.getLine(tryCatchBlockNode.start);
-                int end = frame.getLine(tryCatchBlockNode.end);
-                boolean result = start <= line && line < end;
-                if (result && extends_(objectRef.getVariableType().getType(), type, frame)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
+            int line = frame.getLine();
+            int start = frame.getLine(tryCatchBlockNode.start);
+            int end = frame.getLine(tryCatchBlockNode.end);
+            int handler = frame.getLine(tryCatchBlockNode.handler);
+            if (type != null && handler < end) {
+                end = handler;
             }
-        }).collect(Collectors.toList());
+            boolean result = start <= line && line < end;
+            if (result && (type == null || extends_(objectRef.getVariableType().getType(), type, frame))) {
+                return tryCatchBlockNode;
+            }
+        }
+        return null;
     }
 
     private static boolean extends_(String refType, String className, Frame frame) {
