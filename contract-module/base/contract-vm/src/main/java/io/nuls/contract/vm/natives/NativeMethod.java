@@ -43,9 +43,9 @@ public class NativeMethod {
 
     private static final String registerNatives = "registerNatives";
 
-    public static final Result SUPPORT_NATIVE = new Result(true);
+    public static final Result SUPPORT_NATIVE = new Result();
 
-    public static final Result NOT_SUPPORT_NATIVE = new Result(false);
+    public static final Result NOT_SUPPORT_NATIVE = new Result();
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
 
