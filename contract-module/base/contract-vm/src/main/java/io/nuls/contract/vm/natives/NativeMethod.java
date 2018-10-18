@@ -99,6 +99,9 @@ public class NativeMethod {
             case NativeObject.TYPE:
                 result = NativeObject.nativeRun(methodCode, methodArgs, frame, check);
                 break;
+            case NativeRuntime.TYPE:
+                result = NativeRuntime.nativeRun(methodCode, methodArgs, frame, check);
+                break;
             case NativeStrictMath.TYPE:
                 result = NativeStrictMath.nativeRun(methodCode, methodArgs, frame, check);
                 break;
