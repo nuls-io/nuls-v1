@@ -67,6 +67,7 @@ public class ProgramConstants {
             BigDecimal.class,
             List.class,
             ArrayList.class,
+            LinkedList.class,
             Map.class,
             Map.Entry.class,
             HashMap.class,
