@@ -36,7 +36,8 @@ import io.nuls.contract.vm.natives.NativeMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeThrowable {
 
@@ -46,25 +47,29 @@ public class NativeThrowable {
         switch (methodCode.fullName) {
             case fillInStackTrace:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return fillInStackTrace(methodCode, methodArgs, frame);
                 }
             case getStackTraceDepth:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getStackTraceDepth(methodCode, methodArgs, frame);
                 }
             case getStackTraceElement:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getStackTraceElement(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

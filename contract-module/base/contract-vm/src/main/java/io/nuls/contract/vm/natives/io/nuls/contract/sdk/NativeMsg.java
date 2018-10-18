@@ -31,7 +31,8 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeMsg {
 
@@ -41,37 +42,41 @@ public class NativeMsg {
         switch (methodCode.fullName) {
             case gasleft:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return gasleft(methodCode, methodArgs, frame);
                 }
             case sender:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return sender(methodCode, methodArgs, frame);
                 }
             case value:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return value(methodCode, methodArgs, frame);
                 }
             case gasprice:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return gasprice(methodCode, methodArgs, frame);
                 }
             case address:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return address(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

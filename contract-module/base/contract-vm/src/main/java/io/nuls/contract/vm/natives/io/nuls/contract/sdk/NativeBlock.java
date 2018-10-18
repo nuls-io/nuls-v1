@@ -35,7 +35,8 @@ import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.NativeMethod;
 import org.spongycastle.util.encoders.Hex;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeBlock {
 
@@ -45,19 +46,23 @@ public class NativeBlock {
         switch (methodCode.fullName) {
             case getBlockHeader:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getBlockHeader(methodCode, methodArgs, frame);
                 }
             case currentBlockHeader:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return currentBlockHeader(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

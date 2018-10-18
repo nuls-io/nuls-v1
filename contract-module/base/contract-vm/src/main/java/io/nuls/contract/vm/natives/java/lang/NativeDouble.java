@@ -31,7 +31,8 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeDouble {
 
@@ -41,24 +42,28 @@ public class NativeDouble {
         switch (methodCode.fullName) {
             case parseDouble:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return parseDouble(methodCode, methodArgs, frame);
                 }
             case toString:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return toString(methodCode, methodArgs, frame);
                 }
             case toHexString:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return toHexString(methodCode, methodArgs, frame);
                 }
             default:
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    return null;
+                }
         }
     }
 
@@ -66,19 +71,23 @@ public class NativeDouble {
         switch (methodCode.fullName) {
             case doubleToRawLongBits:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return doubleToRawLongBits(methodCode, methodArgs, frame);
                 }
             case longBitsToDouble:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return longBitsToDouble(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

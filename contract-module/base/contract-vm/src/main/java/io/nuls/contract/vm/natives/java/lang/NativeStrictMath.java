@@ -30,7 +30,8 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeStrictMath {
 
@@ -40,127 +41,131 @@ public class NativeStrictMath {
         switch (methodCode.fullName) {
             case sin:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return sin(methodCode, methodArgs, frame);
                 }
             case cos:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return cos(methodCode, methodArgs, frame);
                 }
             case tan:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return tan(methodCode, methodArgs, frame);
                 }
             case asin:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return asin(methodCode, methodArgs, frame);
                 }
             case acos:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return acos(methodCode, methodArgs, frame);
                 }
             case atan:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return atan(methodCode, methodArgs, frame);
                 }
             case exp:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return exp(methodCode, methodArgs, frame);
                 }
             case log:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return log(methodCode, methodArgs, frame);
                 }
             case log10:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return log10(methodCode, methodArgs, frame);
                 }
             case sqrt:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return sqrt(methodCode, methodArgs, frame);
                 }
             case cbrt:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return cbrt(methodCode, methodArgs, frame);
                 }
             case IEEEremainder:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return IEEEremainder(methodCode, methodArgs, frame);
                 }
             case atan2:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return atan2(methodCode, methodArgs, frame);
                 }
             case pow:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return pow(methodCode, methodArgs, frame);
                 }
             case sinh:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return sinh(methodCode, methodArgs, frame);
                 }
             case cosh:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return cosh(methodCode, methodArgs, frame);
                 }
             case tanh:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return tanh(methodCode, methodArgs, frame);
                 }
             case hypot:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return hypot(methodCode, methodArgs, frame);
                 }
             case expm1:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return expm1(methodCode, methodArgs, frame);
                 }
             case log1p:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return log1p(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

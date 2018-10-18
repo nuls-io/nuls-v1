@@ -39,7 +39,8 @@ import io.nuls.kernel.utils.AddressTool;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeAddress {
 
@@ -49,37 +50,41 @@ public class NativeAddress {
         switch (methodCode.fullName) {
             case balance:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return balance(methodCode, methodArgs, frame);
                 }
             case transfer:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return transfer(methodCode, methodArgs, frame);
                 }
             case call:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return call(methodCode, methodArgs, frame);
                 }
             case callWithReturnValue:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return callWithReturnValue(methodCode, methodArgs, frame);
                 }
             case valid:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return valid(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

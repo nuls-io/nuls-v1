@@ -35,7 +35,8 @@ import io.nuls.contract.vm.natives.NativeMethod;
 
 import java.util.List;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeClass {
 
@@ -45,12 +46,16 @@ public class NativeClass {
         switch (methodCode.fullName) {
             case getInterfaces:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getInterfaces(methodCode, methodArgs, frame);
                 }
             default:
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    return null;
+                }
         }
     }
 
@@ -58,55 +63,59 @@ public class NativeClass {
         switch (methodCode.fullName) {
             case getPrimitiveClass:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getPrimitiveClass(methodCode, methodArgs, frame);
                 }
             case getComponentType:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getComponentType(methodCode, methodArgs, frame);
                 }
             case isArray:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return isArray(methodCode, methodArgs, frame);
                 }
             case isPrimitive:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return isPrimitive(methodCode, methodArgs, frame);
                 }
             case isInterface:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return isInterface(methodCode, methodArgs, frame);
                 }
             case desiredAssertionStatus0:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return desiredAssertionStatus0(methodCode, methodArgs, frame);
                 }
             case getGenericSignature0:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getGenericSignature0(methodCode, methodArgs, frame);
                 }
             case getName0:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return getName0(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

@@ -41,7 +41,8 @@ import io.nuls.contract.vm.util.JsonUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
+import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
 
 public class NativeUtils {
@@ -52,19 +53,23 @@ public class NativeUtils {
         switch (methodCode.fullName) {
             case revert:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return revert(methodCode, methodArgs, frame);
                 }
             case emit:
                 if (check) {
-                    return SUCCESS;
+                    return SUPPORT_NATIVE;
                 } else {
                     return emit(methodCode, methodArgs, frame);
                 }
             default:
-                frame.nonsupportMethod(methodCode);
-                return null;
+                if (check) {
+                    return NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                    return null;
+                }
         }
     }
 

@@ -37,13 +37,14 @@ import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
 import io.nuls.contract.vm.natives.java.lang.*;
 import io.nuls.contract.vm.natives.java.lang.reflect.NativeArray;
 import io.nuls.contract.vm.natives.java.sun.misc.NativeVM;
-import io.nuls.contract.vm.util.Log;
 
 public class NativeMethod {
 
     private static final String registerNatives = "registerNatives";
 
-    public static final Result SUCCESS = new Result();
+    public static final Result SUPPORT_NATIVE = new Result(true);
+
+    public static final Result NOT_SUPPORT_NATIVE = new Result(false);
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
 
