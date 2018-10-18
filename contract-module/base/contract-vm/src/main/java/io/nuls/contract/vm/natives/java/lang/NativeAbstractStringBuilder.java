@@ -31,7 +31,6 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
-import static io.nuls.contract.vm.natives.NativeMethod.NOT_SUPPORT_NATIVE;
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeAbstractStringBuilder {
@@ -57,11 +56,7 @@ public class NativeAbstractStringBuilder {
                     return append(methodCode, methodArgs, frame);
                 }
             default:
-                if (check) {
-                    return NOT_SUPPORT_NATIVE;
-                } else {
-                    return null;
-                }
+                return null;
         }
     }
 

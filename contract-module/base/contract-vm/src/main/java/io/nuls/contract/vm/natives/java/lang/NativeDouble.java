@@ -59,11 +59,7 @@ public class NativeDouble {
                     return toHexString(methodCode, methodArgs, frame);
                 }
             default:
-                if (check) {
-                    return NOT_SUPPORT_NATIVE;
-                } else {
-                    return null;
-                }
+                return null;
         }
     }
 

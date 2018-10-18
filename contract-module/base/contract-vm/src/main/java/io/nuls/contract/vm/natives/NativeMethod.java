@@ -37,6 +37,7 @@ import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
 import io.nuls.contract.vm.natives.java.lang.*;
 import io.nuls.contract.vm.natives.java.lang.reflect.NativeArray;
 import io.nuls.contract.vm.natives.java.sun.misc.NativeVM;
+import io.nuls.contract.vm.util.Log;
 
 public class NativeMethod {
 
@@ -131,7 +132,11 @@ public class NativeMethod {
                 result = NativeVM.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             default:
-                frame.nonsupportMethod(methodCode);
+                if (check) {
+                    result = NOT_SUPPORT_NATIVE;
+                } else {
+                    frame.nonsupportMethod(methodCode);
+                }
                 break;
         }
 
