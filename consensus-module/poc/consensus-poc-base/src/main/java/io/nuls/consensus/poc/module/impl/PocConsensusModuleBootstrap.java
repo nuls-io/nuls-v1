@@ -110,11 +110,11 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 //                        if(height == 680000L) {
 //                            break;
 //                        }
-                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
-                        if (infoPo != null) {
+                        if(height <= 0) {
                             break;
                         }
-                        if(height <= 0) {
+                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
+                        if (infoPo != null) {
                             break;
                         }
                     }

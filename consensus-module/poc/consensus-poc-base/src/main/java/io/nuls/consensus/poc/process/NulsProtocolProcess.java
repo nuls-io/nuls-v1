@@ -78,6 +78,9 @@ public class NulsProtocolProcess {
         if (extendsData.getCurrentVersion() == null) {
             extendsData.setCurrentVersion(1);
         }
+        if (extendsData.getCurrentVersion() == 2) {
+            return;
+        }
         NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
         getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {
@@ -381,7 +384,7 @@ public class NulsProtocolProcess {
 
     private void calcDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
-            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()){
+            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()) {
                 continue;
             }
             if (container.getVersion().intValue() != extendsData.getCurrentVersion().intValue()
@@ -429,7 +432,7 @@ public class NulsProtocolProcess {
 
     private void calcTempDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
-            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()){
+            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()) {
                 continue;
             }
             if (tempInfoPo.getVersion() != extendsData.getCurrentVersion().intValue()
