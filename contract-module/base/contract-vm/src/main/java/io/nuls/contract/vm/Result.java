@@ -38,7 +38,13 @@ public class Result {
 
     private boolean error;
 
+    private boolean supportNative;
+
     public Result() {
+    }
+
+    public Result(boolean supportNative) {
+        this.supportNative = supportNative;
     }
 
     public Result(VariableType variableType) {
@@ -82,6 +88,10 @@ public class Result {
 
     public boolean isError() {
         return error;
+    }
+
+    public boolean isSupportNative() {
+        return supportNative;
     }
 
     @Override
