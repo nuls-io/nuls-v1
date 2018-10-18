@@ -381,6 +381,9 @@ public class NulsProtocolProcess {
 
     private void calcDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
+            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()){
+                continue;
+            }
             if (container.getVersion().intValue() != extendsData.getCurrentVersion().intValue()
                     && container.getStatus() != ProtocolContainer.VALID) {
                 String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
@@ -426,6 +429,9 @@ public class NulsProtocolProcess {
 
     private void calcTempDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
+            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()){
+                continue;
+            }
             if (tempInfoPo.getVersion() != extendsData.getCurrentVersion().intValue()
                     && tempInfoPo.getStatus() != ProtocolContainer.VALID) {
                 String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress());
