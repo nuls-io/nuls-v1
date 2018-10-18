@@ -5,24 +5,24 @@
     <parent>
         <artifactId>message-bus-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.2-BETA</version>
+        <version>1.1.3-BETA</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.message-bus-module</groupId>
     <artifactId>message-bus</artifactId>
-    <version>1.1.2-BETA</version>
+    <version>1.1.3-BETA</version>
 
     <dependencies>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>1.1.2-BETA</version>
+            <version>1.1.3-BETA</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
-            <version>1.1.2-BETA</version>
+            <version>1.1.3-BETA</version>
         </dependency>
     </dependencies>
     <build>
