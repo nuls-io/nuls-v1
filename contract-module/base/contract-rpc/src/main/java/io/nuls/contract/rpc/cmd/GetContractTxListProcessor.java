@@ -57,6 +57,7 @@ public class GetContractTxListProcessor implements CommandProcessor {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address>      address -required")
+                .newLine("\t<<account>>    account -required")
                 .newLine("\t<pageNumber>   pageNumber -required")
                 .newLine("\t<pageSize>     pageSize -required");
         return builder.toString();
@@ -64,7 +65,7 @@ public class GetContractTxListProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getcontracttxlist address <account> <pageNumber> <pageSize> --get the contract transactions by address";
+        return "getcontracttxlist <address> <account> <pageNumber> <pageSize> --get the contract transactions by address";
     }
 
     @Override
