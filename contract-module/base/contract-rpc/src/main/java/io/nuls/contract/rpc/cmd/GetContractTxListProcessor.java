@@ -57,7 +57,6 @@ public class GetContractTxListProcessor implements CommandProcessor {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address>      address -required")
-                .newLine("\t<<account>>    account -required")
                 .newLine("\t<pageNumber>   pageNumber -required")
                 .newLine("\t<pageSize>     pageSize -required");
         return builder.toString();

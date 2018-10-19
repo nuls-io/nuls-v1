@@ -33,8 +33,6 @@ import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
-
-import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -93,8 +91,6 @@ public class GetContractBalanceProcessor implements CommandProcessor {
          * convert balance unit Na to NULS
          * the result balance unit is Na
          */
-       // Object obj= data.get("balance");
-       // BigInteger bigInteger=(BigInteger)obj;
         data.put("balance", CommandHelper.naToNuls(Long.valueOf(data.get("balance").toString())));
         return CommandResult.getResult(result);
     }
