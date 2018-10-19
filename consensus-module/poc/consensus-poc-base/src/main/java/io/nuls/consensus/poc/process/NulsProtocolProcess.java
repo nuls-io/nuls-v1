@@ -78,6 +78,8 @@ public class NulsProtocolProcess {
         if (extendsData.getCurrentVersion() == null) {
             extendsData.setCurrentVersion(1);
         }
+        // TODO 正式上线后去掉这个判断
+        // pierre test comment out
         if (extendsData.getCurrentVersion() == 2) {
             return;
         }
