@@ -70,6 +70,9 @@ public class NativeMethod {
             case NativeSecurityManager.TYPE:
                 result = NativeSecurityManager.override(methodCode, methodArgs, frame, check);
                 break;
+//            case NativeString.TYPE:
+//                result = NativeString.override(methodCode, methodArgs, frame, check);
+//                break;
             default:
                 break;
         }

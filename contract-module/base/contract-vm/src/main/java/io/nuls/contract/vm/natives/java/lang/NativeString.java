@@ -38,6 +38,19 @@ public class NativeString {
 
     public static final String TYPE = "java/lang/String";
 
+//    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+//        switch (methodCode.fullName) {
+//            case format:
+//                if (check) {
+//                    return SUPPORT_NATIVE;
+//                } else {
+//                    return format(methodCode, methodArgs, frame);
+//                }
+//            default:
+//                return null;
+//        }
+//    }
+
     public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
             case intern:
@@ -55,6 +68,18 @@ public class NativeString {
                 }
         }
     }
+
+    public static final String format = TYPE + "." + "format" + "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;";
+
+//    /**
+//     * override
+//     *
+//     * @see String#format(String, Object...)
+//     */
+//    private static Result format(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+//        Result result = NativeMethod.result(methodCode, null, frame);
+//        return result;
+//    }
 
     public static final String intern = TYPE + "." + "intern" + "()Ljava/lang/String;";
 

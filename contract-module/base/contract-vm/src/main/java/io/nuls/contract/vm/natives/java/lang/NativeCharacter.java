@@ -36,8 +36,6 @@ public class NativeCharacter {
 
     public static final String TYPE = "java/lang/Character";
 
-    public static final String digit = TYPE + "." + "digit" + "(II)I";
-
     public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
             case digit:
@@ -50,6 +48,8 @@ public class NativeCharacter {
                 return null;
         }
     }
+
+    public static final String digit = TYPE + "." + "digit" + "(II)I";
 
     /**
      * override

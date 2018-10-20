@@ -40,6 +40,18 @@ public class NativeSecurityManager {
 
     public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
+            case getRootGroup:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getRootGroup(methodCode, methodArgs, frame);
+                }
+            case checkAccessThread:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return checkAccessThread(methodCode, methodArgs, frame);
+                }
             case checkAccess:
                 if (check) {
                     return SUPPORT_NATIVE;
@@ -61,6 +73,30 @@ public class NativeSecurityManager {
             default:
                 return null;
         }
+    }
+
+    public static final String getRootGroup = TYPE + "." + "getRootGroup" + "()Ljava/lang/ThreadGroup;";
+
+    /**
+     * override
+     *
+     * @see SecurityManager#getRootGroup()
+     */
+    private static Result getRootGroup(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, null, frame);
+        return result;
+    }
+
+    public static final String checkAccessThread = TYPE + "." + "checkAccess" + "(Ljava/lang/Thread;)V";
+
+    /**
+     * override
+     *
+     * @see SecurityManager#checkAccess(Thread)
+     */
+    private static Result checkAccessThread(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, null, frame);
+        return result;
     }
 
     public static final String checkAccess = TYPE + "." + "checkAccess" + "(Ljava/lang/ThreadGroup;)V";
