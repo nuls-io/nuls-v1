@@ -50,6 +50,12 @@ public class NativeClass {
                 } else {
                     return getInterfaces(methodCode, methodArgs, frame);
                 }
+            case desiredAssertionStatus:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return desiredAssertionStatus(methodCode, methodArgs, frame);
+                }
             default:
                 return null;
         }
@@ -215,6 +221,19 @@ public class NativeClass {
             b = classCode.isInterface;
         }
         Result result = NativeMethod.result(methodCode, b, frame);
+        return result;
+    }
+
+    public static final String desiredAssertionStatus = TYPE + "." + "desiredAssertionStatus" + "()Z";
+
+    /**
+     * override
+     *
+     * @see Class#desiredAssertionStatus()
+     */
+    private static Result desiredAssertionStatus(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        boolean status = false;
+        Result result = NativeMethod.result(methodCode, status, frame);
         return result;
     }
 

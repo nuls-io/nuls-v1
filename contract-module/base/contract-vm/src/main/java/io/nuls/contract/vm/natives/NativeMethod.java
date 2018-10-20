@@ -67,6 +67,9 @@ public class NativeMethod {
             case NativeFloat.TYPE:
                 result = NativeFloat.override(methodCode, methodArgs, frame, check);
                 break;
+            case NativeSecurityManager.TYPE:
+                result = NativeSecurityManager.override(methodCode, methodArgs, frame, check);
+                break;
             default:
                 break;
         }
@@ -116,6 +119,9 @@ public class NativeMethod {
                 break;
             case NativeSystem.TYPE:
                 result = NativeSystem.nativeRun(methodCode, methodArgs, frame, check);
+                break;
+            case NativeThread.TYPE:
+                result = NativeThread.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeThrowable.TYPE:
                 result = NativeThrowable.nativeRun(methodCode, methodArgs, frame, check);
