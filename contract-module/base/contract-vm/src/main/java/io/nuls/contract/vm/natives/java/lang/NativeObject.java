@@ -94,7 +94,7 @@ public class NativeObject {
      */
     private static Result hashCode(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
-        int hashCode = objectRef.hashCode();
+        int hashCode = NativeSystem.identityHashCode(objectRef);
         Result result = NativeMethod.result(methodCode, hashCode, frame);
         return result;
     }
@@ -108,10 +108,16 @@ public class NativeObject {
      */
     private static Result clone(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
-        Map<String, Object> fields = frame.heap.getFields(objectRef);
-        Map<String, Object> newFields = CloneUtils.clone(fields);
-        ObjectRef newRef = frame.heap.newObjectRef(null, objectRef.getDesc(), objectRef.getDimensions());
-        frame.heap.putFields(newRef, newFields);
+        ObjectRef newRef;
+        if (objectRef.isArray()) {
+            newRef = frame.heap.newArray(objectRef.getVariableType(), objectRef.getDimensions());
+            frame.heap.arraycopy(objectRef, 0, newRef, 0, objectRef.getDimensions()[0]);
+        } else {
+            Map<String, Object> fields = frame.heap.getFields(objectRef);
+            Map<String, Object> newFields = CloneUtils.clone(fields);
+            newRef = frame.heap.newObjectRef(null, objectRef.getDesc(), objectRef.getDimensions());
+            frame.heap.putFields(newRef, newFields);
+        }
         Result result = NativeMethod.result(methodCode, newRef, frame);
         return result;
     }

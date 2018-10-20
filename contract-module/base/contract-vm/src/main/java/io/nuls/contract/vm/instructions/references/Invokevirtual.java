@@ -64,7 +64,7 @@ public class Invokevirtual {
             }
         }
 
-        if (objectRef.isArray() && Constants.TO_STRING_METHOD_NAME.equals(methodName) && Constants.TO_STRING_METHOD_DESC.equals(methodDesc)) {
+        if (objectRef.isArray()) {
             className = Constants.OBJECT_CLASS_NAME;
         }
 

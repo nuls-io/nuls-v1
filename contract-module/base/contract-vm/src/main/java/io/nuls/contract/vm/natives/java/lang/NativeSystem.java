@@ -46,6 +46,12 @@ public class NativeSystem {
                 } else {
                     return arraycopy(methodCode, methodArgs, frame);
                 }
+            case identityHashCode:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return identityHashCode(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -80,6 +86,28 @@ public class NativeSystem {
 
         Result result = NativeMethod.result(methodCode, null, frame);
         return result;
+    }
+
+    public static final String identityHashCode = TYPE + "." + "identityHashCode" + "(Ljava/lang/Object;)I";
+
+    /**
+     * native
+     *
+     * @see System#identityHashCode(Object)
+     */
+    private static Result identityHashCode(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        int hashCode = identityHashCode(objectRef);
+        Result result = NativeMethod.result(methodCode, hashCode, frame);
+        return result;
+    }
+
+    public static int identityHashCode(ObjectRef objectRef) {
+        int hashCode = 0;
+        if (objectRef != null) {
+            hashCode = objectRef.hashCode();
+        }
+        return hashCode;
     }
 
 }
