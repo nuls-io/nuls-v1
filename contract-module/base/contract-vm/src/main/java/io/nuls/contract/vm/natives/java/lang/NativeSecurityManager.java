@@ -30,6 +30,8 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import java.security.Permission;
+
 import static io.nuls.contract.vm.natives.NativeMethod.SUPPORT_NATIVE;
 
 public class NativeSecurityManager {
@@ -49,6 +51,12 @@ public class NativeSecurityManager {
                     return SUPPORT_NATIVE;
                 } else {
                     return checkPropertyAccess(methodCode, methodArgs, frame);
+                }
+            case checkPermission:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return checkPermission(methodCode, methodArgs, frame);
                 }
             default:
                 return null;
@@ -75,6 +83,18 @@ public class NativeSecurityManager {
      * @see SecurityManager#checkPropertyAccess(String)
      */
     private static Result checkPropertyAccess(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, null, frame);
+        return result;
+    }
+
+    public static final String checkPermission = TYPE + "." + "checkPermission" + "(Ljava/security/Permission;)V";
+
+    /**
+     * override
+     *
+     * @see SecurityManager#checkPermission(Permission)
+     */
+    private static Result checkPermission(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = NativeMethod.result(methodCode, null, frame);
         return result;
     }

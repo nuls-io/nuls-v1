@@ -38,10 +38,6 @@ public class NativeSystem {
 
     public static final String TYPE = "java/lang/System";
 
-    public static final String getProperty = TYPE + "." + "getProperty" + "(Ljava/lang/String;)Ljava/lang/String;";
-
-    public static final String getProperty_ = TYPE + "." + "getProperty" + "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
-
     public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
             case arraycopy:
