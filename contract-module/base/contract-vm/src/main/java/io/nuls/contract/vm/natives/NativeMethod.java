@@ -80,7 +80,11 @@ public class NativeMethod {
         }
 
         if (registerNatives.equals(methodCode.name)) {
-            return new Result(methodCode.returnVariableType);
+            if (check) {
+                return SUPPORT_NATIVE;
+            } else {
+                return new Result(methodCode.returnVariableType);
+            }
         }
 
         //Log.nativeMethod(methodCode);

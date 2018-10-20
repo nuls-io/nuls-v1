@@ -56,6 +56,12 @@ public class NativeBlock {
                 } else {
                     return currentBlockHeader(methodCode, methodArgs, frame);
                 }
+            case newestBlockHeader:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return newestBlockHeader(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -90,6 +96,20 @@ public class NativeBlock {
     private static Result currentBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long blockNumber = frame.vm.getProgramInvoke().getNumber();
         ObjectRef objectRef = getBlockHeader(blockNumber + 1, frame);
+        Result result = NativeMethod.result(methodCode, objectRef, frame);
+        return result;
+    }
+
+    public static final String newestBlockHeader = TYPE + "." + "newestBlockHeader" + "()Lio/nuls/contract/sdk/BlockHeader;";
+
+    /**
+     * native
+     *
+     * @see Block#newestBlockHeader()
+     */
+    private static Result newestBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        long blockNumber = frame.vm.getProgramInvoke().getNumber();
+        ObjectRef objectRef = getBlockHeader(blockNumber, frame);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }
