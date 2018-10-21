@@ -149,6 +149,8 @@ public class ConsensusScheduler {
                         }
                         infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
                         if (infoPo != null) {
+                            consensusVersionHeight = height;
+                            getVersionManagerStorageService().saveConsensusVersionHeight(height);
                             break;
                         }
                     }
@@ -158,7 +160,7 @@ public class ConsensusScheduler {
                         ProtocolTransferTool.copyFromBlockProtocolInfoPo(infoPo, container);
                     }
                 }
-                for (long i = consensusVersionHeight; i <= bestHeight; i++) {
+                for (long i = consensusVersionHeight+1; i <= bestHeight; i++) {
                     Result<BlockHeader> result = blockService.getBlockHeader(i);
                     if (result.isSuccess()) {
                         NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
