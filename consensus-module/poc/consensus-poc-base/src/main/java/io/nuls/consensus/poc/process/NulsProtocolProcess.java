@@ -75,9 +75,9 @@ public class NulsProtocolProcess {
         if (extendsData.getCurrentVersion() == null) {
             extendsData.setCurrentVersion(1);
         }
-        if (extendsData.getCurrentVersion() == 2) {
+        /*if (extendsData.getCurrentVersion() == 2) {
             return;
-        }
+        }*/
         NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
         getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {
@@ -87,7 +87,7 @@ public class NulsProtocolProcess {
         refreshProtocolCoverageRate(extendsData, blockHeader);
         refreshTempProtocolCoverageRate(extendsData, blockHeader);
         //收到的区块版本信息大于当前主网版本信息时，统计覆盖率和延迟块数
-        if (extendsData.getCurrentVersion() > NulsVersionManager.getMainVersion()) {
+        if (extendsData.getCurrentVersion() > NulsVersionManager.getMainVersion() && extendsData.getCurrentVersion() > NIPs.NIP_2) {
             ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
             if (protocolContainer != null) {
                 calcNewProtocolCoverageRate(protocolContainer, extendsData, blockHeader);
@@ -376,7 +376,7 @@ public class NulsProtocolProcess {
 
     private void calcDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
-            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()) {
+            if (extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
                 continue;
             }
             if (container.getVersion().intValue() != extendsData.getCurrentVersion().intValue()
@@ -424,7 +424,7 @@ public class NulsProtocolProcess {
 
     private void calcTempDelay(BlockHeader blockHeader, BlockExtendsData extendsData) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
-            if (extendsData.getCurrentVersion() <= NulsVersionManager.getMainVersion()) {
+            if (extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
                 continue;
             }
             if (tempInfoPo.getVersion() != extendsData.getCurrentVersion().intValue()
