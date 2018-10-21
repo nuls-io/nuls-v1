@@ -26,7 +26,6 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.context.PocConsensusContext;
-import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
@@ -34,8 +33,8 @@ import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -69,8 +68,6 @@ public class NulsProtocolProcess {
 
     /**
      * 版本升级流程处理
-     *
-     * @param blockHeader
      */
     public void processProtocolUpGrade(BlockHeader blockHeader) {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
@@ -202,8 +199,6 @@ public class NulsProtocolProcess {
 
     /**
      * 处理当前版本里配置不存在的更高版本协议(更高版本的协议存储在临时持久化实体里)
-     *
-     * @param extendsData
      */
     private void refreshTempProtocolCoverageRate(BlockExtendsData extendsData, BlockHeader header) {
         for (ProtocolTempInfoPo tempInfoPo : getVersionManagerStorageService().getProtocolTempMap().values()) {
@@ -251,9 +246,6 @@ public class NulsProtocolProcess {
 
     /**
      * 计算最新版本协议的覆盖率和延迟块数，判断新协议是否生效
-     *
-     * @param container
-     * @param extendsData
      */
     private void calcNewProtocolCoverageRate(ProtocolContainer container, BlockExtendsData extendsData, BlockHeader blockHeader) {
         container.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
@@ -486,13 +478,11 @@ public class NulsProtocolProcess {
 
     /**
      * 协议升级
-     *
-     * @param container
      */
     private void upgradeProtocol(ProtocolContainer container) {
         NulsContext.MAIN_NET_VERSION = container.getVersion();
         getVersionManagerStorageService().saveMainVersion(container.getVersion());
-        if (container.getVersion() == 2) {
+        if (container.getVersion() == NIPs.NIP_3) {
             getVersionManagerStorageService().saveChangeTxHashBlockHeight(container.getEffectiveHeight());
             NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = container.getEffectiveHeight();
         }
@@ -500,9 +490,6 @@ public class NulsProtocolProcess {
 
     /**
      * 计算覆盖率
-     *
-     * @param tempInfoPo
-     * @return
      */
     private int calcRate(ProtocolTempInfoPo tempInfoPo, BlockExtendsData extendsData) {
         int memberCount = extendsData.getConsensusMemberCount();
@@ -590,7 +577,7 @@ public class NulsProtocolProcess {
                 }
             }
             //版本为2的时候的特殊处理
-            if (protocolContainer.getVersion() == 2 && protocolContainer.getStatus() != ProtocolContainer.VALID) {
+            if (protocolContainer.getVersion() == NIPs.NIP_3 && protocolContainer.getStatus() != ProtocolContainer.VALID) {
                 getVersionManagerStorageService().deleteChangeTxHashBlockHeight();
                 NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = null;
             }

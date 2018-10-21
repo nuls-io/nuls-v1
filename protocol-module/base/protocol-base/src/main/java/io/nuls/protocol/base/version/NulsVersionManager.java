@@ -25,6 +25,7 @@
 package io.nuls.protocol.base.version;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -140,7 +141,7 @@ public class NulsVersionManager {
                     NulsContext.MAIN_NET_VERSION = protocolContainer.getVersion();
                     getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
                     //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
-                    if (protocolContainer.getVersion() == 2) {
+                    if (protocolContainer.getVersion() == NIPs.NIP_2 || protocolContainer.getVersion() == NIPs.NIP_3) {
                         getVersionManagerStorageService().saveChangeTxHashBlockHeight(protocolContainer.getEffectiveHeight());
                         NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = protocolContainer.getEffectiveHeight();
                     }
@@ -151,8 +152,6 @@ public class NulsVersionManager {
 
     /**
      * 读取配置文件信息，生成协议容器
-     *
-     * @throws Exception
      */
     public static void loadConfig() throws Exception {
         XmlLoader.loadXml(NulsConstant.NULS_VERSION_XML, new NulsVersionHandler());
@@ -280,9 +279,7 @@ public class NulsVersionManager {
     /**
      * 添加消息协议
      *
-     * @param id           配置文件中消息协议id
-     * @param messageClass
-     * @throws NulsException
+     * @param id 配置文件中消息协议id
      */
     public static void putMessageProtocol(String id, Class<? extends BaseMessage> messageClass) {
         if (containsMessageId(id) || null == messageClass) {

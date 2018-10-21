@@ -100,7 +100,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                     bos.write(NulsConstant.PLACE_HOLDER);
                     break;
                 }
-                if (NulsContext.MAIN_NET_VERSION == 1) {
+                if (NulsContext.MAIN_NET_VERSION <= 2) {
                     buffer.writeVarInt(type);
                     buffer.writeVarInt(time);
                     break;
@@ -110,7 +110,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                     buffer.writeUint48(time);
                     break;
                 }
-                if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT != null && this.blockHeight >= NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT) {
+                if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT == null || this.blockHeight >= NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT) {
                     buffer.writeUint16(type);
                     buffer.writeUint48(time);
                 } else {
