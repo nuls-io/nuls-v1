@@ -149,6 +149,12 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
                     blockList = retryDownload(executor, result);
                 }
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                    blockList = retryDownload(executor, result);
+                }
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                    blockList = retryDownload(executor, result);
+                }
 
                 if (blockList == null) {
                     executor.shutdown();

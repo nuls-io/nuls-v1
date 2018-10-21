@@ -35,7 +35,9 @@ import io.nuls.consensus.poc.process.*;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.task.*;
+import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.BlockHeader;
@@ -43,8 +45,11 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
+import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +66,10 @@ public class ConsensusScheduler {
     private OrphanBlockProcess orphanBlockProcess;
 
     private CacheManager cacheManager;
+
+    private VersionManagerStorageService versionManagerStorageService;
+
+    private boolean protocolInited;
 
     private ConsensusScheduler() {
     }
@@ -92,9 +101,6 @@ public class ConsensusScheduler {
         ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
-        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
-
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
 
@@ -105,7 +111,69 @@ public class ConsensusScheduler {
         threadPool.scheduleAtFixedRate(new RewardCalculatorTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)), ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, TimeUnit.SECONDS);
 
         threadPool.scheduleAtFixedRate(new TxProcessTask(), 5, 1, TimeUnit.SECONDS);
+
+        if (!protocolInited) {
+            protocolInited = true;
+            initNulsProtocol();
+        }
+
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
+        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
+
         return true;
+    }
+
+
+    private void initNulsProtocol() {
+        try {
+            //针对第一版本升级时的特殊处理
+            NulsVersionManager.init();
+            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+            if (NulsContext.MAIN_NET_VERSION == NIPs.NIP_1 && (NulsContext.CURRENT_PROTOCOL_VERSION == NIPs.NIP_2 || NulsContext.CURRENT_PROTOCOL_VERSION == NIPs.NIP_3)) {
+
+                long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
+                Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
+                if (consensusVersionHeight == null) {
+//                    consensusVersionHeight = 680000L;
+                    consensusVersionHeight = 1L;
+                } else {
+                    long height = consensusVersionHeight + 1;
+                    BlockProtocolInfoPo infoPo = null;
+                    while (true) {
+                        height--;
+//                        if(height == 680000L) {
+//                            break;
+//                        }
+                        if (height <= 0) {
+                            break;
+                        }
+                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
+                        if (infoPo != null) {
+                            consensusVersionHeight = height;
+                            getVersionManagerStorageService().saveConsensusVersionHeight(height);
+                            break;
+                        }
+                    }
+
+                    if (infoPo != null) {
+                        ProtocolContainer container = NulsVersionManager.getProtocolContainer(infoPo.getVersion());
+                        ProtocolTransferTool.copyFromBlockProtocolInfoPo(infoPo, container);
+                    }
+                }
+                for (long i = consensusVersionHeight+1; i <= bestHeight; i++) {
+                    Result<BlockHeader> result = blockService.getBlockHeader(i);
+                    if (result.isSuccess()) {
+                        NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
+                    }
+                }
+            } else {
+                NulsVersionManager.loadVersion();
+            }
+
+        } catch (Exception e) {
+            Log.error(e);
+            System.exit(-1);
+        }
     }
 
     public boolean restart() {
@@ -140,4 +208,10 @@ public class ConsensusScheduler {
         cacheManager.clear();
     }
 
+    private VersionManagerStorageService getVersionManagerStorageService() {
+        if (versionManagerStorageService == null) {
+            versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
+        }
+        return versionManagerStorageService;
+    }
 }

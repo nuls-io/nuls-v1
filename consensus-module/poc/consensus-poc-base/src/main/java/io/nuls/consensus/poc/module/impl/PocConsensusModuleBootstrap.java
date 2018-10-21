@@ -31,29 +31,16 @@ import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.model.Evidence;
-import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.poc.storage.po.EvidencePo;
 import io.nuls.consensus.poc.storage.service.BifurcationEvidenceStorageService;
-import io.nuls.consensus.poc.util.ProtocolTransferTool;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.BaseThread;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.protocol.base.version.NulsVersionManager;
-import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.service.BlockService;
-import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
-import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,10 +48,6 @@ import java.util.Map;
  * @author Niels
  */
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
-
-    private boolean protocolInited;
-
-    private VersionManagerStorageService versionManagerStorageService;
 
     @Override
     public void init() throws Exception {
@@ -81,64 +64,12 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     @Override
     public void start() {
         this.waitForDependencyRunning(ProtocolConstant.MODULE_ID_PROTOCOL);
-        if (!protocolInited) {
-            protocolInited = true;
-            initNulsProtocol();
-        }
+
         ConsensusScheduler.getInstance().start();
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }
 
-    private void initNulsProtocol() {
-        try {
-            //针对第一版本升级时的特殊处理
-            NulsVersionManager.init();
-            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-            if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
-
-                long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
-                Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
-                if (consensusVersionHeight == null) {
-//                    consensusVersionHeight = 680000L;
-                    consensusVersionHeight = 1L;
-                } else {
-                    long height = consensusVersionHeight + 1;
-                    BlockProtocolInfoPo infoPo = null;
-                    while (true) {
-                        height--;
-//                        if(height == 680000L) {
-//                            break;
-//                        }
-                        if(height <= 0) {
-                            break;
-                        }
-                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
-                        if (infoPo != null) {
-                            break;
-                        }
-                    }
-
-                    if (infoPo != null) {
-                        ProtocolContainer container = NulsVersionManager.getProtocolContainer(infoPo.getVersion());
-                        ProtocolTransferTool.copyFromBlockProtocolInfoPo(infoPo, container);
-                    }
-                }
-                for (long i = consensusVersionHeight; i <= bestHeight; i++) {
-                    Result<BlockHeader> result = blockService.getBlockHeader(i);
-                    if (result.isSuccess()) {
-                        NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
-                    }
-                }
-            } else {
-                NulsVersionManager.loadVersion();
-            }
-
-        } catch (Exception e) {
-            Log.error(e);
-            System.exit(-1);
-        }
-    }
 
     private void registerHandlers() {
 
@@ -179,11 +110,5 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
         return str.toString();
     }
 
-    private VersionManagerStorageService getVersionManagerStorageService() {
-        if (versionManagerStorageService == null) {
-            versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
-        }
-        return versionManagerStorageService;
-    }
 
 }

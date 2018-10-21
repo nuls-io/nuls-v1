@@ -500,12 +500,12 @@ public class ForkChainProcess {
 
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
+                nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
                 Result rs = blockService.saveBlock(addBlock);
-                RewardStatisticsProcess.addBlock(addBlock);
-                if (rs.isSuccess()) {
-                    //更新版本协议内容
-                    nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
+                if (!rs.isSuccess()) {
+                    nulsProtocolProcess.processProtocolRollback(addBlock.getHeader());
                 }
+                RewardStatisticsProcess.addBlock(addBlock);
             }
         }
         return changeSuccess;
