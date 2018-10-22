@@ -78,7 +78,7 @@ public class CrowdsaleTest {
         programCreate.args("1535012808001", "1635012808001", "10", WALLET_ADDRESS, "20000000", TOKEN_ADDRESS, "10000000");
         System.out.println(programCreate);
 
-        byte[] prevStateRoot = Hex.decode("fc089b5c5ebd949f308169bff9d963b5905edc3d0d38fd16bb16cd1d1029c73e");
+        byte[] prevStateRoot = Hex.decode("68def44ff5e8cfaede55b572b78064f549a07683fa2a09e44ae252aa50b10ec0");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.create(programCreate);
@@ -92,7 +92,7 @@ public class CrowdsaleTest {
 
     @Test
     public void testBuyTokens() throws IOException {
-        byte[] prevStateRoot = Hex.decode("87b890ccdbcae7ec892e94f4ad29250ca8ba3b0288515a9a742ee3bb8d7238b4");
+        byte[] prevStateRoot = Hex.decode("5d62069546b3da54d9ae5ba3bdddcbe38a1a99b63c41846667b94288cec455ab");
 
         balanceOf(prevStateRoot);
 

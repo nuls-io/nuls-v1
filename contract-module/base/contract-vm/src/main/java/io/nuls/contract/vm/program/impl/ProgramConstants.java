@@ -81,22 +81,10 @@ public class ProgramConstants {
     public static final Class[] CONTRACT_LAZY_USED_CLASSES = new Class[]{
             Object.class,
             Class.class,
-            Set.class,
             Iterator.class,
     };
 
     public static final Class[] VM_INIT_CLASSES = new Class[]{
-            Object.class,
-            Class.class,
-            StrictMath.class,
-            RuntimeException.class,
-            ArrayIndexOutOfBoundsException.class,
-            OutOfMemoryError.class,
-            Collections.class,
-            HashSet.class,
-            StackOverflowError.class,
-            NullPointerException.class,
-            NegativeArraySizeException.class,
             ClassCastException.class,
             StackOverflowError.class,
     };
@@ -107,7 +95,7 @@ public class ProgramConstants {
 
     public static final String[] CONTRACT_LAZY_USED_CLASS_NAMES = new String[CONTRACT_LAZY_USED_CLASSES.length];
 
-    public static final String[] VM_INIT_CLASS_NAMES = new String[VM_INIT_CLASSES.length + 1];
+    public static final String[] VM_INIT_CLASS_NAMES = new String[VM_INIT_CLASSES.length];
 
     static {
         for (int i = 0; i < SDK_CLASSES.length; i++) {
@@ -123,7 +111,6 @@ public class ProgramConstants {
         for (int i = 0; i < length; i++) {
             VM_INIT_CLASS_NAMES[i] = classNameReplace(VM_INIT_CLASSES[i].getName());
         }
-        VM_INIT_CLASS_NAMES[length] = "java/lang/CharacterDataLatin1";
     }
 
     public static String classNameReplace(String s) {

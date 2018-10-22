@@ -615,7 +615,7 @@ public class Heap {
     }
 
     private void change(ObjectRef objectRef) {
-        if (objectRef != null && !this.changes.contains(objectRef)) {
+        if (objectRef != null) {
             this.changes.add(objectRef);
         }
     }

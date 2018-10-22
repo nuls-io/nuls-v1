@@ -111,6 +111,12 @@ public class NativeClass {
                 } else {
                     return getName0(methodCode, methodArgs, frame);
                 }
+            case getSuperclass:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getSuperclass(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -336,6 +342,28 @@ public class NativeClass {
             array = frame.heap.newArray(VariableType.valueOf("[Ljava/lang/Class;"), 0);
         }
         Result result = NativeMethod.result(methodCode, array, frame);
+        return result;
+    }
+
+    public static final String getSuperclass = TYPE + "." + "getSuperclass" + "()Ljava/lang/Class;";
+
+    /**
+     * native
+     *
+     * @see Class#getSuperclass()
+     */
+    private static Result getSuperclass(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ObjectRef objectRef = methodArgs.objectRef;
+        VariableType variableType;
+        if (objectRef.getVariableType().isArray()) {
+            variableType = objectRef.getVariableType();
+        } else {
+            variableType = VariableType.valueOf(objectRef.getRef());
+        }
+        ClassCode classCode = frame.methodArea.loadClass(variableType.getType());
+        VariableType superVariableType = VariableType.valueOf(classCode.superName);
+        ObjectRef classRef = frame.heap.getClassRef(superVariableType.getDesc());
+        Result result = NativeMethod.result(methodCode, classRef, frame);
         return result;
     }
 

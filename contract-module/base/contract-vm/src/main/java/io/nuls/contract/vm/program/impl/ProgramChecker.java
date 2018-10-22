@@ -93,17 +93,6 @@ public class ProgramChecker {
         }
     }
 
-    public static void checkStaticField(Map<String, ClassCode> classCodes) {
-        List<FieldCode> fieldCodes = new ArrayList<>();
-        classCodes.values().stream().forEach(classCode -> {
-            List<FieldCode> list = classCode.fields.values().stream().filter(fieldCode -> fieldCode.isStatic).collect(Collectors.toList());
-            fieldCodes.addAll(list);
-        });
-        if (fieldCodes.size() > 0) {
-            throw new RuntimeException(String.format("find %s static fields", fieldCodes.size()));
-        }
-    }
-
     public static void checkClass(Map<String, ClassCode> classCodes) {
         Set<String> allClass = allClass(classCodes);
         Set<String> classCodeNames = classCodes.values().stream().map(classCode -> classCode.name).collect(Collectors.toSet());
@@ -250,32 +239,6 @@ public class ProgramChecker {
     public static Object isSupportMethod(MethodCode methodCode, Map<String, Object> methodCodes, Map<String, ClassCode> classCodeMap) {
         if (!methodCodes.containsKey(methodCode.fullName)) {
             methodCodes.put(methodCode.fullName, null);
-//            if (NativeMethod.isSupport(methodCode)) {
-//                return Boolean.TRUE;
-//            }
-//            String methodFullName = String.format("%s.%s%s", methodCode.className, methodCode.name, methodCode.desc);
-//            if (methodCode.className.startsWith("sun/")) {
-//                notSupportMethods.add(methodFullName);
-//                log.warn("not support sun method " + methodFullName);
-//                return null;
-//            }
-//            if (methodCode.getInstructions().size() <= 0) {
-//                if (methodCode.isNative()) {
-//                    if (ArrayUtils.contains(NativeMethod.SUPPORT_CLASSES, methodCode.className)) {
-//                        return Boolean.TRUE;
-//                    } else {
-//                        notSupportMethods.add(methodFullName);
-//                        log.warn("not support native method " + methodFullName);
-//                        return null;
-//                    }
-//                } else if (methodCode.classCode.isInterface() || methodCode.isAbstract()) {
-//                    return Boolean.TRUE;
-//                } else {
-//                    notSupportMethods.add(methodFullName);
-//                    log.warn("not support native method " + methodFullName);
-//                    return null;
-//                }
-//            }
             ListIterator<AbstractInsnNode> listIterator = methodCode.instructions.iterator();
             while (listIterator.hasNext()) {
                 AbstractInsnNode abstractInsnNode = listIterator.next();

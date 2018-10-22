@@ -72,6 +72,8 @@ public class VM {
 
     private static final int VM_STACK_MAX_SIZE = 512;
 
+    private static final BigInteger TEN_THOUSAND = new BigInteger("10000");
+
     public static final int MAX_GAS = 1000_0000;
 
     public final VMStack vmStack;
@@ -119,7 +121,10 @@ public class VM {
 
     public VM(VM vm) {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
-        this.heap = new Heap(vm.heap.getObjectRefCount());
+        if (vm.heap.getObjectRefCount().compareTo(TEN_THOUSAND) > 0) {
+            throw new RuntimeException();
+        }
+        this.heap = new Heap(TEN_THOUSAND);
         this.heap.setVm(this);
         this.methodArea = new MethodArea();
         this.methodArea.setVm(this);
