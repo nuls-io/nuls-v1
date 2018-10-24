@@ -56,11 +56,13 @@ public class ProgramDescriptors {
 
     public static String getNormalDesc(VariableType variableType) {
         String desc = variableType.getDesc().replace("[", "");
-        if (Descriptors.DESCRIPTORS.inverse().containsKey(desc)) {
-            desc = Descriptors.DESCRIPTORS.inverse().get(desc);
+        String desc1 = Descriptors.DESCRIPTORS.inverse().get(desc);
+        if (desc1 != null) {
+            desc = desc1;
         } else {
-            if (ProgramDescriptors.DESCRIPTORS.inverse().containsKey(desc)) {
-                desc = ProgramDescriptors.DESCRIPTORS.inverse().get(desc);
+            desc1 = ProgramDescriptors.DESCRIPTORS.inverse().get(desc);
+            if (desc1 != null) {
+                desc = desc1;
             }
         }
         if (variableType.isArray()) {
@@ -104,11 +106,13 @@ public class ProgramDescriptors {
         desc = desc.replace("[]", "");
         String[] parts = desc.split(" ");
         desc = parts[0];
-        if (Descriptors.DESCRIPTORS.containsKey(desc)) {
-            desc = Descriptors.DESCRIPTORS.get(desc);
+        String desc1 = Descriptors.DESCRIPTORS.get(desc);
+        if (desc1 != null) {
+            desc = desc1;
         } else {
-            if (ProgramDescriptors.DESCRIPTORS.containsKey(desc)) {
-                desc = ProgramDescriptors.DESCRIPTORS.get(desc);
+            desc1 = ProgramDescriptors.DESCRIPTORS.get(desc);
+            if (desc1 != null) {
+                desc = desc1;
             }
         }
         for (int i = 0; i < dimensions; i++) {

@@ -47,6 +47,8 @@ public class MethodArea {
 
     private final Map<String, MethodCode> methodCodes = new HashMap<>(1024);
 
+    private final Map<String, ClassCode> loadClassCodes = new HashMap<>(1024);
+
     public MethodArea() {
     }
 
@@ -61,14 +63,16 @@ public class MethodArea {
         } else {
             fullName = className + "." + methodName;
         }
-        if (INIT_METHOD_CODES.containsKey(fullName)) {
-            return INIT_METHOD_CODES.get(fullName);
+        MethodCode methodCode = INIT_METHOD_CODES.get(fullName);
+        if (methodCode != null) {
+            return methodCode;
         }
-        if (methodCodes.containsKey(fullName)) {
-            return methodCodes.get(fullName);
+        methodCode = methodCodes.get(fullName);
+        if (methodCode != null) {
+            return methodCode;
         }
         ClassCode classCode = loadClass(className);
-        MethodCode methodCode = classCode.getMethodCode(methodName, methodDesc);
+        methodCode = classCode.getMethodCode(methodName, methodDesc);
         if (methodCode == null && classCode.superName != null) {
             methodCode = loadSuperMethod(classCode.superName, methodName, methodDesc);
         }
@@ -94,35 +98,31 @@ public class MethodArea {
     }
 
     public ClassCode loadClass(String className) {
-        if (INIT_CLASS_CODES.containsKey(className)) {
-            return INIT_CLASS_CODES.get(className);
-        } else {
-            if (!this.classCodes.containsKey(className)) {
-                ClassCode classCode = ClassCodeLoader.loadFromResource(className);
-                loadClassCode(classCode);
-            }
-            return this.classCodes.get(className);
+        ClassCode classCode = INIT_CLASS_CODES.get(className);
+        if (classCode != null) {
+            return classCode;
         }
+        classCode = this.classCodes.get(className);
+        if (classCode != null) {
+            return classCode;
+        }
+        classCode = ClassCodeLoader.getFromResource(className);
+        if (classCode == null) {
+            classCode = this.loadClassCodes.get(className);
+        }
+        if (classCode == null) {
+            throw new RuntimeException("can't load class " + className);
+        }
+        this.classCodes.put(className, classCode);
+        clinit(classCode);
+        return classCode;
     }
 
     public void loadClassCodes(Map<String, ClassCode> classCodes) {
         if (classCodes != null) {
-            for (ClassCode classCode : classCodes.values()) {
-                this.classCodes.put(classCode.name, classCode);
-            }
-            for (ClassCode classCode : classCodes.values()) {
-                clinit(classCode);
-            }
-        }
-    }
-
-    public void loadClassCode(ClassCode classCode) {
-        String className = classCode.name;
-        if (!INIT_CLASS_CODES.containsKey(className)) {
-            if (!this.classCodes.containsKey(className)) {
-                this.classCodes.put(className, classCode);
-                //Log.loadClass(className);
-                clinit(classCode);
+            this.loadClassCodes.putAll(classCodes);
+            for (String className : classCodes.keySet()) {
+                loadClass(className);
             }
         }
     }

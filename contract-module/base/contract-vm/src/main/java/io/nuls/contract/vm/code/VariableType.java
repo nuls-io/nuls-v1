@@ -169,8 +169,9 @@ public class VariableType {
     private Object defaultValue;
 
     private VariableType(String desc) {
-        if (Descriptors.DESCRIPTORS.containsKey(desc)) {
-            this.desc = Descriptors.DESCRIPTORS.get(desc);
+        final String descriptor = Descriptors.DESCRIPTORS.get(desc);
+        if (descriptor != null) {
+            this.desc = descriptor;
         } else {
             this.desc = desc;
         }
@@ -181,8 +182,9 @@ public class VariableType {
             this.type = this.desc.replace("[", "");
             this.componentType = valueOf(this.desc.replaceFirst("\\[", ""));
         }
-        if (Descriptors.DESCRIPTORS.inverse().containsKey(this.type)) {
-            this.type = Descriptors.DESCRIPTORS.inverse().get(this.type);
+        final String type = Descriptors.DESCRIPTORS.inverse().get(this.type);
+        if (type != null) {
+            this.type = type;
             this.primitiveType = isNotVoid();
         } else if (this.type.startsWith("L") && this.type.endsWith(";")) {
             this.type = this.type.substring(1, this.type.length() - 1);

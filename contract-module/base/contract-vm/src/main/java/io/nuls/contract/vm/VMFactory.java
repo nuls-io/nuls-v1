@@ -27,6 +27,9 @@ package io.nuls.contract.vm;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class VMFactory {
 
     public static final VM VM;
@@ -288,10 +291,12 @@ public class VMFactory {
 
     private static VM initVM() {
         VM vm = new VM();
+        Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
         for (String className : CLINIT_CLASSES) {
             ClassCode classCode = ClassCodeLoader.loadFromResource(className);
-            vm.methodArea.loadClassCode(classCode);
+            classCodes.put(classCode.name, classCode);
         }
+        vm.methodArea.loadClassCodes(classCodes);
         return vm;
     }
 

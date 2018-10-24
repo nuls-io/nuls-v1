@@ -61,8 +61,9 @@ public class ObjectRef {
         }
         this.ref = parts[0];
         String s = parts[1];
-        if (classNames.containsKey(s)) {
-            s = classNames.get(s);
+        String s1 = classNames.get(s);
+        if (s1 != null) {
+            s = s1;
         }
         this.desc = s;
         this.dimensions = dimensions;
@@ -77,8 +78,9 @@ public class ObjectRef {
 //        }
 //        map.put(desc, i + 1);
         String s = desc;
-        if (classNames.inverse().containsKey(s)) {
-            s = classNames.inverse().get(s);
+        String s1 = classNames.inverse().get(s);
+        if (s1 != null) {
+            s = s1;
         }
         sb.append(ref).append(",").append(s);
         for (int dimension : dimensions) {
