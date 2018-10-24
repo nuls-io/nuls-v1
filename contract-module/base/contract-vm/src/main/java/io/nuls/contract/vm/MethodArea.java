@@ -108,7 +108,10 @@ public class MethodArea {
     public void loadClassCodes(Map<String, ClassCode> classCodes) {
         if (classCodes != null) {
             for (ClassCode classCode : classCodes.values()) {
-                loadClassCode(classCode);
+                this.classCodes.put(classCode.name, classCode);
+            }
+            for (ClassCode classCode : classCodes.values()) {
+                clinit(classCode);
             }
         }
     }
