@@ -86,7 +86,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private boolean revert;
 
-    private Thread thread;
+    private final Thread thread;
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
         this(vmContext, stateSource(dbService), null, null, null);
@@ -100,6 +100,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
         this.thread = thread;
+    }
+
+    public ProgramExecutor callProgramExecutor() {
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, thread);
     }
 
     @Override
@@ -337,8 +341,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return programResult;
             }
 
-            repository.increaseNonce(programInvoke.getContractAddress());
-            programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
             programResult.setTransfers(vm.getTransfers());
             programResult.setEvents(vm.getEvents());
             programResult.setBalance(getAccount(programInvoke.getContractAddress()).getBalance());
@@ -371,6 +373,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("add contract state");
 
+            repository.increaseNonce(programInvoke.getContractAddress());
+            programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
             programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;
@@ -448,7 +452,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         }
     }
 
-    @Override
     public ProgramAccount getAccount(byte[] address) {
         ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
         ProgramAccount account = accounts.get(addressWrapper);

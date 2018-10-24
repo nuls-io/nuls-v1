@@ -235,7 +235,7 @@ public class NativeAddress {
             frame.vm.getTransfers().add(programTransfer);
         }
 
-        ProgramResult programResult = frame.vm.getProgramExecutor().call(programCall);
+        ProgramResult programResult = frame.vm.getProgramExecutor().callProgramExecutor().call(programCall);
 
         frame.vm.addGasUsed(programResult.getGasUsed());
         if (programResult.isSuccess()) {

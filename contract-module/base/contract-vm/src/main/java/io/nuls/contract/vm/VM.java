@@ -51,6 +51,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethodArg;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.contract.vm.program.impl.ProgramContext;
+import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +93,7 @@ public class VM {
 
     private ProgramContext programContext;
 
-    private ProgramExecutor programExecutor;
+    private ProgramExecutorImpl programExecutor;
 
     private Repository repository;
 
@@ -1138,7 +1139,7 @@ public class VM {
         return programContext;
     }
 
-    public ProgramExecutor getProgramExecutor() {
+    public ProgramExecutorImpl getProgramExecutor() {
         return programExecutor;
     }
 
@@ -1178,7 +1179,7 @@ public class VM {
         this.result = result;
     }
 
-    public void setProgramExecutor(ProgramExecutor programExecutor) {
+    public void setProgramExecutor(ProgramExecutorImpl programExecutor) {
         this.programExecutor = programExecutor;
     }
 
