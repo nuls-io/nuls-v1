@@ -78,7 +78,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final long beginTime;
 
-    private final Map<ByteArrayWrapper, ProgramAccount> accounts = new HashMap<>();
+    private final Map<ByteArrayWrapper, ProgramAccount> accounts;
 
     private long blockNumber;
 
@@ -89,21 +89,23 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private final Thread thread;
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, stateSource(dbService), null, null, null);
+        this(vmContext, stateSource(dbService), null, null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Thread thread) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot,
+                                Map<ByteArrayWrapper, ProgramAccount> accounts, Thread thread) {
         this.parent = this;
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
+        this.accounts = accounts;
         this.thread = thread;
     }
 
     public ProgramExecutor callProgramExecutor() {
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, thread);
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, accounts, thread);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, Thread.currentThread());
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(), Thread.currentThread());
     }
 
     @Override
@@ -122,7 +124,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, thread);
+        return new ProgramExecutorImpl(vmContext, source, track, null, new HashMap<>(), thread);
     }
 
     @Override
