@@ -79,6 +79,7 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
+import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
 
 /**
  * @desription:
@@ -213,6 +214,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -505,6 +507,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas
@@ -631,6 +634,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 if (!programResult.isSuccess()) {
                     result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                    result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
                 } else {
                     result = Result.getSuccess();
                     result.setData(programResult.getResult());
@@ -680,6 +684,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
                 return result;
             } else {
                 // 其他合法性都通过后，再验证Gas

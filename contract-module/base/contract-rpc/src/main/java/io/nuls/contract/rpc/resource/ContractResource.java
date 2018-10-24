@@ -100,6 +100,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
+import static io.nuls.contract.constant.ContractConstant.NOT_ENOUGH_GAS;
+import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -325,11 +327,12 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.create(programCreate);
             if(!programResult.isSuccess()) {
-                return Result.getSuccess().setData(resultMap).toRpcClientResult();
+                return checkVmResultAndReturn(programResult.getErrorMessage(), Result.getSuccess().setData(resultMap)).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
             gasUsed += gasUsed >> 1;
+            gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
             resultMap.put("gasLimit", gasUsed);
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
@@ -568,6 +571,7 @@ public class ContractResource implements InitializingBean {
             if(!programResult.isSuccess()) {
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
             } else {
                 result = Result.getSuccess();
                 Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
@@ -652,11 +656,12 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.call(programCall);
             if(!programResult.isSuccess()) {
-                return Result.getSuccess().setData(resultMap).toRpcClientResult();
+                return checkVmResultAndReturn(programResult.getErrorMessage(), Result.getSuccess().setData(resultMap)).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
             gasUsed += gasUsed >> 1;
+            gasUsed = gasUsed > MAX_GASLIMIT ? MAX_GASLIMIT : gasUsed;
             resultMap.put("gasLimit", gasUsed);
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {

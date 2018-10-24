@@ -24,12 +24,14 @@
 package io.nuls.contract.util;
 
 import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
@@ -239,6 +241,16 @@ public class ContractUtil {
             return resultMsg + msgs[1].trim();
         }
         return resultMsg + errorMsg;
+    }
+
+    public static Result checkVmResultAndReturn(String errorMessage, Result defaultResult) {
+        if(StringUtils.isBlank(errorMessage)) {
+            return defaultResult;
+        }
+        if(errorMessage.contains(NOT_ENOUGH_GAS)) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_GAS_LIMIT);
+        }
+        return defaultResult;
     }
 
     public static boolean isTerminatedContract(int status) {
