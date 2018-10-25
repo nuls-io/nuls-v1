@@ -42,6 +42,7 @@ import io.nuls.protocol.storage.po.BlockHeaderPo;
 import io.nuls.protocol.storage.service.BlockHeaderStorageService;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * 区块头数据存储服务实现类
@@ -191,6 +192,23 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
     private Result removeBlockHerader(byte[] hashBytes) {
         if (null == hashBytes) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        BlockHeaderPo blockHeaderPo = getBlockHeaderPo(hashBytes);
+        dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(blockHeaderPo.getHeight()).encode());
+        byte[] bestBlockHashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey);
+        if (null != hashBytes && Arrays.equals(hashBytes, bestBlockHashBytes)) {
+            //如果要删除的是最新的区块头，则把前一个区块头hash设为最新区块头hash
+            NulsDigestData preHash = blockHeaderPo.getPreHash();
+            if(null != preHash){
+                byte[] preHashBytes = null;
+                try {
+                    preHashBytes = preHash.serialize();
+                } catch (IOException e) {
+                    Log.error(e);
+                    return Result.getFailed(KernelErrorCode.IO_ERROR);
+                }
+                dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey, preHashBytes);
+            }
         }
         return dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
     }
