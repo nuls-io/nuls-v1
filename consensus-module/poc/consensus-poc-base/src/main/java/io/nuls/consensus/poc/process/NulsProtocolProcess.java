@@ -33,7 +33,6 @@ import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
@@ -89,7 +88,8 @@ public class NulsProtocolProcess {
         refreshTempProtocolCoverageRate(extendsData, blockHeader);
         //收到的区块版本信息大于当前主网版本信息时，统计覆盖率和延迟块数
         //TODO  考虑主网去掉 extendsData.getCurrentVersion() > NIPs.NIP_2
-        if (extendsData.getCurrentVersion() > NulsVersionManager.getMainVersion() && extendsData.getCurrentVersion() > NIPs.NIP_2) {
+//        if (extendsData.getCurrentVersion() > NulsVersionManager.getMainVersion() && extendsData.getCurrentVersion() > NIPs.NIP_2) {
+        if (extendsData.getCurrentVersion() > NulsVersionManager.getMainVersion()) {
             ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
             if (protocolContainer != null) {
                 calcNewProtocolCoverageRate(protocolContainer, extendsData, blockHeader);
@@ -484,7 +484,7 @@ public class NulsProtocolProcess {
     private void upgradeProtocol(ProtocolContainer container) {
         NulsContext.MAIN_NET_VERSION = container.getVersion();
         getVersionManagerStorageService().saveMainVersion(container.getVersion());
-        if (container.getVersion() == NIPs.NIP_3) {
+        if (container.getVersion() == 2) {
             getVersionManagerStorageService().saveChangeTxHashBlockHeight(container.getEffectiveHeight());
             NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = container.getEffectiveHeight();
         }
@@ -579,7 +579,7 @@ public class NulsProtocolProcess {
                 }
             }
             //版本为2的时候的特殊处理
-            if (protocolContainer.getVersion() == NIPs.NIP_3 && protocolContainer.getStatus() != ProtocolContainer.VALID) {
+            if (protocolContainer.getVersion() == 2 && protocolContainer.getStatus() != ProtocolContainer.VALID) {
                 getVersionManagerStorageService().deleteChangeTxHashBlockHeight();
                 NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = null;
             }

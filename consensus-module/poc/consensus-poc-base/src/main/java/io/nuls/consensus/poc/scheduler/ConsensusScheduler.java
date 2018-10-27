@@ -37,7 +37,6 @@ import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.BlockHeader;
@@ -129,7 +128,7 @@ public class ConsensusScheduler {
             //针对第一版本升级时的特殊处理
             NulsVersionManager.init();
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-            if (NulsContext.MAIN_NET_VERSION == NIPs.NIP_1 && (NulsContext.CURRENT_PROTOCOL_VERSION == NIPs.NIP_2 || NulsContext.CURRENT_PROTOCOL_VERSION == NIPs.NIP_3)) {
+            if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
 
                 long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
                 Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();

@@ -67,7 +67,5 @@
                 <tx ref="dappTx_V1"/>
             </txs>
         </protocol>
-        <protocol version="3" block="" extend="2" percent="90" delay="10000">
-        </protocol>
     </protocols>
 </nuls-version>

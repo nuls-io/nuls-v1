@@ -25,7 +25,6 @@
 package io.nuls.protocol.base.version;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NIPs;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -141,7 +140,7 @@ public class NulsVersionManager {
                     NulsContext.MAIN_NET_VERSION = protocolContainer.getVersion();
                     getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
                     //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
-                    if (protocolContainer.getVersion() == NIPs.NIP_2 || protocolContainer.getVersion() == NIPs.NIP_3) {
+                    if (protocolContainer.getVersion() == 2) {
                         getVersionManagerStorageService().saveChangeTxHashBlockHeight(protocolContainer.getEffectiveHeight());
                         NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = protocolContainer.getEffectiveHeight();
                     }
