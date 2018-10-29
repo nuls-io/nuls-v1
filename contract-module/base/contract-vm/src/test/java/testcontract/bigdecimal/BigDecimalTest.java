@@ -129,4 +129,26 @@ public class BigDecimalTest implements Contract {
         return sb.toString();
     }
 
+    @View
+    public String roundModeTest() {
+        BigDecimal a = new BigDecimal("209898010.866");
+        BigDecimal b = new BigDecimal("3");
+        BigDecimal c = a.divide(b, 2, BigDecimal.ROUND_CEILING);
+        BigDecimal c1 = a.divide(b, 0, BigDecimal.ROUND_DOWN);
+        BigDecimal c2 = a.divide(b, 0, BigDecimal.ROUND_FLOOR);
+        BigDecimal c3 = a.divide(b, 0, BigDecimal.ROUND_HALF_DOWN);
+        BigDecimal c4 = a.divide(b, 0, BigDecimal.ROUND_HALF_EVEN);
+        BigDecimal c5 = a.divide(b, 0, BigDecimal.ROUND_HALF_UP);
+        BigDecimal c7 = a.divide(b, 2, BigDecimal.ROUND_UP);
+        StringBuilder sb = new StringBuilder();
+        sb.append(c.toPlainString()).append("\n");
+        sb.append(c1.toPlainString()).append("\n");
+        sb.append(c2.toPlainString()).append("\n");
+        sb.append(c3.toPlainString()).append("\n");
+        sb.append(c4.toPlainString()).append("\n");
+        sb.append(c5.toPlainString()).append("\n");
+        sb.append(c7.toPlainString()).append("\n");
+        return sb.toString();
+    }
+
 }
