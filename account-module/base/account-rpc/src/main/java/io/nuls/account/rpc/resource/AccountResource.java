@@ -30,10 +30,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
-import io.nuls.account.rpc.model.AccountDto;
-import io.nuls.account.rpc.model.AccountKeyStoreDto;
-import io.nuls.account.rpc.model.AssetDto;
-import io.nuls.account.rpc.model.MultiSigAccountDto;
+import io.nuls.account.rpc.model.*;
 import io.nuls.account.rpc.model.form.*;
 import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
@@ -153,19 +150,19 @@ public class AccountResource {
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
         }
-        List<AccountDto> accounts = new ArrayList<>();
+        List<AccountOfflineDto> accounts = new ArrayList<>();
         try {
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 if (StringUtils.isNotBlank(password)) {
                     account.encrypt(password);
                 }
-                accounts.add(new AccountDto(account));
+                accounts.add(new AccountOfflineDto(account));
             }
         } catch (NulsException e) {
             return Result.getFailed().toRpcClientResult();
         }
-        Map<String, List<AccountDto>> map = new HashMap<>();
+        Map<String, List<AccountOfflineDto>> map = new HashMap<>();
         map.put("list", accounts);
         return Result.getSuccess().setData(map).toRpcClientResult();
     }
