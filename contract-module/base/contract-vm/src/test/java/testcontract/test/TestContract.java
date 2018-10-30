@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package testcontract.simple;
+package testcontract.test;
 
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
@@ -115,6 +115,25 @@ public class TestContract implements Contract {
             result += entry.getKey() + ": " + entry.getValue() + " \n";
         }
 
+        return result;
+    }
+
+    @View
+    public String linkedHashMap_values() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("123", "123a");
+        map.put("124", "124a");
+        map.put("125", "125a");
+        map.put("126", "126a");
+        map.put("127", "127a");
+
+        String result = "";
+        Collection<String> values = map.values();
+        String next = values.iterator().next();
+        result += next + " <- next \n";
+        for(String ss : values) {
+            result += ss + " \n";
+        }
         return result;
     }
 
