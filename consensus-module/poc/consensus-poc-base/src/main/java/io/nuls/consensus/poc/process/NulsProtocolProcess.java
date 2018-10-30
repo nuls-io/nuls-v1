@@ -161,19 +161,7 @@ public class NulsProtocolProcess {
             if (container.getStatus() != ProtocolContainer.VALID) {
                 //如果容器的轮次小于当前出块节点的轮次，说明是新的一轮开始
                 if (container.getRoundIndex() < extendsData.getRoundIndex()) {
-                    MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
-                    List<MeetingMember> memberList = currentRound.getMemberList();
-                    Set<String> memberAddressSet = new HashSet<>();
-                    for (MeetingMember member : memberList) {
-                        memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
-                    }
-                    Iterator<String> iterator = container.getAddressSet().iterator();
-                    while (iterator.hasNext()) {
-                        String address = iterator.next();
-                        if (!memberAddressSet.contains(address)) {
-                            iterator.remove();
-                        }
-                    }
+
                     if (container.getStatus() == ProtocolContainer.INVALID) {
                         container.setCurrentDelay(0);
                     } else {
@@ -193,8 +181,22 @@ public class NulsProtocolProcess {
                     container.setPrePercent(container.getCurrentPercent());
                     //container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
-                    saveProtocolInfo(container);
+
                 }
+                MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                List<MeetingMember> memberList = currentRound.getMemberList();
+                Set<String> memberAddressSet = new HashSet<>();
+                for (MeetingMember member : memberList) {
+                    memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                }
+                Iterator<String> iterator = container.getAddressSet().iterator();
+                while (iterator.hasNext()) {
+                    String address = iterator.next();
+                    if (!memberAddressSet.contains(address)) {
+                        iterator.remove();
+                    }
+                }
+                saveProtocolInfo(container);
             }
         }
     }
@@ -211,20 +213,6 @@ public class NulsProtocolProcess {
                     if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
                         tempInfoPo.setCurrentDelay(0);
                     } else {
-
-                        MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
-                        List<MeetingMember> memberList = currentRound.getMemberList();
-                        Set<String> memberAddressSet = new HashSet<>();
-                        for (MeetingMember member : memberList) {
-                            memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
-                        }
-                        Iterator<String> iterator = tempInfoPo.getAddressSet().iterator();
-                        while (iterator.hasNext()) {
-                            String address = iterator.next();
-                            if (!memberAddressSet.contains(address)) {
-                                iterator.remove();
-                            }
-                        }
                         //已经开始统计延迟块的协议，由于存在新的一轮出块节点地址的变化，因此需要重新计算覆盖率
                         //如果覆盖率未达到，则清零延迟块数量，重新计算
                         Result<BlockHeader> result = getBlockService().getBlockHeader(header.getPreHash());
@@ -240,6 +228,20 @@ public class NulsProtocolProcess {
                     tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
                     //tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
+
+                    MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                    List<MeetingMember> memberList = currentRound.getMemberList();
+                    Set<String> memberAddressSet = new HashSet<>();
+                    for (MeetingMember member : memberList) {
+                        memberAddressSet.add(AddressTool.getStringAddressByBytes(member.getPackingAddress()));
+                    }
+                    Iterator<String> iterator = tempInfoPo.getAddressSet().iterator();
+                    while (iterator.hasNext()) {
+                        String address = iterator.next();
+                        if (!memberAddressSet.contains(address)) {
+                            iterator.remove();
+                        }
+                    }
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
                 }
             }

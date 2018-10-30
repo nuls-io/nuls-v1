@@ -30,6 +30,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
@@ -131,9 +132,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (!(cause instanceof IOException)) {
-            //Log.error(cause);
-            Log.error("===========网路消息解析错误===========");
+        if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
+            Log.error(cause);
         }
         ctx.channel().close();
     }

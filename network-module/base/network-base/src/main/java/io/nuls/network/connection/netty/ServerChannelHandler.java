@@ -31,6 +31,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.TooLongFrameException;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
@@ -152,7 +153,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 //        Log.info("----------------- server exceptionCaught -------------------");
-        if (!(cause instanceof IOException)) {
+        if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
             Log.error(cause);
         }
         ctx.channel().close();
