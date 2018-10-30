@@ -90,7 +90,7 @@ public class BackupAccountProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String path = args.length == 3 ? args[2] : System.getProperty("user.dir");
+        String path = args.length == 3 ? args[2] : "";
         RpcClientResult res = CommandHelper.getPassword(address, restFul);
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
@@ -98,62 +98,13 @@ public class BackupAccountProcessor implements CommandProcessor {
         String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
+        parameters.put("path", path);
         RpcClientResult result = restFul.post("/account/export/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        AccountKeyStoreDto accountKeyStoreDto = new AccountKeyStoreDto((Map<String, Object>) result.getData());
-        Result rs = backUpFile(path, accountKeyStoreDto);
-        if (rs.isFailed()) {
-            return CommandResult.getFailed(rs.getMsg());
-        }
-        return CommandResult.getSuccess((String)rs.getData());
+        return CommandResult.getSuccess("The path to the backup file is " + (String)(CommandResult.dataTransformValue(result).getData()));
     }
 
-    /**
-     * 导出文件
-     * Export file
-     *
-     * @param path
-     * @param accountKeyStoreDto
-     * @return
-     */
-    private Result backUpFile(String path, AccountKeyStoreDto accountKeyStoreDto) {
-        File backupFile = new File(path);
-        //if not directory , create directory
-        if (!backupFile.isDirectory()) {
-            if (!backupFile.mkdirs()) {
-                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
-            }
-            if (!backupFile.exists() && !backupFile.mkdir()) {
-                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
-            }
-        }
-        String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
-        backupFile = new File(backupFile, fileName);
-        try {
-            if (!backupFile.exists() && !backupFile.createNewFile()) {
-                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
-            }
-        } catch (IOException e) {
-            return Result.getFailed(KernelErrorCode.IO_ERROR);
-        }
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(backupFile);
-            fileOutputStream.write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
-        } catch (Exception e) {
-            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
-        } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    Log.error(e);
-                }
-            }
-        }
-        return Result.getSuccess().setData("The path to the backup file is " +  path + File.separator + fileName);
-    }
 
 }

@@ -71,6 +71,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -888,7 +889,7 @@ public class AccountResource {
     public RpcClientResult export(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
                                   @ApiParam(name = "form", value = "钱包备份表单数据")
-                                          AccountPasswordForm form, @Context HttpServletResponse response) {
+                                          AccountKeyStoreBackup form, @Context HttpServletResponse response) {
         if (StringUtils.isNotBlank(address) && !AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -897,8 +898,14 @@ public class AccountResource {
             return result.toRpcClientResult();
         }
         AccountKeyStore accountKeyStore = result.getData();
-        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
+        String filePath = form.getPath();
+        if(StringUtils.isBlank(filePath)) {
+            URL resource = ClassLoader.getSystemClassLoader().getResource("");
+            filePath = resource.getPath() + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
+        }
+        return backUpFile(filePath, new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
     }
+
 
 
     /**
@@ -959,7 +966,9 @@ public class AccountResource {
                 }
             }
         }
-        return Result.getSuccess().setData("The path to the backup file is " + path + File.separator + fileName);
+        Map<String, String> map = new HashMap<>();
+        map.put("value", path + File.separator + fileName);
+        return Result.getSuccess().setData(map);
     }
 
     @POST

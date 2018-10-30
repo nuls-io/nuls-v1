@@ -74,4 +74,6 @@ public interface AccountConstant extends NulsConstant {
      * The suffix of the accountkeystore file
      */
     String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
+
+    String ACCOUNTKEYSTORE_FOLDER_NAME ="backup";
 }
