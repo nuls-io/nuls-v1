@@ -76,6 +76,7 @@ public class ProgramConstants {
             HashSet.class,
             Exception.class,
             RuntimeException.class,
+            Collection.class,
     };
 
     public static final Class[] CONTRACT_LAZY_USED_CLASSES = new Class[]{
