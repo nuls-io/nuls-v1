@@ -69,7 +69,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.awt.Desktop;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
@@ -1408,24 +1407,4 @@ public class AccountResource {
         return result.toRpcClientResult();
     }
 
-    @POST
-    @Path("/openDir")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[打开目录] 打开指定文件目录窗口")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
-    })
-    public RpcClientResult openDir(@ApiParam(name = "打开文件目录窗口表单数据", value = "JSONFormat", required = true)
-                                           AccountOpenDirForm form) {
-        if (StringUtils.isBlank(form.getPath())) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-        try {
-            //Open the specified directory window
-            Desktop.getDesktop().open(new File(form.getPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Result.getSuccess().toRpcClientResult();
-    }
 }
