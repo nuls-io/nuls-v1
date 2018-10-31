@@ -72,6 +72,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -901,7 +902,12 @@ public class AccountResource {
         String filePath = form.getPath();
         if(StringUtils.isBlank(filePath)) {
             URL resource = ClassLoader.getSystemClassLoader().getResource("");
-            filePath = resource.getPath() + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
+            try {
+                filePath = URLDecoder.decode(resource.getPath(), "UTF-8") + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                filePath = resource.getPath() + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
+            }
         }
         return backUpFile(filePath, new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
     }
