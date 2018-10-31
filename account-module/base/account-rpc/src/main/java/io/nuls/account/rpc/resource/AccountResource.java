@@ -975,7 +975,9 @@ public class AccountResource {
         //If it is a windows system path, remove the first /
         if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1 && path.startsWith("/")) {
             path = path.substring(1);
+            path = path.replace("/", "\\");
         }
+
         Map<String, String> map = new HashMap<>();
         map.put("value", path + File.separator + fileName);
         return Result.getSuccess().setData(map);
