@@ -212,6 +212,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -222,6 +223,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 programCreate.setGasLimit(realGasLimit);
                 programResult = track.create(programCreate);
                 if(!programResult.isSuccess()) {
+                    Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                     return result;
@@ -505,6 +507,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -515,6 +518,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 programCreate.setGasLimit(realGasLimit);
                 programResult = track.create(programCreate);
                 if(!programResult.isSuccess()) {
+                    Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                     return result;
@@ -632,6 +636,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 ProgramResult programResult = track.call(programCall);
                 Result result;
                 if (!programResult.isSuccess()) {
+                    Log.error(programResult.getStackTrace());
                     result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                     result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -682,6 +687,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -692,6 +698,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 programCall.setGasLimit(realGasLimit);
                 programResult = track.call(programCall);
                 if(!programResult.isSuccess()) {
+                    Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                     return result;

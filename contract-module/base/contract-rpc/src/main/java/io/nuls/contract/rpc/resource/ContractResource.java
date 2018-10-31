@@ -327,6 +327,7 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.create(programCreate);
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 return checkVmResultAndReturn(programResult.getErrorMessage(), Result.getSuccess().setData(resultMap)).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
@@ -569,6 +570,7 @@ public class ContractResource implements InitializingBean {
 
             Result result;
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
@@ -656,6 +658,7 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.call(programCall);
             if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
                 return checkVmResultAndReturn(programResult.getErrorMessage(), Result.getSuccess().setData(resultMap)).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();

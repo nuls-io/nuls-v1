@@ -565,7 +565,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             max = max.subtract(fee);
             return Result.getSuccess().setData(max);
         } catch (Exception e) {
-            Log.error(e.fillInStackTrace());
+            Log.error(e);
             return Result.getFailed(TransactionErrorCode.DATA_ERROR);
         } finally {
             lock.unlock();
