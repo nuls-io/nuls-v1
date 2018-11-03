@@ -33,6 +33,7 @@ import io.nuls.contract.vm.util.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MethodArea {
@@ -124,6 +125,24 @@ public class MethodArea {
             for (String className : classCodes.keySet()) {
                 loadClass(className);
             }
+        }
+    }
+
+    public Map<String, FieldCode> allFields(String className) {
+        Map<String, FieldCode> fields = new LinkedHashMap<>();
+        allFields(className, fields);
+        return fields;
+    }
+
+    private void allFields(String className, Map<String, FieldCode> fields) {
+        ClassCode classCode = loadClass(className);
+        for (Map.Entry<String, FieldCode> entry : classCode.fields.entrySet()) {
+            if (!fields.containsKey(entry.getKey())) {
+                fields.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (classCode.superName != null) {
+            allFields(classCode.superName, fields);
         }
     }
 

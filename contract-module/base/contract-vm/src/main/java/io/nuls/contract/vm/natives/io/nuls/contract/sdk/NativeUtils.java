@@ -117,12 +117,12 @@ public class NativeUtils {
             return null;
         }
 
-        ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
+        Map<String, FieldCode> fields = frame.methodArea.allFields(objectRef.getVariableType().getType());
         Map<String, Object> map = frame.heap.getFields(objectRef);
         Map<String, Object> jsonMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String name = entry.getKey();
-            FieldCode fieldCode = classCode.fields.get(name);
+            FieldCode fieldCode = fields.get(name);
             if (fieldCode != null && !fieldCode.isSynthetic) {
                 Object value = entry.getValue();
                 jsonMap.put(name, toJson(fieldCode, value, frame));
