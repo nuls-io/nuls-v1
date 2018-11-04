@@ -154,7 +154,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 //        Log.info("----------------- server exceptionCaught -------------------");
         if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
+            SocketChannel channel = (SocketChannel) ctx.channel();
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            Log.error("----------------nodeId:" +nodeId);
             Log.error(cause);
+//            nodeManager.deleteNodeFromDB(nodeId);
+//            return;
         }
         ctx.channel().close();
     }

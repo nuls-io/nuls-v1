@@ -349,6 +349,16 @@ public class NodeManager implements Runnable {
         }
     }
 
+    public void deleteNodeFromDB(String nodeId) {
+        Node node = getNode(nodeId);
+        if (node != null) {
+            removeNode(node);
+        }
+        disConnectNodes.remove(nodeId);
+        connectedNodes.remove(nodeId);
+        getNetworkStorageService().deleteNode(nodeId);
+    }
+
     public boolean handshakeNode(String groupName, Node node, NetworkMessageBody versionMessage) {
         lock.lock();
         try {

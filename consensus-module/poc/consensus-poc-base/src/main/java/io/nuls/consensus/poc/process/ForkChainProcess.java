@@ -78,7 +78,7 @@ public class ForkChainProcess {
     private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
-    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
+    private NulsProtocolProcess_1 nulsProtocolProcess = NulsProtocolProcess_1.getInstance();
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;

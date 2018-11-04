@@ -78,6 +78,7 @@ public class NulsProtocolProcess {
         /*if (extendsData.getCurrentVersion() == 2) {
             return;
         }*/
+        //记录每个出块地址对应的出块版本，前台出块节点列表显示用到
         NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
         getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {

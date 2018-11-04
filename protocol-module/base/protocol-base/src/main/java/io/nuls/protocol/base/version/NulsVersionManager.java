@@ -35,6 +35,7 @@ import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,28 +54,11 @@ public class NulsVersionManager {
      */
     private static Map<Integer, ProtocolContainer> containerMap = new ConcurrentHashMap<>();
 
+    private static Map<String, ProtocolTempInfoPo> tempContainerMap = new ConcurrentHashMap<>();
+
     private static VersionManagerStorageService versionManagerStorageService;
 
     private static Map<String, Integer> consensusVersionMap = new ConcurrentHashMap<>();
-
-//    public static void test() {
-//        for (Map.Entry<String, Class<? extends Transaction>> entry : txProtocolMap.entrySet()) {
-//            System.out.println(entry.getValue());
-//        }
-//        System.out.println();
-//        for (Map.Entry<String, Class<? extends BaseMessage>> entry : messageProtocolMap.entrySet()) {
-//            System.out.println(entry.getValue());
-//        }
-//        for (Map.Entry<Integer, ProtocolContainer> entry : containerMap.entrySet()) {
-//            System.out.println("----- ProtocolContainer -----");
-//            try {
-//                System.out.println(JSONUtils.obj2PrettyJson(entry));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("-----------------------------");
-//        }
-//    }
 
     public static void init() throws Exception {
         loadConfig();
@@ -149,6 +133,66 @@ public class NulsVersionManager {
         }
     }
 
+    public static void loadVersionByHeight(long versionHeight) {
+        List<ProtocolInfoPo> infoPoList = getVersionManagerStorageService().getProtocolInfoList(versionHeight);
+        //获取数据库已保存的协议信息
+        if (infoPoList != null && !infoPoList.isEmpty()) {
+            for (ProtocolInfoPo infoPo : infoPoList) {
+                ProtocolContainer container = getProtocolContainer(infoPo.getVersion());
+                copyProtocolFromInfoPo(container, infoPo);
+            }
+        }
+        //获取数据库已保存的临时协议信息，如果发现临时协议信息在最新版本里能查询到就复制到最新版本信息里
+        List<ProtocolTempInfoPo> tempInfoPoList = getVersionManagerStorageService().getProtocolTempInfoList(versionHeight);
+        if (tempInfoPoList == null) {
+            return;
+        }
+        for (int i = 0; i < tempInfoPoList.size(); i++) {
+            ProtocolTempInfoPo tempInfoPo = tempInfoPoList.get(i);
+            ProtocolContainer container = getProtocolContainer(tempInfoPo.getVersion());
+            if (container != null) {
+                copyProtocolFromTempInfoPo(container, tempInfoPo);
+                //如果有协议升级了，要做升级相关处理
+                if (container.getStatus() == ProtocolContainer.VALID && container.getVersion() > NulsContext.MAIN_NET_VERSION) {
+                    NulsContext.MAIN_NET_VERSION = container.getVersion();
+                    getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
+                    //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
+                    if (container.getVersion() == 2) {
+                        getVersionManagerStorageService().saveChangeTxHashBlockHeight(container.getEffectiveHeight());
+                        NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = container.getEffectiveHeight();
+                    }
+                }
+                continue;
+            }
+            //如果有临时协议已经生效，说明当前版本不是最新版本，需要强制升级
+            if (tempInfoPo.getStatus() == ProtocolContainer.VALID) {
+                NulsContext.mastUpGrade = true;
+            }
+            tempContainerMap.put(tempInfoPo.getProtocolKey(), tempInfoPo);
+        }
+    }
+
+
+    public static void copyProtocolFromInfoPo(ProtocolContainer container, ProtocolInfoPo infoPo) {
+        container.setCurrentDelay(infoPo.getCurrentDelay());
+        container.setCurrentPercent(infoPo.getCurrentPercent());
+        container.setAddressSet(infoPo.getAddressSet());
+        container.setStatus(infoPo.getStatus());
+        container.setRoundIndex(infoPo.getRoundIndex());
+        container.setEffectiveHeight(infoPo.getEffectiveHeight());
+        container.setPrePercent(infoPo.getPrePercent());
+    }
+
+    public static void copyProtocolFromTempInfoPo(ProtocolContainer container, ProtocolTempInfoPo infoPo) {
+        container.setCurrentDelay(infoPo.getCurrentDelay());
+        container.setCurrentPercent(infoPo.getCurrentPercent());
+        container.setAddressSet(infoPo.getAddressSet());
+        container.setStatus(infoPo.getStatus());
+        container.setRoundIndex(infoPo.getRoundIndex());
+        container.setEffectiveHeight(infoPo.getEffectiveHeight());
+        container.setPrePercent(infoPo.getPrePercent());
+    }
+
     /**
      * 读取配置文件信息，生成协议容器
      */
@@ -201,6 +245,14 @@ public class NulsVersionManager {
         return containerMap;
     }
 
+    public static Map<String, ProtocolTempInfoPo> getTempProtocolContainers() {
+        return tempContainerMap;
+    }
+
+    public static void setTempProtocolContainers(Map<String, ProtocolTempInfoPo> tempContainerMap) {
+        NulsVersionManager.tempContainerMap = tempContainerMap;
+    }
+
     /**
      * 根据版本号获取协议的容器
      *
@@ -209,6 +261,14 @@ public class NulsVersionManager {
      */
     public static ProtocolContainer getProtocolContainer(int version) {
         return containerMap.get(version);
+    }
+
+    public static ProtocolTempInfoPo getTempProtocolContainer(String key) {
+        return tempContainerMap.get(key);
+    }
+
+    public static void addTempProtocolContainer(ProtocolTempInfoPo tempInfoPo) {
+        tempContainerMap.put(tempInfoPo.getProtocolKey(), tempInfoPo);
     }
 
     /**

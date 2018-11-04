@@ -109,6 +109,14 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
+        result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_INFO_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+        result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_TEMP_INFO_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
     }
 
     @Override
@@ -125,6 +133,36 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     @Override
     public Result saveProtocolInfoPo(ProtocolInfoPo upgradeInfoPo) {
         return dbService.putModel(ProtocolStorageConstant.NULS_PROTOCOL_AREA, Util.intToBytes(upgradeInfoPo.getVersion()), upgradeInfoPo);
+    }
+
+    @Override
+    public Result saveProtocolInfoList(long blockHeight, List<ProtocolInfoPo> protocolInfoPoList) {
+        return dbService.putModel(ProtocolStorageConstant.NULS_PROTOCOL_INFO_AREA, new VarInt(blockHeight).encode(), protocolInfoPoList);
+    }
+
+    @Override
+    public List<ProtocolInfoPo> getProtocolInfoList(long blockHeight) {
+        return dbService.getModel(ProtocolStorageConstant.NULS_PROTOCOL_INFO_AREA, new VarInt(blockHeight).encode(), List.class);
+    }
+
+    @Override
+    public void removeProtocolInfoList(long blockHeight) {
+        dbService.delete(ProtocolStorageConstant.NULS_PROTOCOL_INFO_AREA, new VarInt(blockHeight).encode());
+    }
+
+    @Override
+    public Result saveProtocolTempInfoList(long blockHeight, List<ProtocolTempInfoPo> tempInfoPoList) {
+        return dbService.putModel(ProtocolStorageConstant.NULS_PROTOCOL_TEMP_INFO_AREA, new VarInt(blockHeight).encode(), tempInfoPoList);
+    }
+
+    @Override
+    public List<ProtocolTempInfoPo> getProtocolTempInfoList(long blockHeight) {
+        return dbService.getModel(ProtocolStorageConstant.NULS_PROTOCOL_TEMP_INFO_AREA, new VarInt(blockHeight).encode(), List.class);
+    }
+
+    @Override
+    public void removeProtocolTempInfoList(long blockHeight) {
+        dbService.delete(ProtocolStorageConstant.NULS_PROTOCOL_TEMP_INFO_AREA, new VarInt(blockHeight).encode());
     }
 
     @Override

@@ -95,7 +95,7 @@ public class BlockProcess {
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
-    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
+    private NulsProtocolProcess_1 nulsProtocolProcess = NulsProtocolProcess_1.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
@@ -128,6 +128,9 @@ public class BlockProcess {
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
 
+        if(NulsContext.mastUpGrade == true) {
+            return false;
+        }
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
@@ -135,6 +138,12 @@ public class BlockProcess {
         Log.info(" packingAddress:{}", AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
         // Discard future blocks
         // 丢弃掉未来时间的区块
+
+//        String packAddr = AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress());
+//        if(block.getHeader().getHeight() >= 195 && !packAddr.equals("TTaq9Fe2Rc7XK4tiVrDugq7aA2RHi2ia")) {
+//            return false;
+//        }
+
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
             return false;
         }
