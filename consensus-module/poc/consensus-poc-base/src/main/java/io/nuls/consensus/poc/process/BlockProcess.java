@@ -138,12 +138,6 @@ public class BlockProcess {
         Log.info(" packingAddress:{}", AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
         // Discard future blocks
         // 丢弃掉未来时间的区块
-
-//        String packAddr = AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress());
-//        if(block.getHeader().getHeight() >= 195 && !packAddr.equals("TTaq9Fe2Rc7XK4tiVrDugq7aA2RHi2ia")) {
-//            return false;
-//        }
-
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
             return false;
         }

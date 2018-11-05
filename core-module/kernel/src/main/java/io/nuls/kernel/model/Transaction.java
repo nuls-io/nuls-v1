@@ -100,7 +100,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                     bos.write(NulsConstant.PLACE_HOLDER);
                     break;
                 }
-                if (NulsContext.MAIN_NET_VERSION <= 2) {
+                if (NulsContext.MAIN_NET_VERSION < 2) {
                     buffer.writeVarInt(type);
                     buffer.writeVarInt(time);
                     break;

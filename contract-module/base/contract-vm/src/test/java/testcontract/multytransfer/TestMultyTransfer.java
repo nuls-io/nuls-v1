@@ -109,7 +109,7 @@ public class TestMultyTransfer implements Contract {
         append("\ncoinbase: " + Block.coinbase());
         append("\nheight: " + Block.number());
         append("\ntimestamp: " + Block.timestamp());
-        append("\nnewestBlockHeader: " + Block.newestBlockHeader());
+//        append("\nnewestBlockHeader: " + Block.newestBlockHeader());
         append("\ncurrentBlockHeader: " + Block.currentBlockHeader());
         append("\n");
         return allInfo;

@@ -132,7 +132,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
+        if (!(cause instanceof IOException) ) {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             Log.error("----------------nodeId:" + node.getId());
