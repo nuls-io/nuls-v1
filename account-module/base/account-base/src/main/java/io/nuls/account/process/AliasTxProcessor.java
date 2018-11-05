@@ -105,7 +105,6 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
                 if (!accountAddress.add(Hex.encode(alias.getAddress()))) {
                     return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS).setData(aliasTransaction);
                 }
-                break;
             }
 
         }

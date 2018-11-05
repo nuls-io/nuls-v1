@@ -110,7 +110,6 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                 if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
                     return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_EXIST).setData(transaction);
                 }
-                break;
             } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                 RedPunishData redPunishData = redPunishTransaction.getTxData();
@@ -118,7 +117,6 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                 if (!addressHexSet.add(addressHex)) {
                     return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT).setData(transaction);
                 }
-                break;
             }
         }
 
