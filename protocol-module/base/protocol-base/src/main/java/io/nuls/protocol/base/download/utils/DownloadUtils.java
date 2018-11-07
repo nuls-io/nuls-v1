@@ -81,7 +81,7 @@ public class DownloadUtils {
 
     public static List<Block> getBlocks(Node node, long startHeight, long endHeight) throws Exception {
 
-        Log.info("getBlocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId());
+//        Log.info("getBlocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId());
         List<Block> resultList = new ArrayList<>();
 
         if (node == null || startHeight < 0L || startHeight > endHeight) {
@@ -113,7 +113,7 @@ public class DownloadUtils {
         }
 
         Result result = messageBusService.sendToNode(message, node, false);
-        Log.info("sended.......");
+//        Log.info("sended.......");
         if (!result.isSuccess()) {
             ProtocolCacheHandler.removeTaskFuture(message.getHash());
             ProtocolCacheHandler.removeRequest(requestHash);

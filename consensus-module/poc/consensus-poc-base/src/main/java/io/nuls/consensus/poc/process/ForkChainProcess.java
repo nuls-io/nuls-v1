@@ -86,6 +86,10 @@ public class ForkChainProcess {
 
     public boolean doProcess() throws IOException, NulsException {
 
+
+        clearExpiredChain();
+
+
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return false;
         }
@@ -200,8 +204,6 @@ public class ForkChainProcess {
                     ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }
             }
-
-            clearExpiredChain();
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
