@@ -25,7 +25,6 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.contract.entity.BlockHeaderDto;
-import io.nuls.contract.sdk.Block;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.ObjectRef;

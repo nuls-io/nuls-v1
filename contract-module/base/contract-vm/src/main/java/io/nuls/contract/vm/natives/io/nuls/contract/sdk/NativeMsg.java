@@ -24,7 +24,6 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
-import io.nuls.contract.sdk.Msg;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.Result;

@@ -26,7 +26,10 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.sdk.Utils;
-import io.nuls.contract.vm.*;
+import io.nuls.contract.vm.Frame;
+import io.nuls.contract.vm.MethodArgs;
+import io.nuls.contract.vm.ObjectRef;
+import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
@@ -222,7 +225,6 @@ public class NativeUtils {
      * @see Utils#sha3(String)
      */
     private static Result sha3(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.vm.addGasUsed(GasCost.SHA3);
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef ref = null;
         if (objectRef != null) {
@@ -242,7 +244,6 @@ public class NativeUtils {
      * @see Utils#sha3(byte[])
      */
     private static Result sha3Bytes(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.vm.addGasUsed(GasCost.SHA3);
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         ObjectRef ref = null;
         if (objectRef != null) {
