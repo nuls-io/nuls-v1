@@ -39,7 +39,7 @@ public class Sha3Hash {
         if(src == null || src.length() == 0) {
             return null;
         }
-        return sha3(src.getBytes(StandardCharsets.UTF_8), 256);
+        return sha3(src.getBytes(StandardCharsets.UTF_8));
     }
 
     public static String sha3(byte[] bytes) {
