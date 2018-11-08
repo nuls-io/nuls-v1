@@ -24,8 +24,6 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
-import io.nuls.contract.sdk.Event;
-import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
 import io.nuls.contract.vm.ObjectRef;
