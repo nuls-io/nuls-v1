@@ -60,9 +60,9 @@ public class DataCacher<T> {
     public boolean callback(NulsDigestData hash, T t, boolean log) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            if (log) {
-                Log.warn("Time out: ({}) : {}", type, hash.getDigestHex());
-            }
+//            if (log) {
+//                Log.warn("Time out: ({}) : {}", type, hash.getDigestHex());
+//            }
             return false;
         }
         future.complete(t);
