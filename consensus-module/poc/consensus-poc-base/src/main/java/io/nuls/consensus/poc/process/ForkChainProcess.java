@@ -784,11 +784,11 @@ public class ForkChainProcess {
         List<BlockHeader> blockHeaderList = masterChain.getBlockHeaderList();
         List<Block> blockList = masterChain.getBlockList();
 
-        if (blockHeaderList.size() > 30000) {
-            masterChain.setBlockHeaderList(blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size()));
+        while (blockHeaderList.size() > 30000) {
+            blockHeaderList.remove(0);
         }
-        if (blockList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
-            masterChain.setBlockList(blockList.subList(blockList.size() - PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size()));
+        while (blockList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
+            blockList.remove(0);
         }
 
         List<Agent> agentList = masterChain.getAgentList();

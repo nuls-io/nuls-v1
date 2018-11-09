@@ -138,10 +138,10 @@ public class NulsProtocolProcess_1 {
                 upgradeProtocol(container, blockHeader);
             }
         }
-        Log.info("========== 协议version：" + container.getVersion());
-        Log.info("========== 当前高度：" + blockHeader.getHeight());
-        Log.info("========== 当前hash：" + blockHeader.getHash());
-        Log.info("========== 协议状态：" + container.getStatus());
+//        Log.info("========== 协议version：" + container.getVersion());
+//        Log.info("========== 当前高度：" + blockHeader.getHeight());
+//        Log.info("========== 当前hash：" + blockHeader.getHash());
+//        Log.info("========== 协议状态：" + container.getStatus());
         if (container.getStatus() == ProtocolContainer.VALID) {
             Log.info("********** 协议生效了！！！！！！！！！ **********");
             Log.info("********** 协议生效了！！！！！！！！！ **********");
@@ -150,10 +150,10 @@ public class NulsProtocolProcess_1 {
             Log.info("********** 生效协议version：" + container.getVersion());
             Log.info("********** 生效协议高度：" + container.getEffectiveHeight());
         }
-        Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
-        Log.info("========== 协议当前轮次：" + container.getRoundIndex());
-        Log.info("========== 协议当前轮出块节点数：" + extendsData.getConsensusMemberCount());
-        Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
+//        Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
+//        Log.info("========== 协议当前轮次：" + container.getRoundIndex());
+//        Log.info("========== 协议当前轮出块节点数：" + extendsData.getConsensusMemberCount());
+//        Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
     }
 
     /**

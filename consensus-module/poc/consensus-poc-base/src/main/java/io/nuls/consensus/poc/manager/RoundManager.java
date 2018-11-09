@@ -92,8 +92,12 @@ public class RoundManager {
     }
 
     public boolean clearRound(int count) {
-        if (roundList.size() > count) {
-            roundList = roundList.subList(roundList.size() - count, roundList.size());
+        boolean doit = false;
+        while (roundList.size() > count) {
+            doit = true;
+            roundList.remove(0);
+        }
+        if(doit){
             MeetingRound round = roundList.get(0);
             round.setPreRound(null);
         }
