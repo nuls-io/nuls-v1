@@ -127,7 +127,7 @@ public class DownloadUtils {
         }
         String reqMsg = "request operation:::::" + node.getId() + ":::::" + startHeight;
         try {
-            reactFuture.get(1L, TimeUnit.SECONDS);
+            reactFuture.get(3L, TimeUnit.SECONDS);
             reqMsg += ",,,,done";
             CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
             if (taskResult.isSuccess()) {
@@ -139,9 +139,7 @@ public class DownloadUtils {
                 }
             }
         } catch (Exception e) {
-
             Log.error(reqMsg);
-            Log.error(e.getMessage());
             return new ArrayList<>();
         } finally {
             ProtocolCacheHandler.removeTaskFuture(requestHash);
