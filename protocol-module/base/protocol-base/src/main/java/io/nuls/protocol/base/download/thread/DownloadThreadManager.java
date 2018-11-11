@@ -45,9 +45,7 @@ import io.nuls.protocol.base.download.utils.DownloadUtils;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -98,6 +96,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download-thread"));
 
         List<FutureTask<ResultMessage>> futures = new ArrayList<>();
+        List<Integer> sizeList = new ArrayList<>();
 
         long totalCount = netBestHeight - localBestHeight;
 
@@ -118,8 +117,9 @@ public class DownloadThreadManager implements Callable<Boolean> {
                     size = (int) (netBestHeight - start) + 1;
                     isEnd = true;
                 }
-
-                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
+                Node node = nodes.get(j);
+                sizeList.add(size);
+                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, node);
 
                 FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
 
@@ -131,7 +131,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
                     break;
                 }
             }
-            for (FutureTask<ResultMessage> task : futures) {
+            for (int a = 0; a < futures.size(); a++) {
+                FutureTask<ResultMessage> task = futures.get(a);
                 ResultMessage result = null;
                 try {
                     result = task.get();
@@ -140,17 +141,23 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 }
                 List<Block> blockList = null;
 
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                int size = sizeList.get(a);
+
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
+                    Log.warn("failed 1 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     blockList = retryDownload(executor, result);
                 }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
+                    Log.warn("failed 2 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     blockList = retryDownload(executor, result);
                 }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
+                    Log.warn("failed 3 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     blockList = retryDownload(executor, result);
                 }
 
-                if (blockList == null) {
+                if (blockList == null || blockList.size() < size) {
+                    Log.warn("failed 4 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     executor.shutdown();
                     resetNetwork("attempts to download blocks from all available nodes failed");
                     return true;
