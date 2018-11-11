@@ -38,18 +38,18 @@ public class NativeString {
 
     public static final String TYPE = "java/lang/String";
 
-//    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
-//        switch (methodCode.fullName) {
-//            case format:
-//                if (check) {
-//                    return SUPPORT_NATIVE;
-//                } else {
-//                    return format(methodCode, methodArgs, frame);
-//                }
-//            default:
-//                return null;
-//        }
-//    }
+    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case getBytes:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getBytes(methodCode, methodArgs, frame);
+                }
+            default:
+                return null;
+        }
+    }
 
     public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
         switch (methodCode.fullName) {
@@ -69,8 +69,29 @@ public class NativeString {
         }
     }
 
-    public static final String format = TYPE + "." + "format" + "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;";
+    public static final String getBytes = TYPE + "." + "getBytes" + "()[B";
 
+    /**
+     * override
+     *
+     * @see String#getBytes()
+     */
+    private static Result getBytes(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ObjectRef objectRef = methodArgs.objectRef;
+        ObjectRef ref = null;
+        if (objectRef != null) {
+            String str = frame.heap.runToString(objectRef);
+            if (str != null) {
+                byte[] bytes = str.getBytes();
+                ref = frame.heap.newArray(bytes);
+            }
+        }
+        Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
+    }
+
+//    public static final String format = TYPE + "." + "format" + "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;";
+//
 //    /**
 //     * override
 //     *

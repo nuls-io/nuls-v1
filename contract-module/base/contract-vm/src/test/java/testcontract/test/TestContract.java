@@ -26,6 +26,7 @@ package testcontract.test;
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
 import io.nuls.contract.sdk.Msg;
+import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.sdk.annotation.View;
 
 import java.math.BigInteger;
@@ -57,7 +58,9 @@ public class TestContract implements Contract {
     }
 
     public String balance() {
-        return Msg.address().balance().toString();
+        String result = Msg.address().balance().toString();
+        result += ", SHA3Hash is " + Utils.sha3(result);
+        return result;
     }
 
     public String transfer() {
@@ -65,26 +68,6 @@ public class TestContract implements Contract {
         address.transfer(BigInteger.valueOf(10000000));
         return "AW158U";
     }
-
-    //@View
-    //public int randomNumberInt() {
-    //    return Utils.pseudoRandom(1, 16);
-    //}
-    //
-    //@View
-    //public int randomNumberString() {
-    //    return Utils.pseudoRandom("a", 16);
-    //}
-    //
-    //@View
-    //public int randomNumberWithIntAndCap(int cap) {
-    //    return Utils.pseudoRandom(1, cap);
-    //}
-    //
-    //@View
-    //public int randomNumberWithStringAndCap(int cap) {
-    //    return Utils.pseudoRandom("a", cap);
-    //}
 
     public TestContract() {
         name += " - AW158U";
@@ -94,11 +77,6 @@ public class TestContract implements Contract {
         map.put("126", "126a");
         map.put("127", "127a");
     }
-
-    //public String setName(String name, int cap) {
-    //    this.name += name + Utils.pseudoRandom("a", cap);
-    //    return this.name;
-    //}
 
     @View
     public String linkedHashMap_EntrySet() {
@@ -115,6 +93,7 @@ public class TestContract implements Contract {
             result += entry.getKey() + ": " + entry.getValue() + " \n";
         }
 
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -134,6 +113,7 @@ public class TestContract implements Contract {
         for(String ss : values) {
             result += ss + " \n";
         }
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -145,6 +125,7 @@ public class TestContract implements Contract {
             result += entry.getKey() + ": " + entry.getValue() + " \n";
         }
 
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -156,6 +137,7 @@ public class TestContract implements Contract {
             result += key + ": " + map.get(key) + " \n";
         }
 
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -174,6 +156,7 @@ public class TestContract implements Contract {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        result += ", SHA3Hash is " + Utils.sha3(result);
 
         return result;
     }
@@ -194,6 +177,7 @@ public class TestContract implements Contract {
             e.printStackTrace();
         }
 
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -213,6 +197,7 @@ public class TestContract implements Contract {
             e.printStackTrace();
         }
 
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result;
     }
 
@@ -224,12 +209,14 @@ public class TestContract implements Contract {
                 result += aaa;
             }
         }
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result + b;
     }
 
     @View
     public String qwe(String b, String a, String c) {
         String result = "";
+        result += ", SHA3Hash is " + Utils.sha3(result);
         return result + b + a +c;
     }
 

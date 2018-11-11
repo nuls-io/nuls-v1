@@ -24,7 +24,6 @@
  */
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
-import io.nuls.contract.sdk.Address;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
