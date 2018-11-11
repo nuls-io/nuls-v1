@@ -144,9 +144,13 @@ public interface AccountLedgerService {
      */
     Result transfer(byte[] from, byte[] to, Na values, String password, byte[] remark, Na price);
 
+
+    Result sendToAddress(byte[] from, byte[] to, Na values, String password, byte[] remark, Na price);
+
     /**
      * create and send a dapp transaction
-     * @param from from address
+     *
+     * @param from     from address
      * @param password
      * @param data
      * @param remark
@@ -251,20 +255,23 @@ public interface AccountLedgerService {
      * @param price
      * @return
      */
-    Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price,int size);
+    Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price, int size);
 
     /**
      * 多地址转账
+     *
      * @param fromModelList
      * @param toModelList
-     * @param password
      * @param amount
      * @param remark
      * @param price
      * @return
      */
 
-    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, String password,Na amount, String remark, Na price);
+    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, Na amount, String remark, Na price);
+
+
+    Result sendFrom(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, Na amount, String remark, Na price);
 
     /**
      * 零钱汇整
@@ -306,19 +313,20 @@ public interface AccountLedgerService {
 
     /**
      * A transfers NULS to B   多签交易
+     *
      * @param fromAddr
      * @param signAddr
      * @param outputs
-     * @param values    NULS amount
-     * @param password  password of A
-     * @param remark    remarks of transaction
-     * @param price     Unit price of fee
-     * @param pubkeys   公钥列表
-     * @param m         至少需要签名验证通过
-     * @param txdata    签名的交易数据
+     * @param values   NULS amount
+     * @param password password of A
+     * @param remark   remarks of transaction
+     * @param price    Unit price of fee
+     * @param pubkeys  公钥列表
+     * @param m        至少需要签名验证通过
+     * @param txdata   签名的交易数据
      * @return Result
      */
-    Result transferP2SH(byte[] fromAddr, byte[] signAddr , List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys, int m, String txdata);
+    Result transferP2SH(byte[] fromAddr, byte[] signAddr, List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String> pubkeys, int m, String txdata);
 
 
     /**
@@ -353,15 +361,15 @@ public interface AccountLedgerService {
      * @param txdata   需要签名的数据
      * @return Result
      */
-    Result signMultiTransaction(String signAddr,String password,String txdata);
+    Result signMultiTransaction(String signAddr, String password, String txdata);
 
     /**
      * A transfers NULS to B   多签账户签名
      *
-     * @param tx         需要签名的交易
+     * @param tx                   需要签名的交易
      * @param transactionSignature 已签名的签名数据
-     * @param account    签名账户
-     * @param password   password
+     * @param account              签名账户
+     * @param password             password
      * @return Result
      */
     Result txMultiProcess(Transaction tx, TransactionSignature transactionSignature, Account account, String password);
@@ -369,7 +377,7 @@ public interface AccountLedgerService {
     /**
      * A transfers NULS to B   获取多签账户的赎回脚本
      *
-     * @param multiSigAccount        多签账户
+     * @param multiSigAccount 多签账户
      * @return Result
      */
     Script getRedeemScript(MultiSigAccount multiSigAccount);
@@ -377,7 +385,7 @@ public interface AccountLedgerService {
     /**
      * A transfers NULS to B   获取交易的签名类型
      *
-     * @param utxoList        交易花的UTXO
+     * @param utxoList 交易花的UTXO
      * @return Result
      */
     Result getSignatureType(List<String> utxoList);
