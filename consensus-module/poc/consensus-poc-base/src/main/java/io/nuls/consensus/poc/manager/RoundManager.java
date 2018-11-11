@@ -126,7 +126,7 @@ public class RoundManager {
         if (currentRound.getPreRound() == null) {
 
             BlockExtendsData extendsData = null;
-            List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+            List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
             for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
                 BlockHeader blockHeader = blockHeaderList.get(i);
                 extendsData = new BlockExtendsData(blockHeader.getExtend());
@@ -378,7 +378,8 @@ public class RoundManager {
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusProtocolConstant.CREDIT_MAGIC_NUM, sumRoundVal),
                 DoubleUtils.mul(PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT));
 
-        return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
+        double value = DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
+        return value;
     }
 
     private long getPunishCountByAddress(byte[] address, long roundStart, long roundEnd, int code) {
@@ -414,7 +415,7 @@ public class RoundManager {
 
     private long getBlockCountByAddress(byte[] packingAddress, long roundStart, long roundEnd) {
         long count = 0;
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
 
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
@@ -436,7 +437,7 @@ public class RoundManager {
     private BlockHeader getFirstBlockHeightOfPreRoundByRoundIndex(long roundIndex) {
         BlockHeader firstBlockHeader = null;
         long startRoundIndex = 0L;
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
             long currentRoundIndex = new BlockExtendsData(blockHeader.getExtend()).getRoundIndex();

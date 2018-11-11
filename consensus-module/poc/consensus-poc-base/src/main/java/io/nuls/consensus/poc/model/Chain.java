@@ -26,6 +26,8 @@
 
 package io.nuls.consensus.poc.model;
 
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
@@ -35,9 +37,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Transaction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author ln
@@ -56,37 +56,45 @@ public class Chain implements Cloneable {
     private List<PunishLogPo> redPunishList;
 
     public Chain() {
-        blockHeaderList = new ArrayList<>();
-        blockList = new ArrayList<>();
+        blockHeaderList = new LinkedList<>();
+        blockList = new LinkedList<>();
         id = StringUtils.getNewUUID();
     }
 
-    public void setId(String id) {
-        this.id = id;
+
+    public void addBlock(Block block) {
+        endBlockHeader = block.getHeader();
+        blockHeaderList.add(block.getHeader());
+        if (blockHeaderList.size() > PocConsensusConstant.MAX_BLOCK_HEADER_COUNT) {
+            blockHeaderList.remove(0);
+        }
+        blockList.add(block);
+        if (blockList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
+            blockList.remove(0);
+        }
+        if (null == startBlockHeader) {
+            this.startBlockHeader = block.getHeader();
+        }
     }
 
-    public void setPreChainId(String preChainId) {
-        this.preChainId = preChainId;
+    public BlockHeader rollbackBlock() {
+        blockList.remove(blockList.size() - 1);
+        BlockHeader header = blockHeaderList.remove(blockHeaderList.size() - 1);
+        if (blockHeaderList.isEmpty()) {
+            this.startBlockHeader = null;
+            this.endBlockHeader = null;
+        } else {
+            this.endBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
+        }
+        return header;
     }
 
-    public void setStartBlockHeader(BlockHeader startBlockHeader) {
-        this.startBlockHeader = startBlockHeader;
+    public List<BlockHeader> getAllBlockHeaderList() {
+        return blockHeaderList;
     }
 
-    public void setEndBlockHeader(BlockHeader endBlockHeader) {
-        this.endBlockHeader = endBlockHeader;
-    }
-
-    public void setBlockHeaderList(List<BlockHeader> blockHeaderList) {
-        this.blockHeaderList = blockHeaderList;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getPreChainId() {
-        return preChainId;
+    public List<Block> getAllBlockList() {
+        return blockList;
     }
 
     public BlockHeader getStartBlockHeader() {
@@ -94,31 +102,19 @@ public class Chain implements Cloneable {
     }
 
     public BlockHeader getEndBlockHeader() {
-        return endBlockHeader;
-    }
-
-    public List<BlockHeader> getBlockHeaderList() {
-        return blockHeaderList;
-    }
-
-    public List<Block> getBlockList() {
-        return blockList;
+        return this.endBlockHeader;
     }
 
     public List<Agent> getAgentList() {
         return agentList;
     }
 
-    public List<Deposit> getDepositList() {
-        return depositList;
-    }
-
-    public void setBlockList(List<Block> blockList) {
-        this.blockList = blockList;
-    }
-
     public void setAgentList(List<Agent> agentList) {
         this.agentList = agentList;
+    }
+
+    public List<Deposit> getDepositList() {
+        return depositList;
     }
 
     public void setDepositList(List<Deposit> depositList) {
@@ -139,6 +135,22 @@ public class Chain implements Cloneable {
 
     public void setRedPunishList(List<PunishLogPo> redPunishList) {
         this.redPunishList = redPunishList;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setPreChainId(String preChainId) {
+        this.preChainId = preChainId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getPreChainId() {
+        return preChainId;
     }
 
     public Agent getAgentByAddress(byte[] address) {
@@ -163,5 +175,25 @@ public class Chain implements Cloneable {
             return null;
         }
         return blockList.get(blockList.size() - 1);
+    }
+
+    public void initData(BlockHeader startHeader, List<BlockHeader> headerList, List<Block> blockList) {
+        this.startBlockHeader = startHeader;
+        this.endBlockHeader = headerList.get(headerList.size() - 1);
+        this.blockHeaderList = headerList;
+        this.blockList = blockList;
+    }
+
+    public void initData(Block block) {
+        this.startBlockHeader = block.getHeader();
+        this.endBlockHeader = block.getHeader();
+        this.blockHeaderList.add(block.getHeader());
+        this.blockList.add(block);
+    }
+
+    public void addPreBlock(Block block) {
+        this.startBlockHeader = block.getHeader();
+        this.blockHeaderList.add(0, block.getHeader());
+        this.blockList.add(0, block);
     }
 }

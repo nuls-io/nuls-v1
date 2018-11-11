@@ -128,7 +128,7 @@ public class BlockProcess {
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
 
-        if(NulsContext.mastUpGrade == true) {
+        if (NulsContext.mastUpGrade == true) {
             return false;
         }
 
@@ -470,7 +470,7 @@ public class BlockProcess {
         BlockHeader blockHeader = block.getHeader();
 
         Chain masterChain = chainManager.getMasterChain().getChain();
-        List<BlockHeader> headerList = masterChain.getBlockHeaderList();
+        List<BlockHeader> headerList = masterChain.getAllBlockHeaderList();
 
         for (int i = headerList.size() - 1; i >= 0; i--) {
             BlockHeader header = headerList.get(i);
@@ -487,11 +487,7 @@ public class BlockProcess {
                 }
                 Chain newForkChain = new Chain();
 
-                newForkChain.getBlockList().add(block);
-                newForkChain.getBlockHeaderList().add(block.getHeader());
-
-                newForkChain.setStartBlockHeader(block.getHeader());
-                newForkChain.setEndBlockHeader(block.getHeader());
+                newForkChain.addBlock(block);
 
                 chainManager.getChains().add(new ChainContainer(newForkChain));
                 return true;
@@ -522,7 +518,7 @@ public class BlockProcess {
         for (ChainContainer chainContainer : chainManager.getChains()) {
 
             Chain forkChain = chainContainer.getChain();
-            List<BlockHeader> headerList = forkChain.getBlockHeaderList();
+            List<BlockHeader> headerList = forkChain.getAllBlockHeaderList();
 
             for (int i = headerList.size() - 1; i >= 0; i--) {
                 BlockHeader header = headerList.get(i);
@@ -541,26 +537,19 @@ public class BlockProcess {
                     // Check whether it is forked or connected. If it is a connection, add it.
                     // 检查是分叉还是连接，如果是连接，则加上即可
                     if (i == headerList.size() - 1) {
-                        chainContainer.getChain().setEndBlockHeader(block.getHeader());
-                        chainContainer.getChain().getBlockHeaderList().add(block.getHeader());
-                        chainContainer.getChain().getBlockList().add(block);
+                        chainContainer.getChain().addBlock(block);
                         return true;
                     }
 
                     // The block is again forked in the forked chain
                     // 该块是在分叉链中再次进行的分叉
-                    List<Block> blockList = forkChain.getBlockList();
+                    List<Block> blockList = forkChain.getAllBlockList();
 
                     Chain newForkChain = new Chain();
 
-                    newForkChain.getBlockList().addAll(blockList.subList(0, i + 1));
-                    newForkChain.getBlockHeaderList().addAll(headerList.subList(0, i + 1));
+                    newForkChain.initData(forkChain.getStartBlockHeader(), headerList.subList(0, i + 1), blockList.subList(0, i + 1));
+                    newForkChain.addBlock(block);
 
-                    newForkChain.getBlockList().add(block);
-                    newForkChain.getBlockHeaderList().add(block.getHeader());
-
-                    newForkChain.setStartBlockHeader(forkChain.getStartBlockHeader());
-                    newForkChain.setEndBlockHeader(block.getHeader());
 
                     return chainManager.getChains().add(new ChainContainer(newForkChain));
                 } else if (header.getHeight() < blockHeader.getHeight()) {
