@@ -144,20 +144,16 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 int size = sizeList.get(a);
 
                 if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
-                    Log.warn("failed 1 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     blockList = retryDownload(executor, result);
                 }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
-                    Log.warn("failed 2 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
+                if (blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
-                    Log.warn("failed 3 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
+                if ( blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
 
                 if (blockList == null || blockList.size() < size) {
-                    Log.warn("failed 4 -=-=-=--=-=-==-=-=-=-=-=-=-=-=-=-=-=");
                     executor.shutdown();
                     resetNetwork("attempts to download blocks from all available nodes failed");
                     return true;
