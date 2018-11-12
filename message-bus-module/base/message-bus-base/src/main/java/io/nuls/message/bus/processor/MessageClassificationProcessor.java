@@ -27,11 +27,13 @@ package io.nuls.message.bus.processor;
 import com.lmax.disruptor.EventHandler;
 import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.HandlerManager;
+import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.processor.thread.NulsMessageCall;
 import io.nuls.protocol.message.base.BaseMessage;
@@ -63,7 +65,7 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         }
 
         ProcessData processData = disruptorData.getData();
-        Class<? extends BaseMessage> serviceId = processData.getData().getClass();
+        Class<? extends BaseMessage> serviceId = processData.getType();
         Set<NulsMessageHandler> handlers = handlerManager.getHandlerList(serviceId);
         ThreadPoolExecutor handlerExecutor = (ThreadPoolExecutor) handlerService.get(serviceId);
         if (handlerExecutor == null) {
