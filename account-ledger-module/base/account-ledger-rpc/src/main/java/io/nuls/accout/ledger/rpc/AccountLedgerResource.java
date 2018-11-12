@@ -31,7 +31,9 @@ package io.nuls.accout.ledger.rpc;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
+import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
@@ -40,6 +42,8 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.accout.ledger.rpc.dto.*;
 import io.nuls.accout.ledger.rpc.form.*;
+import io.nuls.accout.ledger.rpc.util.ConvertCoinTool;
+import io.nuls.accout.ledger.rpc.util.LedgerRpcUtil;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.service.ContractService;
@@ -63,6 +67,9 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PHKSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -493,6 +500,166 @@ public class AccountLedgerResource {
             result.setData(map);
         }
         return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/transaction/simple")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建转账交易(不用计算手续费)", notes = "返回交易Hash，交易对象序列化数组Hex编码，本次交易已使用的UTXO")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult createTransactionSimple(@ApiParam(name = "form", value = "转账参数(传入该账户拥有的UTXO)", required = true)
+                                                         TransferSimpleForm form) {
+        try {
+            if (form == null) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (form.getUtxos() == null || form.getUtxos().isEmpty()) {
+                return RpcClientResult.getFailed("inputs error");
+            }
+            if (!AddressTool.validAddress(form.getAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (!AddressTool.validAddress(form.getToAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (form.getAmount() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+
+            byte[] remarkBytes = new byte[0];
+
+            if (form.getRemark() != null && form.getRemark().length() > 0) {
+                if (!validTxRemark(form.getRemark())) {
+                    return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                }
+
+                try {
+                    remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+                } catch (UnsupportedEncodingException e) {
+                    return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                }
+            }
+            byte[] fromBytes = AddressTool.getAddress(form.getAddress());
+            byte[] toBytes = AddressTool.getAddress(form.getToAddress());
+            Na values = Na.valueOf(form.getAmount());
+
+            TransferTransaction tx = new TransferTransaction();
+            tx.setRemark(remarkBytes);
+            tx.setTime(TimeService.currentTimeMillis());
+            CoinData coinData = new CoinData();
+            //如果为多签地址则以脚本方式存储
+            Coin toCoin;
+            if (toBytes[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                Script scriptPubkey = SignatureUtil.createOutputScript(toBytes);
+                toCoin = new Coin(scriptPubkey.getProgram(), values);
+            } else {
+                toCoin = new Coin(toBytes, values);
+            }
+            coinData.getTo().add(toCoin);
+
+            List<Coin> coinList = ConvertCoinTool.convertCoinList(form.getUtxos());
+            CoinDataResult coinDataResult = getCoinData(fromBytes, values, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES, coinList);
+
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+            }
+            coinData.setFrom(coinDataResult.getCoinList());
+            // 找零的UTXO
+            if (coinDataResult.getChange() != null) {
+                coinData.getTo().add(coinDataResult.getChange());
+            }
+            tx.setCoinData(coinData);
+
+            // 重置为0，重新计算交易对象的size
+            tx.setSize(0);
+            if (tx.getSize() > TxMaxSizeValidator.MAX_TX_SIZE) {
+                return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
+            }
+
+            TransactionCreatedReturnInfo returnInfo = LedgerRpcUtil.makeReturnInfo(tx);
+
+            Map<String, TransactionCreatedReturnInfo> map = new HashMap<>();
+            map.put("value", returnInfo);
+            return Result.getSuccess().setData(map).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(AccountLedgerErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+        }
+
+    }
+
+    private CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price, List<Coin> coinList) {
+        if (null == price) {
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        }
+        CoinDataResult coinDataResult = new CoinDataResult();
+        coinDataResult.setEnough(false);
+
+        coinList = coinList.stream()
+                .filter(coin1 -> !Na.ZERO.equals(coin1.getNa()))
+                .sorted(CoinComparator.getInstance())
+                .collect(Collectors.toList());
+
+        if (coinList.isEmpty()) {
+            return coinDataResult;
+        }
+        List<Coin> coins = new ArrayList<>();
+        Na values = Na.ZERO;
+        // 累加到足够支付转出额与手续费
+        for (int i = 0; i < coinList.size(); i++) {
+            Coin coin = coinList.get(i);
+            coins.add(coin);
+            size += coin.size();
+            if (i == 127) {
+                size += 1;
+            }
+            //每次累加一条未花费余额时，需要重新计算手续费
+            Na fee = TransactionFeeCalculator.getFee(size, price);
+            values = values.add(coin.getNa());
+
+            /**
+             * 判断是否是脚本验证UTXO
+             * */
+            int signType = coinDataResult.getSignType();
+            if (signType != 3) {
+                if ((signType & 0x01) == 0 && coin.getTempOwner().length == 23) {
+                    coinDataResult.setSignType((byte) (signType | 0x01));
+                    size += P2PHKSignature.SERIALIZE_LENGTH;
+                } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                    coinDataResult.setSignType((byte) (signType | 0x02));
+                    size += P2PHKSignature.SERIALIZE_LENGTH;
+                }
+            }
+
+            //需要判断是否找零，如果有找零，则需要重新计算手续费
+            if (values.isGreaterThan(amount.add(fee))) {
+                Na change = values.subtract(amount.add(fee));
+                Coin changeCoin = new Coin();
+                if (address[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                } else {
+                    changeCoin.setOwner(address);
+                }
+                changeCoin.setNa(change);
+                fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
+                if (values.isLessThan(amount.add(fee))) {
+                    continue;
+                }
+                changeCoin.setNa(values.subtract(amount.add(fee)));
+                if (!changeCoin.getNa().equals(Na.ZERO)) {
+                    coinDataResult.setChange(changeCoin);
+                }
+            }
+            coinDataResult.setFee(fee);
+            if (values.isGreaterOrEquals(amount.add(fee))) {
+                coinDataResult.setEnough(true);
+                coinDataResult.setCoinList(coins);
+                break;
+            }
+        }
+        return coinDataResult;
     }
 
     @POST
