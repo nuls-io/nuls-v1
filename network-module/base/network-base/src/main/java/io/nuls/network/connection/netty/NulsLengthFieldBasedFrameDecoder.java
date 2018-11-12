@@ -50,7 +50,7 @@ public class NulsLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecod
         try{
             return super.decode(ctx, in);
         }catch (Exception e){
-            Log.warn(ctx.name()+"::::"+e.getMessage());
+            Log.warn(ctx.channel().toString()+"::::"+e.getMessage());
         }
         return null;
     }
