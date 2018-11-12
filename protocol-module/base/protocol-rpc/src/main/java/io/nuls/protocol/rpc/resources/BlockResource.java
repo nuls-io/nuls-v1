@@ -134,7 +134,8 @@ public class BlockResource {
         }
         Block block = null;
         try {
-            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+            // 包含智能合约内部转账(从合约转出)交易的区块
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash), true).getData();
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -166,7 +167,8 @@ public class BlockResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
-        Block block = blockService.getBlock(height).getData();
+        // 包含智能合约内部转账(从合约转出)交易的区块
+        Block block = blockService.getBlock(height, true).getData();
         if (block == null) {
             result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         } else {
@@ -229,7 +231,7 @@ public class BlockResource {
         }
         Block block = null;
         try {
-            // 包含合约转账(从合约转出)交易的区块
+            // 包含智能合约内部转账(从合约转出)交易的区块
             block = blockService.getBlock(NulsDigestData.fromDigestHex(hash), true).getData();
         } catch (NulsException e) {
             Log.error(e);
