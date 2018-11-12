@@ -66,10 +66,7 @@ public class ChainManagerTest extends BaseTest {
 
         ChainContainer masterChain = new ChainContainer(new Chain());
         chainManager.setMasterChain(masterChain);
-        masterChain.getChain().setEndBlockHeader(block.getHeader());
-        masterChain.getChain().setStartBlockHeader(block.getHeader());
-        masterChain.getChain().getBlockList().add(block);
-        masterChain.getChain().getBlockHeaderList().add(block.getHeader());
+        masterChain.getChain().addBlock(block);
 
         assertEquals(0L, chainManager.getBestBlockHeight());
     }
@@ -86,10 +83,7 @@ public class ChainManagerTest extends BaseTest {
         block1.getHeader().setPreHash(block.getHeader().getHash());
 
         ChainContainer orphanChain = new ChainContainer(new Chain());
-        orphanChain.getChain().setEndBlockHeader(block1.getHeader());
-        orphanChain.getChain().setStartBlockHeader(block1.getHeader());
-        orphanChain.getChain().getBlockList().add(block1);
-        orphanChain.getChain().getBlockHeaderList().add(block1.getHeader());
+        orphanChain.getChain().addBlock(block1);
 
         chainManager.getOrphanChains().add(orphanChain);
 
@@ -113,10 +107,7 @@ public class ChainManagerTest extends BaseTest {
         block1.getHeader().setPreHash(block.getHeader().getHash());
 
         ChainContainer orphanChain = new ChainContainer(new Chain());
-        orphanChain.getChain().setEndBlockHeader(block.getHeader());
-        orphanChain.getChain().setStartBlockHeader(block.getHeader());
-        orphanChain.getChain().getBlockList().add(block);
-        orphanChain.getChain().getBlockHeaderList().add(block.getHeader());
+        orphanChain.getChain().addBlock(block);
 
         chainManager.getOrphanChains().add(orphanChain);
 

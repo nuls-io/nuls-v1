@@ -83,9 +83,6 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
-        List<Block> blockList = chain.getBlockList();
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-
         List<Agent> agentList = chain.getAgentList();
         List<Deposit> depositList = chain.getDepositList();
         List<PunishLogPo> yellowList = chain.getYellowPunishList();
@@ -206,10 +203,7 @@ public class ChainContainer implements Cloneable {
                 }
             }
         }
-
-        chain.setEndBlockHeader(block.getHeader());
-        blockList.add(block);
-        blockHeaderList.add(block.getHeader());
+        chain.addBlock(block);
 
         return true;
     }
@@ -655,27 +649,16 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
-        List<Block> blockList = chain.getBlockList();
-
-        if (blockList == null || blockList.size() == 0) {
+        int length = chain.getAllBlockList().size();
+        if (length == 0) {
             return false;
         }
-        if (blockList.size() <= 2) {
-            addBlockInBlockList(blockList);
-            if (blockList.size() > 0) {
-                Block startBlock = blockList.get(0);
-                if (startBlock != null && chain.getStartBlockHeader().getHeight() > startBlock.getHeader().getHeight()) {
-                    chain.setStartBlockHeader(startBlock.getHeader());
-                }
-            }
+        if (length <= 2) {
+            addBlockInBlockList(chain);
         }
 
-        blockList.remove(blockList.size() - 1);
 
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-
-        chain.setEndBlockHeader(blockHeaderList.get(blockHeaderList.size() - 2));
-        BlockHeader rollbackBlockHeader = blockHeaderList.remove(blockHeaderList.size() - 1);
+        BlockHeader rollbackBlockHeader =  chain.rollbackBlock();
 
         // update txs
         List<Agent> agentList = chain.getAgentList();
@@ -735,17 +718,17 @@ public class ChainContainer implements Cloneable {
         return true;
     }
 
-    private void addBlockInBlockList(List<Block> blockList) {
+    private void addBlockInBlockList(Chain chain) {
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        if (blockList.isEmpty()) {
-            blockList.add(blockService.getBestBlock().getData());
+        if (chain.getAllBlockList().isEmpty()) {
+            chain.addBlock(blockService.getBestBlock().getData());
         }
-        while (blockList.size() < PocConsensusConstant.INIT_BLOCKS_COUNT) {
-            Block preBlock = blockList.get(0);
+        while (chain.getAllBlockList().size() < PocConsensusConstant.INIT_BLOCKS_COUNT) {
+            Block preBlock = chain.getAllBlockList().get(0);
             if (preBlock.getHeader().getHeight() == 0) {
                 break;
             }
-            blockList.add(0, blockService.getBlock(preBlock.getHeader().getPreHash()).getData());
+            chain.addPreBlock(blockService.getBlock(preBlock.getHeader().getPreHash()).getData());
         }
     }
 
@@ -762,10 +745,8 @@ public class ChainContainer implements Cloneable {
 
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
-        newChain.setStartBlockHeader(chain.getStartBlockHeader());
-        newChain.setEndBlockHeader(chain.getEndBlockHeader());
-        newChain.setBlockHeaderList(new ArrayList<>(chain.getBlockHeaderList()));
-        newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
+
+        newChain.initData(chain.getStartBlockHeader(),chain.getAllBlockHeaderList(),chain.getAllBlockList());
 
         if (chain.getAgentList() != null) {
             List<Agent> agentList = new ArrayList<>();
@@ -805,7 +786,7 @@ public class ChainContainer implements Cloneable {
         // 分叉点
         BlockHeader pointBlockHeader = chainContainer.getChain().getStartBlockHeader();
 
-        List<Block> blockList = newChain.getBlockList();
+        List<Block> blockList = newChain.getAllBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
             Block block = blockList.get(i);
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
@@ -834,7 +815,7 @@ public class ChainContainer implements Cloneable {
 
         Chain chain = new Chain();
 
-        List<Block> blockList = getChain().getBlockList();
+        List<Block> blockList = getChain().getAllBlockList();
 
         boolean canAdd = false;
         for (int i = 0; i < blockList.size(); i++) {
@@ -842,15 +823,12 @@ public class ChainContainer implements Cloneable {
             Block block = blockList.get(i);
 
             if (canAdd) {
-                chain.getBlockList().add(block);
-                chain.getBlockHeaderList().add(block.getHeader());
+                chain.addBlock(block);
             }
 
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 canAdd = true;
                 if (i + 1 < blockList.size()) {
-                    chain.setStartBlockHeader(blockList.get(i + 1).getHeader());
-                    chain.setEndBlockHeader(getChain().getEndBlockHeader());
                     chain.setPreChainId(chainContainer.getChain().getId());
                 }
                 continue;

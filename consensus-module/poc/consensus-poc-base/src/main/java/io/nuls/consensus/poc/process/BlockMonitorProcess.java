@@ -67,7 +67,7 @@ public class BlockMonitorProcess {
             return;
         }
         lastBestHash = bestBlock.getHeader().getHash();
-        List<Block> blockList = chainManager.getMasterChain().getChain().getBlockList();
+        List<Block> blockList = chainManager.getMasterChain().getChain().getAllBlockList();
         int minCount = 10;
         if (blockList.size() < minCount) {
             return;

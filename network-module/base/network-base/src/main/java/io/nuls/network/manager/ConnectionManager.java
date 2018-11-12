@@ -26,7 +26,9 @@
 package io.nuls.network.manager;
 
 import io.netty.buffer.ByteBuf;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.log.MessageLog;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -131,6 +133,7 @@ public class ConnectionManager {
             list = new ArrayList<>();
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
+            MessageLog.debug(Hex.encode(bytes));
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
             while (!byteBuffer.isFinished()) {
                 MessageHeader header = byteBuffer.readNulsData(new MessageHeader());

@@ -43,6 +43,7 @@ public class BlockMessageHandler extends AbstractMessageHandler<BlockMessage> {
             Log.warn("recieved a null blockEvent form " + fromNode.getId());
             return;
         }
+//        Log.info("recieved:::::" + block.getHeader().getHeight() + ":::::" + fromNode.getId());
         ProtocolCacheHandler.receiveBlock(block);
     }
 }

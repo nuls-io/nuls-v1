@@ -161,7 +161,7 @@ public class Bootstrap {
                     for (Node node : nodeList) {
                         ids.append("," + node.getId());
                     }
-                    Log.info("height:" + height + ",count:" + nodeList.size() + ", hash:" + key.getDigestHex() + ids);
+//                    Log.info("height:" + height + ",count:" + nodeList.size() + ", hash:" + key.getDigestHex() + ids);
                 }
             } else {
                 i++;
