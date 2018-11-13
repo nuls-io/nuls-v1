@@ -146,10 +146,10 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
-                if (blockList.size() < size) {
+                if (blockList==null||blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
-                if (blockList.size() < size) {
+                if (blockList==null||blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
 
@@ -173,6 +173,10 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 System.gc();
                 Runtime.getRuntime().runFinalization();
                 System.gc();
+            }
+            if(count.get()>400000){
+                //稳妥起见，重启一下
+                NulsContext.getInstance().exit(2);
             }
             futures.clear();
         }
