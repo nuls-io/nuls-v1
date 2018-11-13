@@ -1,11 +1,7 @@
 package io.nuls.contract.rpc;
 
 import io.nuls.accout.ledger.rpc.dto.InputDto;
-import io.nuls.contract.rpc.form.transaction.CreateContractTx;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.RestFulUtils;
 import org.junit.Before;
