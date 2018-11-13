@@ -93,7 +93,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      */
     @Override
     public BlockHeaderPo getBlockHeaderPo(long height) {
-        if(height < 0L) {
+        if (height < 0L) {
             return null;
         }
         byte[] hashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(height).encode());
@@ -137,13 +137,13 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         }
         BlockHeaderPo po = new BlockHeaderPo();
         try {
-            po.parse(bytes,0);
+            po.parse(bytes, 0);
         } catch (NulsException e) {
             Log.error(e);
         }
         NulsDigestData hash = new NulsDigestData();
         try {
-            hash.parse(hashBytes,0);
+            hash.parse(hashBytes, 0);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -194,21 +194,15 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         BlockHeaderPo blockHeaderPo = getBlockHeaderPo(hashBytes);
+        if (null == blockHeaderPo) {
+            return Result.getSuccess();
+        }
         dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(blockHeaderPo.getHeight()).encode());
-        byte[] bestBlockHashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey);
-        if (null != hashBytes && Arrays.equals(hashBytes, bestBlockHashBytes)) {
-            //如果要删除的是最新的区块头，则把前一个区块头hash设为最新区块头hash
-            NulsDigestData preHash = blockHeaderPo.getPreHash();
-            if(null != preHash){
-                byte[] preHashBytes = null;
-                try {
-                    preHashBytes = preHash.serialize();
-                } catch (IOException e) {
-                    Log.error(e);
-                    return Result.getFailed(KernelErrorCode.IO_ERROR);
-                }
-                dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey, preHashBytes);
-            }
+
+        try {
+            dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey, blockHeaderPo.getPreHash().serialize());
+        } catch (IOException e) {
+            Log.error(e);
         }
         return dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
     }
