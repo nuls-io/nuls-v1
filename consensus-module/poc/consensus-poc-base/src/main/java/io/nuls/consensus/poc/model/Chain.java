@@ -79,12 +79,19 @@ public class Chain implements Cloneable {
 
     public BlockHeader rollbackBlock() {
         blockList.remove(blockList.size() - 1);
-        BlockHeader header = blockHeaderList.remove(blockHeaderList.size() - 1);
-        if (blockHeaderList.isEmpty()) {
+        BlockHeader header;
+        if (blockHeaderList.size() == 1) {
+            header = blockHeaderList.remove(blockHeaderList.size() - 1);
             this.startBlockHeader = null;
             this.endBlockHeader = null;
         } else {
-            this.endBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
+            BlockHeader preHeader = blockHeaderList.get(blockHeaderList.size() - 2);
+            header = blockHeaderList.remove(blockHeaderList.size() - 1);
+            if (header.getPreHash().equals(preHeader.getHash())) {
+                this.endBlockHeader = preHeader;
+            } else {
+                this.endBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
+            }
         }
         return header;
     }
