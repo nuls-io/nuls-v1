@@ -75,17 +75,17 @@ public class BaseChainTest extends BaseTest {
             throw new NulsRuntimeException(e);
         }
 
-        chain.setEndBlockHeader(blockHeader);
 
         // new a block of height 0
         Block block = new Block();
         block.setHeader(blockHeader);
 
-        // add the block into chain
-        chain.getBlockList().add(block);
-        chain.setStartBlockHeader(blockHeader);
-        chain.setEndBlockHeader(blockHeader);
-
+//        chain.setEndBlockHeader(blockHeader);
+//        // add the block into chain
+//        chain.getBlockList().add(block);
+//        chain.setStartBlockHeader(blockHeader);
+//        chain.setEndBlockHeader(blockHeader);
+        chain.addBlock(block);
         // init some agent
         List<Agent> agentList = new ArrayList<>();
 

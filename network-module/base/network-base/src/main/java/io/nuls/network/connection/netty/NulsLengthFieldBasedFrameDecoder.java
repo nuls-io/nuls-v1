@@ -26,6 +26,7 @@ package io.nuls.network.connection.netty;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.nuls.core.tools.log.Log;
 
 import java.nio.ByteOrder;
 
@@ -46,6 +47,11 @@ public class NulsLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecod
 
     @Override
     public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        return super.decode(ctx, in);
+        try{
+            return super.decode(ctx, in);
+        }catch (Exception e){
+            Log.warn(ctx.channel().toString()+"::::"+e.getMessage());
+            throw e;
+        }
     }
 }

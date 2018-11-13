@@ -50,13 +50,8 @@ public class ChainManager {
     }
 
     public void newOrphanChain(Block block) {
-        BlockHeader header = block.getHeader();
-
         Chain orphanChain = new Chain();
-        orphanChain.setStartBlockHeader(header);
-        orphanChain.setEndBlockHeader(header);
-        orphanChain.getBlockHeaderList().add(header);
-        orphanChain.getBlockList().add(block);
+        orphanChain.initData(block);
 
         ChainContainer orphanChainContainer = new ChainContainer(orphanChain);
         orphanChains.add(orphanChainContainer);
@@ -70,9 +65,7 @@ public class ChainManager {
             Chain chain = chainContainer.getChain();
             if(header.getHash().equals(chain.getStartBlockHeader().getPreHash())) {
                 success = true;
-                chain.setStartBlockHeader(header);
-                chain.getBlockHeaderList().add(0, header);
-                chain.getBlockList().add(0, block);
+                chain.addPreBlock(block);
             }
         }
         return success;
@@ -84,9 +77,7 @@ public class ChainManager {
         for(ChainContainer chainContainer : orphanChains) {
             Chain chain = chainContainer.getChain();
             if(header.getPreHash().equals(chain.getEndBlockHeader().getHash())) {
-                chain.setEndBlockHeader(header);
-                chain.getBlockHeaderList().add(header);
-                chain.getBlockList().add(block);
+                chain.addBlock(block);
                 return true;
             }
         }

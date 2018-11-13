@@ -136,7 +136,7 @@ public class RoundManagerTest extends BaseChainTest {
         Chain chain = roundManager.getChain();
 
         assertNotNull(chain.getEndBlockHeader());
-        assert(chain.getBlockList().size() > 0);
+        assert(chain.getAllBlockList().size() > 0);
 
         MeetingRound round = roundManager.initRound();
 

@@ -100,12 +100,12 @@ public class ForkChainProcess {
 
             long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
-            ChainContainer newChain = chainManager.getMasterChain();
-            if (null == newChain) {
+            ChainContainer masterChain = chainManager.getMasterChain();
+            if (null == masterChain) {
                 return false;
             }
             //获得主链最新块，如果分叉链和主链高度一致，但是最新块hash不一致，然后排序hash来决定要不要进行特殊回滚处理
-            BlockHeader newChainBlockHeader = newChain.getBestBlock().getHeader();
+            BlockHeader masterChainBlockHeader = masterChain.getBestBlock().getHeader();
 
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
@@ -114,7 +114,7 @@ public class ForkChainProcess {
                     iterator.remove();
                     continue;
                 }
-                long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
+                long forkChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
                 BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
                 byte[] rightHash = null;
                 byte[] rightAddress = null;
@@ -122,18 +122,22 @@ public class ForkChainProcess {
                 byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
                 boolean sameAddress = false;
                 //如果高度相同，则排序选一个hash，作为大家都认同的块
-                if (newChainBlockHeader.getHeight() == newChainHeight) {
-                    byte[] newChainBlockHash = newChainBlockHeader.getHash().getDigestBytes();
-                    rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
-                    sameAddress = ArraysTool.arrayEquals(forkChainBlockHeader.getPackingAddress(), newChainBlockHeader.getPackingAddress());
+                if (masterChainBlockHeader.getHeight() == forkChainHeight) {
+                    byte[] masterChainBlockHash = masterChainBlockHeader.getHash().getDigestBytes();
+                    if (masterChainBlockHash.equals(forkChainBlockHash)) {
+                        iterator.remove();
+                        continue;
+                    }
+                    rightHash = rightHash(masterChainBlockHash, forkChainBlockHash);
+                    sameAddress = ArraysTool.arrayEquals(forkChainBlockHeader.getPackingAddress(), masterChainBlockHeader.getPackingAddress());
                 }
                 boolean hashEquals = Arrays.equals(forkChainBlockHash, rightHash);
-                if (newChainHeight > newestBlockHeight
-                        || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
-                        || (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress)) {
-                    if (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress) {
+                if (forkChainHeight > newestBlockHeight
+                        || (forkChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < masterChain.getChain().getEndBlockHeader().getTime())
+                        || (masterChainBlockHeader.getHeight() == forkChainHeight && hashEquals && sameAddress)) {
+                    if (masterChainBlockHeader.getHeight() == forkChainHeight && hashEquals && sameAddress) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
-                        Log.info("-+-+-+-+-+-+-+-+- height: " + newChainHeight + ", Right hash：" + Hex.encode(rightHash));
+                        Log.info("-+-+-+-+-+-+-+-+- height: " + forkChainHeight + ", Right hash：" + Hex.encode(rightHash));
                         /** ******************************************************************************************************** */
                         try {
                             Log.info("");
@@ -147,24 +151,24 @@ public class ForkChainProcess {
                         }
                         /** ******************************************************************************************************** */
                     }
-                    newChain = forkChain;
-                    newestBlockHeight = newChainHeight;
+                    masterChain = forkChain;
+                    newestBlockHeight = forkChainHeight;
                 }
             }
 
-            if (!newChain.equals(chainManager.getMasterChain())) {
+            if (!masterChain.equals(chainManager.getMasterChain())) {
 
-                ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
+                ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", masterChain.getChain().getId(), masterChain.getChain().getStartBlockHeader().getHeight(), masterChain.getChain().getStartBlockHeader().getHash(), masterChain.getChain().getEndBlockHeader().getHeight(), masterChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
                 //ChainContainer resultChain = verifyNewChain(newChain);
                 //Verify the new chain, combined with the current latest chain, to get the status of the branch node
                 //验证新的链，结合当前最新的链，获取到分叉节点时的状态
-                ChainContainer resultChain = chainManager.getMasterChain().getBeforeTheForkChain(newChain);
+                ChainContainer resultChain = chainManager.getMasterChain().getBeforeTheForkChain(masterChain);
 
                 //Combined with the new bifurcated block chain, combine and verify one by one
                 //结合新分叉的块链， 逐个组合并验证
                 List<Object[]> verifyResultList = new ArrayList<>();
-                for (Block forkBlock : newChain.getChain().getBlockList()) {
+                for (Block forkBlock : masterChain.getChain().getAllBlockList()) {
                     Result success = resultChain.verifyAndAddBlock(forkBlock, true, false);
                     if (success.isFailed()) {
                         resultChain = null;
@@ -175,15 +179,15 @@ public class ForkChainProcess {
                 }
 
                 if (resultChain == null) {
-                    ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
+                    ChainLog.debug("verify the fork chain fail {} remove it", masterChain.getChain().getId());
 
-                    chainManager.getChains().remove(newChain);
+                    chainManager.getChains().remove(masterChain);
                 } else {
                     //Verify pass, try to switch chain
                     //验证通过，尝试切换链
-                    boolean success = changeChain(resultChain, newChain, verifyResultList);
+                    boolean success = changeChain(resultChain, masterChain, verifyResultList);
                     if (success) {
-                        chainManager.getChains().remove(newChain);
+                        chainManager.getChains().remove(masterChain);
                         /** ******************************************************************************************************** */
                         try {
                             Log.info("");
@@ -197,11 +201,12 @@ public class ForkChainProcess {
                         }
                         /** ******************************************************************************************************** */
                     }
-                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", masterChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }
             }
 
             clearExpiredChain();
+
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
@@ -288,7 +293,7 @@ public class ForkChainProcess {
             sb.append("end hash : " + chain.getChain().getEndBlockHeader().getHash() + " \n");
         }
 
-        List<BlockHeader> blockHeaderList = chain.getChain().getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chain.getChain().getAllBlockHeaderList();
 
         if (blockHeaderList != null && blockHeaderList.size() > 0) {
             sb.append("start blockHeaders height : " + blockHeaderList.get(0).getHeight() + " \n");
@@ -297,7 +302,7 @@ public class ForkChainProcess {
             sb.append("end blockHeaders hash : " + blockHeaderList.get(blockHeaderList.size() - 1).getHash() + " \n");
         }
 
-        List<Block> block = chain.getChain().getBlockList();
+        List<Block> block = chain.getChain().getAllBlockList();
 
         if (block != null && block.size() > 0) {
             sb.append("start blocks height : " + block.get(0).getHeader().getHeight() + " \n");
@@ -332,7 +337,7 @@ public class ForkChainProcess {
         // 判断该孤立链是否和主链相连
         BlockHeader startBlockHeader = orphanChain.getChain().getStartBlockHeader();
 
-        List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getAllBlockHeaderList();
 
         int count = blockHeaderList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT ? PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT : blockHeaderList.size();
         for (int i = blockHeaderList.size() - 1; i >= blockHeaderList.size() - count; i--) {
@@ -361,18 +366,14 @@ public class ForkChainProcess {
                 continue;
             }
 
-            blockHeaderList = chain.getBlockHeaderList();
+            blockHeaderList = chain.getAllBlockHeaderList();
 
             for (int i = 0; i < blockHeaderList.size(); i++) {
                 BlockHeader header = blockHeaderList.get(i);
                 if (startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                     //yes connectioned
                     orphanChain.getChain().setPreChainId(chain.getPreChainId());
-                    orphanChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
-
-                    orphanChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i + 1));
-                    orphanChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i + 1));
-
+                    orphanChain.getChain().initData(chain.getStartBlockHeader(), blockHeaderList.subList(0, i + 1), chain.getAllBlockList().subList(0, i + 1));
                     chainManager.getChains().add(orphanChain);
 
                     if (i == blockHeaderList.size() - 1) {
@@ -394,9 +395,7 @@ public class ForkChainProcess {
             if (orphan.getChain().getEndBlockHeader().getHash().equals(orphanChain.getChain().getStartBlockHeader().getPreHash()) &&
                     orphan.getChain().getEndBlockHeader().getHeight() + 1 == orphanChain.getChain().getStartBlockHeader().getHeight()) {
                 Chain chain = orphan.getChain();
-                chain.setEndBlockHeader(orphanChain.getChain().getEndBlockHeader());
-                chain.getBlockHeaderList().addAll(orphanChain.getChain().getBlockHeaderList());
-                chain.getBlockList().addAll(orphanChain.getChain().getBlockList());
+                chain.initData(orphanChain.getChain().getEndBlockHeader(), orphanChain.getChain().getAllBlockHeaderList(), orphanChain.getChain().getAllBlockList());
                 return true;
             }
         }
@@ -420,7 +419,7 @@ public class ForkChainProcess {
 
         //Combined with the new bifurcated block chain, combine and verify one by one
         //结合新分叉的块链， 逐个组合并验证
-        for (Block forkBlock : needVerifyChain.getChain().getBlockList()) {
+        for (Block forkBlock : needVerifyChain.getChain().getAllBlockList()) {
             Result success = forkChain.verifyAndAddBlock(forkBlock, true, false);
             if (success.isFailed()) {
                 return null;
@@ -453,7 +452,7 @@ public class ForkChainProcess {
         ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(originalForkChain);
 
         //rollbackTransaction
-        List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
+        List<Block> rollbackBlockList = oldChain.getChain().getAllBlockList();
 
         ChainLog.debug("rollbackTransaction the master chain , need rollbackTransaction block count is {}, master chain is {} : {} - {} , service best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
 
@@ -482,7 +481,7 @@ public class ForkChainProcess {
             newMasterChain.initRound();
             NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
 
-            if (oldChain.getChain().getBlockList().size() > 0) {
+            if (oldChain.getChain().getAllBlockList().size() > 0) {
                 chainManager.getChains().add(oldChain);
             }
         } else {
@@ -514,7 +513,7 @@ public class ForkChainProcess {
     private boolean doChange(List<Block> successList, ChainContainer originalForkChain, List<Object[]> verifyResultList) {
         boolean changeSuccess = true;
         //add new block
-        List<Block> addBlockList = originalForkChain.getChain().getBlockList();
+        List<Block> addBlockList = originalForkChain.getChain().getAllBlockList();
 
         Result<Block> preBlockResult = blockService.getBlock(addBlockList.get(0).getHeader().getPreHash());
         Block preBlock = preBlockResult.getData();
@@ -778,16 +777,6 @@ public class ForkChainProcess {
     private void clearMasterChainData() {
         Chain masterChain = chainManager.getMasterChain().getChain();
         long bestHeight = masterChain.getEndBlockHeader().getHeight();
-
-        List<BlockHeader> blockHeaderList = masterChain.getBlockHeaderList();
-        List<Block> blockList = masterChain.getBlockList();
-
-        if (blockHeaderList.size() > 30000) {
-            masterChain.setBlockHeaderList(blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size()));
-        }
-        if (blockList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
-            masterChain.setBlockList(blockList.subList(blockList.size() - PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size()));
-        }
 
         List<Agent> agentList = masterChain.getAgentList();
         List<Deposit> depositList = masterChain.getDepositList();

@@ -145,6 +145,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 node.setCanConnect(false);
             }
         }
+        if(cause instanceof TooLongFrameException) {
+            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+            Node node = nodeAttribute.get();
+            node.setFailCount(5);
+        }
         ctx.channel().close();
     }
 
