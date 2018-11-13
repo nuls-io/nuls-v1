@@ -5,6 +5,7 @@ import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.util.CoinDataTool;
 import io.nuls.account.util.AccountTool;
 import io.nuls.accout.ledger.rpc.dto.TransactionCreatedReturnInfo;
+import io.nuls.accout.ledger.rpc.util.ConvertCoinTool;
 import io.nuls.accout.ledger.rpc.util.LedgerRpcUtil;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.entity.tx.CallContractTransaction;
@@ -18,6 +19,7 @@ import io.nuls.contract.rpc.form.transaction.CreateContractTx;
 import io.nuls.contract.rpc.form.transaction.DeleteContractTx;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.calc.LongUtils;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -37,6 +39,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,14 +90,17 @@ public class ContractSdkResource {
         }
         byte[] contractAddressBytes = contractAddress.getAddressBytes();
         // 组装txData
+
+        String contractCode =createContractTx.getContractCode();
+        byte[] contractCodeBytes = Hex.decode(contractCode);
         CreateContractData txData = new CreateContractData();
         txData.setSender(senderBytes);
         txData.setContractAddress(contractAddressBytes);
         txData.setValue(value.getValue());
         txData.setGasLimit(gasLimit);
         txData.setPrice(price);
-        txData.setCodeLen(createContractTx.getContractCode().length);
-        txData.setCode(createContractTx.getContractCode());
+        txData.setCodeLen(contractCodeBytes.length);
+        txData.setCode(contractCodeBytes);
 
         Object[] args = createContractTx.getArgs();
         if (args != null) {
@@ -117,10 +123,10 @@ public class ContractSdkResource {
         }
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(txData);
-
+        List<Coin> coinList = ConvertCoinTool.convertCoinList(createContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size(),
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
-                createContractTx.getUtxos());
+                coinList);
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
         }
@@ -162,7 +168,7 @@ public class ContractSdkResource {
         if (callContractTx.getGasLimit() < 0 || callContractTx.getPrice() < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (StringUtils.isNotBlank(callContractTx.getMethodName())) {
+        if (StringUtils.isBlank(callContractTx.getMethodName())) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (callContractTx.getUtxos().isEmpty()) {
@@ -171,7 +177,7 @@ public class ContractSdkResource {
         }
         Long gasLimit = callContractTx.getGasLimit();
         Long price = callContractTx.getPrice();
-        Na value = callContractTx.getValue();
+        Na value = Na.valueOf(callContractTx.getValue());
         byte[] senderBytes = AddressTool.getAddress(callContractTx.getSender());
         byte[] contractAddressBytes = AddressTool.getAddress(callContractTx.getContractAddress());
         if (value == null) {
@@ -210,9 +216,11 @@ public class ContractSdkResource {
         }
         tx.setTxData(callContractData);
 
+        List<Coin> coinList = ConvertCoinTool.convertCoinList(callContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size(),
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
-                callContractTx.getUtxos());
+                coinList);
+
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
         }
@@ -275,9 +283,10 @@ public class ContractSdkResource {
         deleteContractData.setSender(senderBytes);
         tx.setTxData(deleteContractData);
 
+        List<Coin> coinList = ConvertCoinTool.convertCoinList(deleteContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, Na.ZERO, tx.size(),
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
-                deleteContractTx.getUtxos());
+                coinList);
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
         }

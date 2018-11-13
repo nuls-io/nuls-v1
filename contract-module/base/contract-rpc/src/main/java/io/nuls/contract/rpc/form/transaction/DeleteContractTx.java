@@ -1,6 +1,6 @@
 package io.nuls.contract.rpc.form.transaction;
 
-import io.nuls.kernel.model.Coin;
+import io.nuls.accout.ledger.rpc.dto.InputDto;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class DeleteContractTx {
     private String sender;
     private String contractAddress;
     private String remark;
-    private List<Coin> utxos;
+    private List<InputDto> utxos;
 
     public String getSender() {
         return sender;
@@ -39,11 +39,11 @@ public class DeleteContractTx {
         this.remark = remark;
     }
 
-    public List<Coin> getUtxos() {
+    public List<InputDto> getUtxos() {
         return utxos;
     }
 
-    public void setUtxos(List<Coin> utxos) {
+    public void setUtxos(List<InputDto> utxos) {
         this.utxos = utxos;
     }
 }

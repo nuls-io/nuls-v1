@@ -1,6 +1,6 @@
 package io.nuls.contract.rpc.form.transaction;
 
-import io.nuls.kernel.model.Coin;
+import io.nuls.accout.ledger.rpc.dto.InputDto;
 import io.nuls.kernel.model.Na;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 public class CallContractTx {
 
     private String sender;
-    private Na value;
+    private Long value;
     private Long gasLimit;
     private Long price;
     private String contractAddress;
@@ -20,7 +20,7 @@ public class CallContractTx {
     private String methodDesc;
     private Object[] args;
     private String remark;
-    private List<Coin> utxos;
+    private List<InputDto> utxos;
 
     public String getSender() {
         return sender;
@@ -30,11 +30,11 @@ public class CallContractTx {
         this.sender = sender;
     }
 
-    public Na getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Na value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 
@@ -94,11 +94,11 @@ public class CallContractTx {
         this.remark = remark;
     }
 
-    public List<Coin> getUtxos() {
+    public List<InputDto> getUtxos() {
         return utxos;
     }
 
-    public void setUtxos(List<Coin> utxos) {
+    public void setUtxos(List<InputDto> utxos) {
         this.utxos = utxos;
     }
 }
