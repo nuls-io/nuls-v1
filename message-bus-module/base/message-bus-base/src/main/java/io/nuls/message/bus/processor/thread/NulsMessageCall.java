@@ -26,19 +26,21 @@
 package io.nuls.message.bus.processor.thread;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
+import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author: Charlie
  */
-public class NulsMessageCall<T extends BaseMessage> implements Runnable {
+public class NulsMessageCall<T extends NulsDigestData> implements Runnable {
 
     private final ProcessData<T> data;
-    private final NulsMessageHandler<T> handler;
+    private final NulsMessageHandler<BaseMessage> handler;
 
-    public NulsMessageCall(ProcessData<T> data, NulsMessageHandler<T> handler) {
+    public NulsMessageCall(ProcessData<T> data, NulsMessageHandler<BaseMessage> handler) {
         this.data = data;
         this.handler = handler;
     }
@@ -50,8 +52,12 @@ public class NulsMessageCall<T extends BaseMessage> implements Runnable {
         }
         try {
             long start = System.currentTimeMillis();
-            handler.onMessage(data.getData(), data.getNode());
-            if(Log.isDebugEnabled()) {
+            BaseMessage message = MessageCacher.take(data.getData());
+            if (null == message) {
+                return;
+            }
+            handler.onMessage(message, MessageCacher.takeNode(data.getData()));
+            if (Log.isDebugEnabled()) {
                 Log.debug(data.getData().getClass() + ",use:" + (System.currentTimeMillis() - start));
             }
         } catch (Exception e) {

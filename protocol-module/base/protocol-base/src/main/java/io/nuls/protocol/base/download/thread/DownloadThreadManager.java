@@ -50,6 +50,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ln
@@ -59,7 +60,6 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
-    private NulsThreadFactory factory = new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download");
 
     private NetworkNewestBlockInfos newestInfos;
     private Queue<Block> blockQueue;
@@ -100,7 +100,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         long totalCount = netBestHeight - localBestHeight;
 
-        long laveCount = totalCount;
+        AtomicInteger count = new AtomicInteger(0);
 
         long downCount = (long) Math.ceil((double) totalCount / (maxDowncount * nodes.size()));
 
@@ -123,7 +123,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
                 FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
 
-                executor.execute(factory.newThread(downloadThreadFuture));
+                executor.execute(downloadThreadFuture);
 
                 futures.add(downloadThreadFuture);
 
@@ -149,7 +149,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 if (blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
-                if ( blockList.size() < size) {
+                if (blockList.size() < size) {
                     blockList = retryDownload(executor, result);
                 }
 
@@ -160,11 +160,19 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 }
 
                 for (Block block : blockList) {
-                    if (block.getHeader().getHeight() > (NulsContext.getInstance().getBestHeight() + 1000)) {
+                    if (block.getHeader().getHeight() > (NulsContext.getInstance().getBestHeight() + 10000)) {
+                        System.out.println("sleep 1000 ms............");
                         Thread.sleep(1000);
                     }
                     blockQueue.offer(block);
+                    count.incrementAndGet();
                 }
+            }
+
+            if (count.get() % 100001 == 0) {
+                System.gc();
+                Runtime.getRuntime().runFinalization();
+                System.gc();
             }
             futures.clear();
         }
