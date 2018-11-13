@@ -95,6 +95,11 @@ public class ConsensusScheduler {
                 new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
+        if (!protocolInited) {
+            protocolInited = true;
+            initNulsProtocol();
+        }
+
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 300L, TimeUnit.MILLISECONDS);
 
         ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
@@ -111,11 +116,6 @@ public class ConsensusScheduler {
 
         threadPool.scheduleAtFixedRate(new TxProcessTask(), 5, 1, TimeUnit.SECONDS);
 
-        if (!protocolInited) {
-            protocolInited = true;
-            initNulsProtocol();
-        }
-
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
@@ -130,8 +130,8 @@ public class ConsensusScheduler {
             //获取最新的记录版本信息的高度
             Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
             if (consensusVersionHeight == null) {
-                //todo 正式上线这里会改成900000L
-                consensusVersionHeight = 1L;
+                //todo 正式上线这里会改成1200000L
+                consensusVersionHeight = 1200000L;
             }
             NulsVersionManager.loadVersionByHeight(consensusVersionHeight);
 
