@@ -161,7 +161,6 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
                 for (Block block : blockList) {
                     if (block.getHeader().getHeight() > (NulsContext.getInstance().getBestHeight() + 10000)) {
-                        System.out.println("sleep 1000 ms............");
                         Thread.sleep(1000);
                     }
                     blockQueue.offer(block);
