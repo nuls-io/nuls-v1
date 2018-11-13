@@ -24,6 +24,7 @@
 package io.nuls.accout.ledger.rpc.util;
 
 import io.nuls.accout.ledger.rpc.dto.InputDto;
+import io.nuls.accout.ledger.rpc.dto.OutputDto;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.model.Coin;
@@ -80,5 +81,27 @@ public class ConvertCoinTool {
         input.setFromHash(LedgerUtil.getTxHash(coin.getOwner()));
         input.setFromIndex(LedgerUtil.getIndex(coin.getOwner()));
         return input;
+    }
+
+    public static List<OutputDto> convertOutputList(List<Coin> tos, String txHash) {
+        if(tos == null || tos.size() == 0) {
+            return null;
+        }
+        int size = tos.size();
+        List<OutputDto> outputs = new ArrayList<>(size);
+        for(int i = 0; i < size; i++) {
+            outputs.add(convertOutput(tos.get(i), txHash, i));
+        }
+        return outputs;
+    }
+
+    public static OutputDto convertOutput(Coin coin, String txHash, Integer index) {
+        OutputDto output = new OutputDto();
+        output.setAddress(AddressTool.getStringAddressByBytes(coin.getAddress()));
+        output.setLockTime(coin.getLockTime());
+        output.setValue(coin.getNa().getValue());
+        output.setTxHash(txHash);
+        output.setIndex(index);
+        return output;
     }
 }

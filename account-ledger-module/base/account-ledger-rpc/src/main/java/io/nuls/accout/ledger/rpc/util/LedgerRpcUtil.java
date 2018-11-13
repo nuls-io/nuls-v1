@@ -25,8 +25,10 @@ package io.nuls.accout.ledger.rpc.util;
 
 
 import io.nuls.accout.ledger.rpc.dto.InputDto;
+import io.nuls.accout.ledger.rpc.dto.OutputDto;
 import io.nuls.accout.ledger.rpc.dto.TransactionCreatedReturnInfo;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
@@ -41,8 +43,10 @@ public class LedgerRpcUtil {
     public static TransactionCreatedReturnInfo makeReturnInfo(Transaction tx) throws IOException {
         String hash = NulsDigestData.calcDigestData(tx.serializeForHash()).getDigestHex();
         String txHex = Hex.encode(tx.serialize());
-        List<InputDto> inputs = ConvertCoinTool.convertInputList(tx.getCoinData().getFrom());
-        TransactionCreatedReturnInfo returnInfo = new TransactionCreatedReturnInfo(hash, txHex, inputs);
+        CoinData coinData = tx.getCoinData();
+        List<InputDto> inputs = ConvertCoinTool.convertInputList(coinData.getFrom());
+        List<OutputDto> outputs = ConvertCoinTool.convertOutputList(coinData.getTo(), hash);
+        TransactionCreatedReturnInfo returnInfo = new TransactionCreatedReturnInfo(hash, txHex, inputs, outputs);
         return returnInfo;
     }
 }

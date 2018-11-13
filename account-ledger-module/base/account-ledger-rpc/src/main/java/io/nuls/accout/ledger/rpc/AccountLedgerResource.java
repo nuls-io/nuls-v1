@@ -505,7 +505,7 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/simple")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "创建转账交易(不用计算手续费)", notes = "返回交易Hash，交易对象序列化数组Hex编码，本次交易已使用的UTXO")
+    @ApiOperation(value = "创建转账交易(不用计算手续费)", notes = "返回交易Hash，交易对象序列化数组Hex编码，本次交易的输入，输出")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
