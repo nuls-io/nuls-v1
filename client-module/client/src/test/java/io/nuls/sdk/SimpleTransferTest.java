@@ -52,14 +52,27 @@ public class SimpleTransferTest {
     public void before() {
         RestFulUtils.getInstance().setServerUri(PATH1);
         restFul = RestFulUtils.getInstance();
-        from = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
-        fromKey = "3a9a47428fa5b687afd7a212aca49bcf2340cda45e261b6b7634c92390e800dd";
-        to = "NsdtsS1aNVNA5xYV1b4ZTPMFw67S4JFf";
-        amount = 10000000000L;
+        //from = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
+        //fromKey = "3a9a47428fa5b687afd7a212aca49bcf2340cda45e261b6b7634c92390e800dd";
+        //to = "Nse8gVoWwrWfC3GrV5zg5qQ9SX97iCgQ";
+        from = "Nse8gVoWwrWfC3GrV5zg5qQ9SX97iCgQ";
+        fromKey = "638521c05400808106e3eec5b5fd58782e0b9ad79f7b6d5a4630a6a5e7f54281";
+        to = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
+        amount = 10100000000L;
     }
 
     @Test
-    public void create() {
+    public void transfer() {
+
+        String txHex = create();
+
+        String txHexSign = sign(txHex);
+
+        broadcast(txHexSign);
+
+    }
+
+    private String create() {
         Map<String, Object> params = new HashMap<>();
         params.put("address", from);
         params.put("toAddress", to);
@@ -76,9 +89,12 @@ public class SimpleTransferTest {
         Object inputs = value.get("inputs");
         Object outputs = value.get("outputs");
 
-        // /transaction/sign
+        return txHex.toString();
+    }
+
+    private String sign(String txHex) {
         Map<String, Object> paramsSign = new HashMap<>();
-        paramsSign.put("txHex", txHex.toString());
+        paramsSign.put("txHex", txHex);
         paramsSign.put("address", from);
         paramsSign.put("priKey", fromKey);
         paramsSign.put("password", null);
@@ -86,17 +102,18 @@ public class SimpleTransferTest {
         Object dataSign = postSign.getData();
         Map<String, Object> mapSign = (Map<String, Object>) dataSign;
         Object txHexSign = mapSign.get("value");
+        return txHexSign.toString();
+    }
 
-
-        // /transaction/broadcast
+    private String broadcast(String txHexSign) {
         Map<String, Object> paramsBroadcast = new HashMap<>();
-        paramsBroadcast.put("txHex", txHexSign.toString());
+        paramsBroadcast.put("txHex", txHexSign);
         RpcClientResult postBroadcast = restFul.post("/accountledger/transaction/broadcast", paramsBroadcast);
         Object dataBroadcast = postBroadcast.getData();
         Map<String, Object> mapBroadcast = (Map<String, Object>) dataBroadcast;
         Object valueBroadcast = mapBroadcast.get("value");
         System.out.println("txHash: " + valueBroadcast);
-
+        return valueBroadcast.toString();
     }
 
     private List<InputDto> getUTXOs(String address, Long limit) {
