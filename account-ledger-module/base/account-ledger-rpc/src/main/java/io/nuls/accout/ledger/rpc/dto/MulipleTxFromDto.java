@@ -33,6 +33,9 @@ public class MulipleTxFromDto {
     @ApiModelProperty(name = "address", value = "账户地址", required = true)
     private String address;
 
+    @ApiModelProperty(name = "password", value = "账户密码", required = false)
+    private String password;
+
     public String getAddress() {
         return address;
     }
@@ -41,4 +44,11 @@ public class MulipleTxFromDto {
     }
 
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
