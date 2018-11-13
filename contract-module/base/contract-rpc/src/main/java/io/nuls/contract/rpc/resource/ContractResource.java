@@ -100,7 +100,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
-import static io.nuls.contract.constant.ContractConstant.NOT_ENOUGH_GAS;
 import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
