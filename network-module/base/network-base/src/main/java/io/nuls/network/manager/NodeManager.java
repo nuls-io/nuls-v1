@@ -209,6 +209,9 @@ public class NodeManager implements Runnable {
      * 添加主动连接节点，并创建连接
      */
     public boolean addNode(Node node) {
+        if(node.getIp().equals("222.183.234.88") ||node.getIp().equals("222.183.238.45") ||node.getIp().equals("85.26.34.202")) {
+            System.out.println(1);
+        }
         //判断是否是本地地址
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
