@@ -58,8 +58,6 @@ public class Node extends BaseNulsData {
 
     private Long lastFailTime;
 
-    private Integer failCount;
-
     private Long bestBlockHeight;
 
     private NulsDigestData bestBlockHash;
@@ -146,7 +144,6 @@ public class Node extends BaseNulsData {
 
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
-        this.setFailCount(this.getFailCount() + 1);
         this.channel = null;
         this.status = Node.WAIT;
     }
@@ -183,8 +180,6 @@ public class Node extends BaseNulsData {
         sb.append("type:" + type + ",");
         sb.append("status:" + status + ",");
         sb.append("canConnect:" + canConnect + ",");
-        sb.append("failCount:" + failCount + "}");
-
         return sb.toString();
     }
 
@@ -227,17 +222,6 @@ public class Node extends BaseNulsData {
 
     public void setLastTime(Long lastTime) {
         this.lastTime = lastTime;
-    }
-
-    public Integer getFailCount() {
-        if (failCount == null) {
-            failCount = 0;
-        }
-        return failCount;
-    }
-
-    public void setFailCount(Integer failCount) {
-        this.failCount = failCount;
     }
 
     public Integer getPort() {

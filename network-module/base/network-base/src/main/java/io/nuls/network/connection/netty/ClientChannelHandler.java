@@ -80,7 +80,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } else {
             //其他节点则正常保持连接
             node.setCanConnect(true);
-            node.setFailCount(0);
             boolean result = nodeManager.processConnectedNode(node, channel);
             if (!result) {
                 channel.close();
@@ -137,9 +136,14 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeAttribute.get();
             Log.error("----------------nodeId:" + node.getId());
             Log.error(cause);
-//
-//            nodeManager.deleteNodeFromDB(node.getId());
-//            return;
+
+        }
+        if (cause instanceof TooLongFrameException) {
+            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+            Node node = nodeAttribute.get();
+            if (node != null) {
+                node.setCanConnect(false);
+            }
         }
         ctx.channel().close();
     }

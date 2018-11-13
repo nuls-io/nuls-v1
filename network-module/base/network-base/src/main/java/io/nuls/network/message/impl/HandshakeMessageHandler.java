@@ -84,7 +84,7 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             }
         }
         //握手成功时，更新自己的外网ip地址
-        node.setFailCount(0);
+//        node.setFailCount(0);
         node.setSeverPort(body.getSeverPort());
         node.setBestBlockHash(body.getBestBlockHash());
         node.setBestBlockHeight(body.getBestBlockHeight());

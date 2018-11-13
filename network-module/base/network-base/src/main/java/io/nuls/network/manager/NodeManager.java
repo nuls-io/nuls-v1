@@ -103,7 +103,6 @@ public class NodeManager implements Runnable {
         //判断自己是否是种子节点
         for (String ip : IpUtil.getIps()) {
             if (isSeedNode(ip)) {
-//                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
                 isSeed = true;
             }
         }
@@ -338,12 +337,11 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if (node.getFailCount() <= NetworkConstant.CONNECT_FAIL_MAX_COUNT) {
-            node.setLastFailTime(TimeService.currentTimeMillis());
-            if (!disConnectNodes.containsKey(node.getId())) {
-                disConnectNodes.put(node.getId(), node);
+        if(node.isCanConnect()) {
+            if(!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(),node);
             }
-        } else {
+        }else {
             disConnectNodes.remove(node.getId());
             getNetworkStorageService().deleteNode(node.getId());
         }
@@ -535,7 +533,7 @@ public class NodeManager implements Runnable {
                 e.printStackTrace();
             }
 
-            /*System.out.println("--------disConnectNodes:" + disConnectNodes.size());
+            System.out.println("--------disConnectNodes:" + disConnectNodes.size());
             for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
@@ -548,7 +546,7 @@ public class NodeManager implements Runnable {
             System.out.println("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
                 System.out.println(node.toString());
-            }*/
+            }
 
             if (handShakeNodes.size() > 9) {
                 removeSeedNode();
@@ -565,24 +563,24 @@ public class NodeManager implements Runnable {
                 }
             }
 
-            //定期尝试重新连接，检测网络节点
-            long now = TimeService.currentTimeMillis();
-            for (Node node : disConnectNodes.values()) {
-                if (node.getStatus() == Node.WAIT) {
-                    if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
-                        connectionManager.connectionNode(node);
-                    } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
-                        connectionManager.connectionNode(node);
-                    }
-                }
-            }
+//            //定期尝试重新连接，检测网络节点
+//            long now = TimeService.currentTimeMillis();
+//            for (Node node : disConnectNodes.values()) {
+//                if (node.getStatus() == Node.WAIT) {
+//                    if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
+//                        connectionManager.connectionNode(node);
+//                    } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
+//                        connectionManager.connectionNode(node);
+//                    }
+//                }
+//            }
         }
     }
 
     public void shutdown() {
         running = false;
         for (Node node : handShakeNodes.values()) {
-            if(node.getType() == Node.OUT) {
+            if (node.getType() == Node.OUT) {
                 removeNode(node);
             }
         }
