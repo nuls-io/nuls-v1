@@ -18,15 +18,16 @@ public class MessageCacher {
         nodeMap.put(hash, node);
     }
 
-    public static BaseMessage take(NulsDigestData hash) {
-        return map.remove(hash);
+    public static void remove(NulsDigestData hash) {
+        map.remove(hash);
+        nodeMap.remove(hash);
     }
 
     public static BaseMessage get(NulsDigestData data) {
         return map.get(data);
     }
 
-    public static Node takeNode(NulsDigestData data) {
-        return nodeMap.remove(data);
+    public static Node getNode(NulsDigestData data) {
+        return nodeMap.get(data);
     }
 }

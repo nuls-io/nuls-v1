@@ -52,14 +52,16 @@ public class NulsMessageCall<T extends NulsDigestData> implements Runnable {
         }
         try {
             long start = System.currentTimeMillis();
-            BaseMessage message = MessageCacher.take(data.getData());
+            BaseMessage message = MessageCacher.get(data.getData());
             if (null == message) {
+                MessageCacher.remove(data.getData());
                 return;
             }
-            handler.onMessage(message, MessageCacher.takeNode(data.getData()));
+            handler.onMessage(message, MessageCacher.getNode(data.getData()));
             if (Log.isDebugEnabled()) {
                 Log.debug(data.getData().getClass() + ",use:" + (System.currentTimeMillis() - start));
             }
+            MessageCacher.remove(data.getData());
         } catch (Exception e) {
             Log.error(e);
         }
