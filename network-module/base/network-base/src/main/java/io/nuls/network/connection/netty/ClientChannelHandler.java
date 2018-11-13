@@ -132,7 +132,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (!(cause instanceof IOException) ) {
+        if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             Log.error("----------------nodeId:" + node.getId());
@@ -140,6 +140,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 //
 //            nodeManager.deleteNodeFromDB(node.getId());
 //            return;
+        }
+        if(cause instanceof TooLongFrameException) {
+            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+            Node node = nodeAttribute.get();
+            node.setFailCount(5);
         }
         ctx.channel().close();
     }
