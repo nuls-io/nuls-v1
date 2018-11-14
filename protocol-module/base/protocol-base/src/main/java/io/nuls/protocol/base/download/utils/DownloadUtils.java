@@ -128,8 +128,9 @@ public class DownloadUtils {
         String reqMsg = "request operation:::::" + node.getId() + ":::::" + startHeight;
         try {
             reactFuture.get(1L, TimeUnit.SECONDS);
-            reqMsg += ",,,,done";
+            reqMsg += ",,,,react done";
             CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
+            reqMsg += ",,,,task done";
             if (taskResult.isSuccess()) {
                 for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                     for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {

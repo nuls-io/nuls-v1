@@ -144,13 +144,13 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 int size = sizeList.get(a);
 
                 if (result == null || (blockList = result.getBlockList()) == null || blockList.size() < size) {
-                    blockList = retryDownload(executor, result);
+                    blockList = retryDownload(executor, result, size);
                 }
                 if (blockList == null || blockList.size() < size) {
-                    blockList = retryDownload(executor, result);
+                    blockList = retryDownload(executor, result, size);
                 }
                 if (blockList == null || blockList.size() < size) {
-                    blockList = retryDownload(executor, result);
+                    blockList = retryDownload(executor, result, size);
                 }
 
                 if (blockList == null || blockList.size() < size) {
@@ -181,7 +181,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         return true;
     }
 
-    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result) throws InterruptedException, ExecutionException {
+    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result, int size) throws InterruptedException, ExecutionException {
 
         //try download to other nodes
         List<Node> otherNodes = new ArrayList<>();
@@ -197,7 +197,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         for (Node node : otherNodes) {
             result.setNode(node);
             List<Block> blockList = downloadBlockFromNode(executor, result);
-            if (blockList != null && blockList.size() > 0) {
+            if (blockList != null && blockList.size() == size) {
                 return blockList;
             }
         }
@@ -209,18 +209,18 @@ public class DownloadThreadManager implements Callable<Boolean> {
     }
 
     private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, ResultMessage result) throws ExecutionException, InterruptedException {
-        DownloadThread downloadThread = new DownloadThread(result.getStartHash(), result.getEndHash(), result.getStartHeight(), result.getSize(), result.getNode());
+        DownloadThread downloadThread = new DownloadThread(result.getStartHash(), result.getEndHash(), result.getStartHeight() + result.getBlockList().size(), result.getSize(), result.getNode());
 
-        FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
-        executor.execute(new Thread(downloadThreadFuture));
+        FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
+        executor.execute(downloadThreadFuture);
 
-        List<Block> blockList = null;
         try {
-            blockList = downloadThreadFuture.get().getBlockList();
+            List<Block> blockList = downloadThreadFuture.get().getBlockList();
+            result.getBlockList().addAll(blockList);
         } catch (Exception e) {
             Log.error(e);
         }
-        return blockList;
+        return result.getBlockList();
     }
 
     private boolean checkFirstBlock() throws NulsException {
