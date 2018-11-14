@@ -129,7 +129,6 @@ public class VMContext {
         Result<ContractBalance> result = contractUtxoService.getBalance(address, blockHeight);
         if(result.isSuccess()) {
             ContractBalance balance = result.getData();
-            // pierre test comment out
             return BigInteger.valueOf(balance.getRealUsable().getValue());
         }
         return BigInteger.ZERO;

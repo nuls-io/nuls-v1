@@ -119,3 +119,6 @@ logs/
 # chain data
 data/
 
+.gitignore
+
+contract-module/base/contract-vm/src/test/java/testcontract/crowdsale/*

@@ -179,11 +179,6 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
              * 多扣除的费用会以CoinBase交易还给Sender
              */
             CoinData coinData = new CoinData();
-            // 向智能合约账户转账
-            if (!Na.ZERO.equals(value)) {
-                Coin toCoin = new Coin(contractAddressBytes, value);
-                coinData.getTo().add(toCoin);
-            }
 
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
             // 当前区块高度
@@ -320,6 +315,85 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
             result.setMsg(e.getMessage());
             return result;
+        }
+    }
+
+    /**
+     * 验证创建生成智能合约的交易
+     *
+     * @param gasLimit     最大gas消耗
+     * @param price        执行合约单价
+     * @param contractCode 合约代码
+     * @param args         参数列表
+     * @return
+     */
+    @Override
+    public Result validateContractCreateTx(Long gasLimit, Long price,
+                                   byte[] contractCode, String[][] args) {
+        try {
+            AssertUtil.canNotEmpty(contractCode, "the contractCode can not be empty");
+            Na value = Na.ZERO;
+
+            if(!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            }
+
+            Account senderAccount = AccountTool.createAccount();
+            // 生成一个地址作为智能合约地址
+            Address contractAddress = AccountTool.createContractAddress();
+
+            byte[] contractAddressBytes = contractAddress.getAddressBytes();
+            byte[] senderBytes = senderAccount.getAddress().getAddressBytes();
+
+
+            BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块高度
+            long blockHeight = blockHeader.getHeight();
+            // 当前区块状态根
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
+
+            // 执行VM验证合法性
+            ProgramCreate programCreate = new ProgramCreate();
+            programCreate.setContractAddress(contractAddressBytes);
+            programCreate.setSender(senderBytes);
+            programCreate.setValue(BigInteger.valueOf(value.getValue()));
+            programCreate.setPrice(price.longValue());
+            programCreate.setGasLimit(gasLimit.longValue());
+            programCreate.setNumber(blockHeight);
+            programCreate.setContractCode(contractCode);
+            if (args != null) {
+                programCreate.setArgs(args);
+            }
+            ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            // 验证合约时跳过Gas验证
+            long realGasLimit = programCreate.getGasLimit();
+            programCreate.setGasLimit(MAX_GASLIMIT);
+            ProgramResult programResult = track.create(programCreate);
+
+            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
+            if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
+                Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                return result;
+            } else {
+                // 其他合法性都通过后，再验证Gas
+                track = programExecutor.begin(prevStateRoot);
+                programCreate.setGasLimit(realGasLimit);
+                programResult = track.create(programCreate);
+                if(!programResult.isSuccess()) {
+                    Log.error(programResult.getStackTrace());
+                    Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                    return result;
+                }
+            }
+            return Result.getSuccess();
+        }  catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -805,6 +879,105 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         }
     }
 
+    /**
+     * 验证创建调用智能合约的交易
+     *
+     * @param sender          交易创建者
+     * @param gasLimit        最大gas消耗
+     * @param price           执行合约单价
+     * @param contractAddress 合约地址
+     * @param methodName      方法名
+     * @param methodDesc      方法签名，如果方法名不重复，可以不传
+     * @param args            参数列表
+     * @return
+     */
+    @Override
+    public Result validateContractCallTx(String sender, Long gasLimit, Long price, String contractAddress,
+                                 String methodName, String methodDesc, String[][] args) {
+        AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
+        AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
+        AssertUtil.canNotEmpty(methodName, "the methodName can not be empty");
+
+        if(!ContractUtil.checkPrice(price.longValue())) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+        }
+
+        byte[] senderBytes = AddressTool.getAddress(sender);
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+        BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+        // 当前区块高度
+        long blockHeight = blockHeader.getHeight();
+        // 当前区块状态根
+        byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+        AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
+
+        // 组装VM执行数据
+        ProgramCall programCall = new ProgramCall();
+        programCall.setContractAddress(contractAddressBytes);
+        programCall.setSender(senderBytes);
+        programCall.setNumber(blockHeight);
+        programCall.setMethodName(methodName);
+        programCall.setMethodDesc(methodDesc);
+        programCall.setArgs(args);
+
+        // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
+        if (vmHelper.checkIsViewMethod(methodName, methodDesc, contractAddressBytes)) {
+            programCall.setValue(BigInteger.ZERO);
+            programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
+            programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
+
+            ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            ProgramResult programResult = track.call(programCall);
+            Result result;
+            if (!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
+                result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+            } else {
+                result = Result.getSuccess();
+                result.setData(programResult.getResult());
+            }
+            return result;
+        }
+
+
+        // 创建链上交易，包含智能合约
+        programCall.setValue(BigInteger.ZERO);
+        programCall.setPrice(price.longValue());
+        programCall.setGasLimit(gasLimit.longValue());
+
+        // 执行VM验证合法性
+        ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        // 验证合约时跳过Gas验证
+        long realGasLimit = programCall.getGasLimit();
+        programCall.setGasLimit(MAX_GASLIMIT);
+        ProgramResult programResult = track.call(programCall);
+
+        // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
+        if(!programResult.isSuccess()) {
+            Log.error(programResult.getStackTrace());
+            Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+            result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+            result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+            return result;
+        } else {
+            // 其他合法性都通过后，再验证Gas
+            track = programExecutor.begin(prevStateRoot);
+            programCall.setGasLimit(realGasLimit);
+            programResult = track.call(programCall);
+            if(!programResult.isSuccess()) {
+                Log.error(programResult.getStackTrace());
+                Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                return result;
+            }
+        }
+
+        return Result.getSuccess();
+    }
+
     private Result<byte[]> saveUnConfirmedTokenTransfer(CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {
         try {
             byte[] senderBytes = AddressTool.getAddress(sender);
@@ -1097,6 +1270,59 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             result.setMsg(e.getMessage());
             return result;
         }
+    }
+
+    /**
+     * 验证创建删除智能合约的交易
+     *
+     * @param sender          交易创建者
+     * @param contractAddress 合约地址
+     * @return
+     */
+    @Override
+    public Result validateContractDeleteTx(String sender, String contractAddress) {
+
+        AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
+        AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
+
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+
+        Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+        if(contractAddressInfoPoResult.isFailed()) {
+            return contractAddressInfoPoResult;
+        }
+        ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
+        if(contractAddressInfoPo == null) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
+        }
+
+        BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+        // 当前区块状态根
+        byte[] stateRoot = ContractUtil.getStateRoot(blockHeader);
+        // 获取合约当前状态
+        ProgramStatus status = vmHelper.getContractStatus(stateRoot, contractAddressBytes);
+        boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
+        if(isTerminatedContract) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
+        }
+
+        byte[] senderBytes = AddressTool.getAddress(sender);
+        if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
+        }
+
+        Result<ContractBalance> result = contractBalanceManager.getBalance(contractAddressBytes);
+        ContractBalance balance = (ContractBalance) result.getData();
+        if(balance == null) {
+            return result;
+        }
+
+        Na totalBalance = balance.getBalance();
+        if(totalBalance.compareTo(Na.ZERO) != 0) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
+        }
+
+        return Result.getSuccess();
     }
 
 }
