@@ -70,9 +70,9 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
 
-        if (!downloadService.isDownloadSuccess().isSuccess()) {
-            return;
-        }
+//        if (!downloadService.isDownloadSuccess().isSuccess()) {
+//            return;
+//        }
 
         SmallBlock smallBlock = event.getMsgBody();
         if (null == smallBlock) {
