@@ -536,7 +536,7 @@ public class NodeManager implements Runnable {
                 e.printStackTrace();
             }
 
-            System.out.println("--------disConnectNodes:" + disConnectNodes.size());
+           /* System.out.println("--------disConnectNodes:" + disConnectNodes.size());
             for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
@@ -549,7 +549,7 @@ public class NodeManager implements Runnable {
             System.out.println("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
                 System.out.println(node.toString());
-            }
+            }*/
 
             if (handShakeNodes.size() > 9) {
                 removeSeedNode();

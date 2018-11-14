@@ -74,65 +74,6 @@ public class NulsVersionManager {
         }
     }
 
-    /***
-     * 读取数据库里已经保存的版本升级信息
-     */
-    public static void loadVersion() {
-        //获取当前已存储的主网版本信息
-        VersionManagerStorageService vmss = NulsContext.getServiceBean(VersionManagerStorageService.class);
-        Map<String, Integer> versionMap = vmss.getConsensusVersionMap();
-        if (versionMap != null) {
-            consensusVersionMap = versionMap;
-        }
-        checkHasLaterVersion();
-        //从数据库获取各个版本的升级信息，赋值到对应的协议容器里
-        for (ProtocolContainer protocolContainer : containerMap.values()) {
-            ProtocolInfoPo protocolInfoPo = vmss.getProtocolInfoPo(protocolContainer.getVersion());
-            if (protocolContainer.getVersion() == 1) {
-                protocolContainer.setStatus(ProtocolContainer.VALID);
-                protocolContainer.setEffectiveHeight(0L);
-                protocolContainer.setCurrentDelay(0L);
-                protocolContainer.setCurrentPercent(100);
-                protocolContainer.setRoundIndex(0);
-            } else if (protocolInfoPo != null) {
-                protocolContainer.setCurrentDelay(protocolInfoPo.getCurrentDelay());
-                protocolContainer.setStatus(protocolInfoPo.getStatus());
-                protocolContainer.setAddressSet(protocolInfoPo.getAddressSet());
-                protocolContainer.setEffectiveHeight(protocolInfoPo.getEffectiveHeight());
-                protocolContainer.setCurrentPercent(protocolInfoPo.getCurrentPercent());
-                protocolContainer.setRoundIndex(protocolInfoPo.getRoundIndex());
-                protocolContainer.setPrePercent(protocolInfoPo.getPrePercent());
-            }
-            //如果有对应版本的临时协议数据时，将临时数据赋值到container上，然后删除临时数据
-            ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(protocolContainer.getProtocolKey());
-            if (tempInfoPo != null) {
-                protocolContainer.setRoundIndex(tempInfoPo.getRoundIndex());
-                protocolContainer.setCurrentDelay(tempInfoPo.getCurrentDelay());
-                protocolContainer.setAddressSet(tempInfoPo.getAddressSet());
-                protocolContainer.setStatus(tempInfoPo.getStatus());
-                protocolContainer.setEffectiveHeight(tempInfoPo.getEffectiveHeight());
-                protocolContainer.setCurrentPercent(tempInfoPo.getCurrentPercent());
-                protocolContainer.setPrePercent(tempInfoPo.getPrePercent());
-                protocolInfoPo = new ProtocolInfoPo(tempInfoPo);
-                getVersionManagerStorageService().saveProtocolInfoPo(protocolInfoPo);
-                getVersionManagerStorageService().removeProtocolTempInfo(tempInfoPo.getProtocolKey());
-            }
-
-            //赋值完成后，检查是否有超过当前主网版本的协议已生效，有则修改当前主网协议版本号
-            if (protocolContainer.getStatus() == ProtocolContainer.VALID) {
-                if (NulsContext.MAIN_NET_VERSION < protocolContainer.getVersion()) {
-                    NulsContext.MAIN_NET_VERSION = protocolContainer.getVersion();
-                    getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
-                    //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
-                    if (protocolContainer.getVersion() == 2) {
-                        getVersionManagerStorageService().saveChangeTxHashBlockHeight(protocolContainer.getEffectiveHeight());
-                        NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = protocolContainer.getEffectiveHeight();
-                    }
-                }
-            }
-        }
-    }
-
     public static void loadVersionByHeight(long versionHeight) {
         List<ProtocolInfoPo> infoPoList = getVersionManagerStorageService().getProtocolInfoList(versionHeight);
         //获取数据库已保存的协议信息
@@ -261,6 +202,14 @@ public class NulsVersionManager {
      */
     public static ProtocolContainer getProtocolContainer(int version) {
         return containerMap.get(version);
+    }
+
+    public static ProtocolContainer getProtocolContainer(int version, int percent, long delay) {
+        ProtocolContainer container = containerMap.get(version);
+        if (container != null && container.getPercent() == percent && container.getDelay() == delay) {
+            return container;
+        }
+        return null;
     }
 
     public static ProtocolTempInfoPo getTempProtocolContainer(String key) {

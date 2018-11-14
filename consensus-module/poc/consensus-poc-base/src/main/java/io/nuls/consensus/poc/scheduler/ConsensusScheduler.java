@@ -39,10 +39,12 @@ import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -127,16 +129,28 @@ public class ConsensusScheduler {
             //针对第一版本升级时的特殊处理
             NulsVersionManager.init();
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+
+
+
             //获取最新的记录版本信息的高度
             Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
             if (consensusVersionHeight == null) {
                 //todo 正式上线这里会改成1200000L
-                consensusVersionHeight = 1200000L;
+                consensusVersionHeight = 1L;
             }
             NulsVersionManager.loadVersionByHeight(consensusVersionHeight);
 
             //获取最新的区块高度
             long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
+            for(int i=50;i<bestHeight;i++) {
+                Block block = blockService.getBlock(i).getData();
+                ValidateResult result = block.verify();
+                if(result.isFailed()) {
+                    System.out.println(result.getMsg());
+                }
+            }
+
+
             //检查记录的版本最新高度和区块的最新高度是否一致，如果不一致，找出中间相差的块，再做统计
             if (consensusVersionHeight < bestHeight) {
                 for (long i = consensusVersionHeight; i <= bestHeight; i++) {
@@ -146,50 +160,6 @@ public class ConsensusScheduler {
                     }
                 }
             }
-//
-//
-//            //
-//
-//            if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
-//
-//                long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
-//                Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
-//                if (consensusVersionHeight == null) {
-////                    consensusVersionHeight = 680000L;
-//                    consensusVersionHeight = 1L;
-//                } else {
-//                    long height = consensusVersionHeight + 1;
-//                    BlockProtocolInfoPo infoPo = null;
-//                    while (true) {
-//                        height--;
-////                        if(height == 680000L) {
-////                            break;
-////                        }
-//                        if (height <= 0) {
-//                            break;
-//                        }
-//                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
-//                        if (infoPo != null) {
-//                            consensusVersionHeight = height;
-//                            getVersionManagerStorageService().saveConsensusVersionHeight(height);
-//                            break;
-//                        }
-//                    }
-//
-//                    if (infoPo != null) {
-//                        ProtocolContainer container = NulsVersionManager.getProtocolContainer(infoPo.getVersion());
-//                        ProtocolTransferTool.copyFromBlockProtocolInfoPo(infoPo, container);
-//                    }
-//                }
-//                for (long i = consensusVersionHeight + 1; i <= bestHeight; i++) {
-//                    Result<BlockHeader> result = blockService.getBlockHeader(i);
-//                    if (result.isSuccess()) {
-//                        NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
-//                    }
-//                }
-//            } else {
-//                NulsVersionManager.loadVersion();
-//            }
         } catch (Exception e) {
             Log.error(e);
             System.exit(-1);
