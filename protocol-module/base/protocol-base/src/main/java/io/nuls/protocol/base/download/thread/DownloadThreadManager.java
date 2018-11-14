@@ -89,7 +89,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         RequestThread requestThread = new RequestThread(nodes, localBestHeight + 1, netBestHeight);
         CollectThread collectThread = CollectThread.initInstance(localBestHeight + 1, netBestHeight, requestThread);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-collect", collectThread);
-        requestThread.run();
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-request", requestThread);
         return true;
     }
 

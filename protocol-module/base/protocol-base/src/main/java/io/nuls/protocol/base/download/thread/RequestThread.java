@@ -58,7 +58,7 @@ public class RequestThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                if (startHeight >= endHeight) {
+                if (startHeight > endHeight) {
                     this.init();
                     return;
                 }
@@ -88,11 +88,11 @@ public class RequestThread implements Runnable {
             }
             int size = count;
             if ((startHeight + size) > endHeight) {
-                size = (int) (endHeight - startHeight);
+                size = (int) (endHeight - startHeight+1);
             }
             boolean result = request(node, startHeight, size);
             if (result) {
-                startHeight += size;
+                startHeight += size+1;
             }
         }
     }
