@@ -181,7 +181,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         return true;
     }
 
-    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result, int size) throws InterruptedException, ExecutionException {
+    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result, int totalSize) throws InterruptedException, ExecutionException {
 
         //try download to other nodes
         List<Node> otherNodes = new ArrayList<>();
@@ -196,8 +196,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         for (Node node : otherNodes) {
             result.setNode(node);
-            List<Block> blockList = downloadBlockFromNode(executor, result);
-            if (blockList != null && blockList.size() == size) {
+            List<Block> blockList = downloadBlockFromNode(executor, result, totalSize);
+            if (blockList != null && blockList.size() == totalSize) {
                 return blockList;
             }
         }
@@ -205,10 +205,10 @@ public class DownloadThreadManager implements Callable<Boolean> {
         //if fail , down again
         result.setNode(defultNode);
 
-        return downloadBlockFromNode(executor, result);
+        return downloadBlockFromNode(executor, result, totalSize);
     }
 
-    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, ResultMessage result) throws ExecutionException, InterruptedException {
+    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, ResultMessage result, int totalSize) throws ExecutionException, InterruptedException {
         DownloadThread downloadThread = new DownloadThread(result.getStartHash(), result.getEndHash(), result.getStartHeight() + result.getBlockList().size(), result.getSize(), result.getNode());
 
         FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
@@ -217,6 +217,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         try {
             List<Block> blockList = downloadThreadFuture.get().getBlockList();
             result.getBlockList().addAll(blockList);
+            result.setSize(totalSize - result.getBlockList().size());
         } catch (Exception e) {
             Log.error(e);
         }
