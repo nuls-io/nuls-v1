@@ -31,6 +31,7 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import java.util.ArrayList;
@@ -59,6 +60,10 @@ public class MeetingMember implements Comparable<MeetingMember> {
     private String sortValue;
     private long packStartTime;
     private long packEndTime;
+
+
+    private String agentAddressStr;
+    private String packingAddressStr;
 
     public Na getTotalDeposit() {
         return totalDeposit;
@@ -204,5 +209,27 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public void setRewardAddress(byte[] rewardAddress) {
         this.rewardAddress = rewardAddress;
+    }
+
+    public String getAgentAddressStr() {
+        if (null == this.agentAddressStr) {
+            this.agentAddressStr = AddressTool.getStringAddressByBytes(this.agentAddress);
+        }
+        return agentAddressStr;
+    }
+
+    public String getPackingAddressStr() {
+        if (null == this.packingAddressStr) {
+            this.packingAddressStr = AddressTool.getStringAddressByBytes(this.packingAddress);
+        }
+        return packingAddressStr;
+    }
+
+    public void setAgentAddressStr(String agentAddressStr) {
+        this.agentAddressStr = agentAddressStr;
+    }
+
+    public void setPackingAddressStr(String packingAddressStr) {
+        this.packingAddressStr = packingAddressStr;
     }
 }
