@@ -29,6 +29,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.base.cache.ProtocolCacheHandler;
+import io.nuls.protocol.base.download.thread.CollectThread;
 import io.nuls.protocol.message.BlockMessage;
 
 /**
@@ -44,6 +45,12 @@ public class BlockMessageHandler extends AbstractMessageHandler<BlockMessage> {
             return;
         }
 //        Log.info("recieved:::::" + block.getHeader().getHeight() + ":::::" + fromNode.getId());
+
+        boolean result = CollectThread.getInstance().addBlock(block);
+        if (result) {
+            return;
+        }
+
         ProtocolCacheHandler.receiveBlock(block);
     }
 }
