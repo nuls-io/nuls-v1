@@ -88,11 +88,11 @@ public class RequestThread implements Runnable {
             }
             int size = count;
             if ((startHeight + size) > endHeight) {
-                size = (int) (endHeight - startHeight+1);
+                size = (int) (endHeight - startHeight + 1);
             }
             boolean result = request(node, startHeight, size);
             if (result) {
-                startHeight += size+1;
+                startHeight += size;
             }
         }
     }
