@@ -142,14 +142,6 @@ public class ConsensusScheduler {
 
             //获取最新的区块高度
             long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
-            for(int i=50;i<bestHeight;i++) {
-                Block block = blockService.getBlock(i).getData();
-                ValidateResult result = block.verify();
-                if(result.isFailed()) {
-                    System.out.println(result.getMsg());
-                }
-            }
-
 
             //检查记录的版本最新高度和区块的最新高度是否一致，如果不一致，找出中间相差的块，再做统计
             if (consensusVersionHeight < bestHeight) {
