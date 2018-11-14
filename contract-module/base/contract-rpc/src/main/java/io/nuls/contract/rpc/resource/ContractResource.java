@@ -199,6 +199,38 @@ public class ContractResource implements InitializingBean {
     }
 
     @POST
+    @Path("/validate/create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证创建智能合约")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult validateCreateContract(@ApiParam(name = "validateCreateForm", value = "验证创建智能合约", required = true) ContractValidateCreate create) {
+        if (create == null || create.getGasLimit() < 0 || create.getPrice() < 0) {
+            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        String contractCode = create.getContractCode();
+        if(StringUtils.isBlank(contractCode)) {
+            return Result.getFailed(ContractErrorCode.NULL_PARAMETER).toRpcClientResult();
+        }
+
+        byte[] contractCodeBytes = Hex.decode(contractCode);
+
+        ProgramMethod method = vmHelper.getMethodInfoByCode(ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
+        String[][] args = null;
+        if(method != null) {
+            args = create.getArgs(method.argsType2Array());
+        }
+
+        return contractTxService.validateContractCreateTx(
+                create.getGasLimit(),
+                create.getPrice(),
+                contractCodeBytes,
+                args).toRpcClientResult();
+    }
+
+    @POST
     @Path("/constructor")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "获取智能合约构造函数")
@@ -382,6 +414,47 @@ public class ContractResource implements InitializingBean {
                 args,
                 call.getPassword(),
                 call.getRemark()).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/validate/call")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证调用智能合约")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult validateCallContract(@ApiParam(name = "validateCallForm", value = "验证调用智能合约", required = true) ContractValidateCall call) {
+        if (call == null || call.getGasLimit() < 0 || call.getPrice() < 0) {
+            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        if (!AddressTool.validAddress(call.getSender())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        String contractAddress = call.getContractAddress();
+        if (!AddressTool.validAddress(contractAddress)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+        if(!ContractLedgerUtil.isExistContractAddress(contractAddressBytes)) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
+        }
+
+        ProgramMethod method = vmHelper.getMethodInfoByContractAddress(call.getMethodName(), call.getMethodDesc(), contractAddressBytes);
+        String[][] args = null;
+        if(method != null) {
+            args = call.getArgs(method.argsType2Array());
+        }
+
+        return contractTxService.validateContractCallTx(call.getSender(),
+                call.getGasLimit(),
+                call.getPrice(),
+                contractAddress,
+                call.getMethodName(),
+                call.getMethodDesc(),
+                args).toRpcClientResult();
     }
 
     @POST
@@ -725,6 +798,30 @@ public class ContractResource implements InitializingBean {
                 contractAddress,
                 delete.getPassword(),
                 delete.getRemark()).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/validate/delete")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证删除智能合约")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult validateDeleteContract(@ApiParam(name = "validateDeleteForm", value = "验证删除智能合约", required = true) ContractValidateDelete delete) {
+        if (delete == null) {
+            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(delete.getSender())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        String contractAddress = delete.getContractAddress();
+        if (!AddressTool.validAddress(contractAddress)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        return contractTxService.validateContractDeleteTx(delete.getSender(),
+                contractAddress).toRpcClientResult();
     }
 
 

@@ -52,6 +52,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -114,7 +115,7 @@ public class ContractSdkResource {
         byte[] contractAddressBytes = contractAddress.getAddressBytes();
         // 组装txData
 
-        String contractCode =createContractTx.getContractCode();
+        String contractCode = createContractTx.getContractCode();
         byte[] contractCodeBytes = Hex.decode(contractCode);
         CreateContractData txData = new CreateContractData();
         txData.setSender(senderBytes);
@@ -161,12 +162,13 @@ public class ContractSdkResource {
         if (coinDataResult.getChange() != null) {
             coinData.getTo().add(coinDataResult.getChange());
         }
-        // transfer to contract address.
-        if (value.isGreaterThan(Na.ZERO)) {
-            Coin toCoin = new Coin(contractAddressBytes, value);
-            coinData.getTo().add(toCoin);
-        }
         tx.setCoinData(coinData);
+
+        // 重置为0，重新计算交易对象的size
+        tx.setSize(0);
+        if (tx.getSize() > TxMaxSizeValidator.MAX_TX_SIZE) {
+            return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
+        }
 
         return this.buildReturnInfo(tx);
     }
@@ -239,28 +241,37 @@ public class ContractSdkResource {
         }
         tx.setTxData(callContractData);
 
+        /**
+         * build coin data
+         */
+        CoinData coinData = new CoinData();
+        // transfer to contract address.
+        if (value.isGreaterThan(Na.ZERO)) {
+            Coin toCoin = new Coin(contractAddressBytes, value);
+            coinData.getTo().add(toCoin);
+        }
+
         List<Coin> coinList = ConvertCoinTool.convertCoinList(callContractTx.getUtxos());
-        CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size(),
+        CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(),
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
                 coinList);
 
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
         }
-        /**
-         * build coin data
-         */
-        CoinData coinData = new CoinData();
+
         coinData.setFrom(coinDataResult.getCoinList());
         if (coinDataResult.getChange() != null) {
             coinData.getTo().add(coinDataResult.getChange());
         }
-        // transfer to contract address.
-        if (value.isGreaterThan(Na.ZERO)) {
-            Coin toCoin = new Coin(contractAddressBytes, value);
-            coinData.getTo().add(toCoin);
-        }
         tx.setCoinData(coinData);
+
+        // 重置为0，重新计算交易对象的size
+        tx.setSize(0);
+        if (tx.getSize() > TxMaxSizeValidator.MAX_TX_SIZE) {
+            return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
+        }
+
         return this.buildReturnInfo(tx);
     }
 
@@ -322,6 +333,12 @@ public class ContractSdkResource {
             coinData.getTo().add(coinDataResult.getChange());
         }
         tx.setCoinData(coinData);
+
+        // 重置为0，重新计算交易对象的size
+        tx.setSize(0);
+        if (tx.getSize() > TxMaxSizeValidator.MAX_TX_SIZE) {
+            return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
+        }
 
         return this.buildReturnInfo(tx);
     }
