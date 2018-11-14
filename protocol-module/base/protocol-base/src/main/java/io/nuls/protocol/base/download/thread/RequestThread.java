@@ -58,13 +58,13 @@ public class RequestThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                if (startHeight - NulsContext.getInstance().getBestHeight() < 10000) {
-                    downloadRound();
-                    continue;
-                }
                 if (startHeight >= endHeight) {
                     this.init();
                     return;
+                }
+                if (startHeight - NulsContext.getInstance().getBestHeight() < 10000) {
+                    downloadRound();
+                    continue;
                 }
                 Thread.sleep(1000);
             } catch (Exception e) {
@@ -74,7 +74,6 @@ public class RequestThread implements Runnable {
     }
 
     private void init() {
-        this.nodeList = null;
         this.startHeight = 0;
         this.endHeight = 0;
         this.randomIndex = 1;
