@@ -359,6 +359,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
+        Log.error("----------rollbackBlock:" + block.getHeader().getHeight() + ",hash:" + block.getHeader().getHash().getDigestHex());
         boolean b = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
         if (!b) {
             return Result.getFailed(KernelErrorCode.DATA_ERROR);

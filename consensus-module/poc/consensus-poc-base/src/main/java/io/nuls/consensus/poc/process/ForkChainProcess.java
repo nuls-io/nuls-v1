@@ -105,8 +105,9 @@ public class ForkChainProcess {
                 return false;
             }
             //获得主链最新块，如果分叉链和主链高度一致，但是最新块hash不一致，然后排序hash来决定要不要进行特殊回滚处理
-            BlockHeader masterChainBlockHeader = masterChain.getBestBlock().getHeader();
-
+            BlockHeader masterBestBlockHeader = masterChain.getBestBlock().getHeader();
+            BlockHeader forkBestBlockHeader = null;
+            byte[] rightHash = null;
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
                 ChainContainer forkChain = iterator.next();
@@ -114,30 +115,26 @@ public class ForkChainProcess {
                     iterator.remove();
                     continue;
                 }
-                long forkChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-                BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
-                byte[] rightHash = null;
-                byte[] rightAddress = null;
-                //String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
-                byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
+                forkBestBlockHeader = forkChain.getChain().getEndBlockHeader();
                 boolean sameAddress = false;
+                boolean hashEquals = false;
                 //如果高度相同，则排序选一个hash，作为大家都认同的块
-                if (masterChainBlockHeader.getHeight() == forkChainHeight) {
-                    byte[] masterChainBlockHash = masterChainBlockHeader.getHash().getDigestBytes();
-                    if (masterChainBlockHash.equals(forkChainBlockHash)) {
+                if (masterBestBlockHeader.getHeight() == forkBestBlockHeader.getHeight()) {
+                    if (masterBestBlockHeader.getHash().equals(forkBestBlockHeader.getHash())) {
                         iterator.remove();
                         continue;
                     }
-                    rightHash = rightHash(masterChainBlockHash, forkChainBlockHash);
-                    sameAddress = ArraysTool.arrayEquals(forkChainBlockHeader.getPackingAddress(), masterChainBlockHeader.getPackingAddress());
+                    rightHash = rightHash(masterBestBlockHeader.getHash().getDigestBytes(), forkBestBlockHeader.getHash().getDigestBytes());
+                    sameAddress = ArraysTool.arrayEquals(forkBestBlockHeader.getPackingAddress(), masterBestBlockHeader.getPackingAddress());
+                    hashEquals = Arrays.equals(forkBestBlockHeader.getHash().getDigestBytes(), rightHash);
                 }
-                boolean hashEquals = Arrays.equals(forkChainBlockHash, rightHash);
-                if (forkChainHeight > newestBlockHeight
-                        || (forkChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < masterChain.getChain().getEndBlockHeader().getTime())
-                        || (masterChainBlockHeader.getHeight() == forkChainHeight && hashEquals && sameAddress)) {
-                    if (masterChainBlockHeader.getHeight() == forkChainHeight && hashEquals && sameAddress) {
+
+                if (forkBestBlockHeader.getHeight() > newestBlockHeight
+                        || (forkBestBlockHeader.getHeight() == newestBlockHeight && forkBestBlockHeader.getTime() < masterChain.getChain().getEndBlockHeader().getTime())
+                        || (masterBestBlockHeader.getHeight() == forkBestBlockHeader.getHeight() && hashEquals && sameAddress)) {
+                    if (masterBestBlockHeader.getHeight() == forkBestBlockHeader.getHeight() && hashEquals && sameAddress) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
-                        Log.info("-+-+-+-+-+-+-+-+- height: " + forkChainHeight + ", Right hash：" + Hex.encode(rightHash));
+                        Log.info("-+-+-+-+-+-+-+-+- height: " + forkBestBlockHeader.getHeight() + ", Right hash：" + Hex.encode(rightHash));
                         /** ******************************************************************************************************** */
                         try {
                             Log.info("");
@@ -152,12 +149,15 @@ public class ForkChainProcess {
                         /** ******************************************************************************************************** */
                     }
                     masterChain = forkChain;
-                    newestBlockHeight = forkChainHeight;
+                    newestBlockHeight = forkBestBlockHeader.getHeight();
                 }
             }
 
             if (!masterChain.equals(chainManager.getMasterChain())) {
 
+                if(newestBlockHeight >= chainManager.getBestBlockHeight() + 3) {
+                    System.out.println();
+                }
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", masterChain.getChain().getId(), masterChain.getChain().getStartBlockHeader().getHeight(), masterChain.getChain().getStartBlockHeader().getHash(), masterChain.getChain().getEndBlockHeader().getHeight(), masterChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
                 //ChainContainer resultChain = verifyNewChain(newChain);
@@ -685,6 +685,12 @@ public class ForkChainProcess {
         List<Block> rollbackList = new ArrayList<>();
         for (Block rollbackBlock : rollbackBlockList) {
             try {
+                Result<BlockHeader> result = blockService.getBlockHeader(rollbackBlock.getHeader().getHeight());
+                if (result.isFailed()) {
+                    Log.error("---------------------rollbackBlocks get block:" + result.getMsg());
+                    result = blockService.getBestBlockHeader();
+                    Log.error("-----------------bestBlockheight:" + result.getData().getHeight());
+                }
                 boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
                 if (success) {
                     //回滚版本更新统计数据
