@@ -154,10 +154,6 @@ public class ForkChainProcess {
             }
 
             if (!masterChain.equals(chainManager.getMasterChain())) {
-
-                if(newestBlockHeight >= chainManager.getBestBlockHeight() + 3) {
-                    System.out.println();
-                }
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", masterChain.getChain().getId(), masterChain.getChain().getStartBlockHeader().getHeight(), masterChain.getChain().getStartBlockHeader().getHash(), masterChain.getChain().getEndBlockHeader().getHeight(), masterChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
                 //ChainContainer resultChain = verifyNewChain(newChain);
