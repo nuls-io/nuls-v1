@@ -131,7 +131,7 @@ public class ConsensusScheduler {
             Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
             if (consensusVersionHeight == null) {
                 //todo 正式上线这里会改成1200000L
-                consensusVersionHeight = 1L;
+                consensusVersionHeight = ProtocolConstant.START_CHECK_PROTOCOL_HEIGHT;
             }
             NulsVersionManager.loadVersionByHeight(consensusVersionHeight);
 
