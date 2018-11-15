@@ -161,7 +161,7 @@ public interface ProtocolConstant extends NulsConstant {
     //协议升级要求最低覆盖率
     int MIN_PROTOCOL_UPGRADE_RATE = 60;
     //协议升级要求最低延迟块数
-    int MIN_PROTOCOL_UPGRADE_DELAY = 50;
+    int MIN_PROTOCOL_UPGRADE_DELAY = 1000;
     // pierre test comment out
 
     /**

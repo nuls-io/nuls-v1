@@ -35,21 +35,16 @@ import io.nuls.consensus.poc.process.*;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.task.*;
-import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.base.version.NulsVersionManager;
-import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
-import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -148,7 +143,7 @@ public class ConsensusScheduler {
                 for (long i = consensusVersionHeight; i <= bestHeight; i++) {
                     Result<BlockHeader> result = blockService.getBlockHeader(i);
                     if (result.isSuccess()) {
-                        NulsProtocolProcess_1.getInstance().processProtocolUpGrade(result.getData());
+                        NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
                     }
                 }
             }

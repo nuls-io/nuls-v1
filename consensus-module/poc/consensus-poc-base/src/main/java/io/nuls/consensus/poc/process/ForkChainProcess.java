@@ -47,7 +47,6 @@ import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -78,7 +77,7 @@ public class ForkChainProcess {
     private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
-    private NulsProtocolProcess_1 nulsProtocolProcess = NulsProtocolProcess_1.getInstance();
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
