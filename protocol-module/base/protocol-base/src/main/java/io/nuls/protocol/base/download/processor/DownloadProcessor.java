@@ -26,11 +26,9 @@
 package io.nuls.protocol.base.download.processor;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
@@ -40,7 +38,6 @@ import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.base.constant.DownloadStatus;
 import io.nuls.protocol.base.download.entity.NetworkNewestBlockInfos;
 import io.nuls.protocol.base.download.thread.DownloadThreadManager;
-import io.nuls.protocol.base.download.utils.DownloadDataStorage;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 
@@ -115,30 +112,18 @@ public class DownloadProcessor extends Thread {
             return;
         }
         NulsContext.getInstance().setNetBestBlockHeight(newestInfos.getNetBestHeight());
-        BlockingQueue<Block> blockQueue = new LinkedBlockingQueue<>();
 
-        DownloadThreadManager downloadThreadManager = new DownloadThreadManager(newestInfos, blockQueue);
+        DownloadThreadManager downloadThreadManager = new DownloadThreadManager(newestInfos);
 
         FutureTask<Boolean> threadManagerFuture = new FutureTask<>(downloadThreadManager);
 
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-thread-manager",
                 new Thread(threadManagerFuture));
 
-        DownloadDataStorage downloadDataStorage = new DownloadDataStorage(blockQueue);
-
-        FutureTask<Boolean> dataStorageFuture = new FutureTask<>(downloadDataStorage);
-
-        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-data-storeage",
-                new Thread(dataStorageFuture));
-
         try {
             Boolean downResult = threadManagerFuture.get();
 
-            blockQueue.offer(new Block());
-
-            Boolean storageResult = dataStorageFuture.get();
-
-            boolean success = downResult != null && downResult.booleanValue() && storageResult != null && storageResult.booleanValue();
+            boolean success = downResult != null && downResult.booleanValue();
 
             if (success && checkIsNewest(newestInfos)) {
                 downloadStatus = DownloadStatus.SUCCESS;
