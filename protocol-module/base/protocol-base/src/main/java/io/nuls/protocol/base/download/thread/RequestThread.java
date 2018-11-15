@@ -62,7 +62,7 @@ public class RequestThread implements Runnable {
                     this.init();
                     return;
                 }
-                if (startHeight - NulsContext.getInstance().getBestHeight() < 10000) {
+                if (startHeight - NulsContext.getInstance().getBestHeight() < 1000) {
                     downloadRound();
                     continue;
                 }
