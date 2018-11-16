@@ -22,15 +22,18 @@ public class ContractTxTest {
 
     private RestFulUtils restFul = null;
 
+    private String sender;
+
 
     @Before
     public void init() {
         restFul = RestFulUtils.getInstance();
-        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:8001/api");
+        RestFulUtils.getInstance().setServerUri("http://192.168.1.40:8001/api");
+        sender = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
     }
 
     public List<InputDto> loadUTXOs() {
-        String address = "Nsdv1Hbu4TokdgbXreypXmVttYKdPT1g";
+        String address = sender;
         Long limit = 100L;
         String url = "/utxo/limit/" + address + "/" + limit;
         RpcClientResult result = restFul.get(url, new HashMap());
@@ -53,7 +56,7 @@ public class ContractTxTest {
     @Test
     public void create() {
         List<InputDto> utxos = loadUTXOs();
-        String sender = "Nsdv1Hbu4TokdgbXreypXmVttYKdPT1g";
+        String sender = this.sender;
         String url = "/contract/sdk/create";
 
         long gasLimit = 27043L;
@@ -94,7 +97,7 @@ public class ContractTxTest {
         String url = "/contract/sdk/call";
 
         String contractAddress = "NseA4LYf5kBXjrnag4xN8BjzgWx7YrVm";
-        String sender = "Nsdv1Hbu4TokdgbXreypXmVttYKdPT1g";
+        String sender = this.sender;
         Long value = 100_0000_0000L;
         Long gasLimit = 81325l;
         Long price = 25L;
@@ -130,7 +133,7 @@ public class ContractTxTest {
     public void deleteContract() {
         List<InputDto> utxos = loadUTXOs();
         String url = "/contract/sdk/delete";
-        String sender = "Nsdv1Hbu4TokdgbXreypXmVttYKdPT1g";
+        String sender = this.sender;
         String contractAddress = "NseDkRagNCj8kNE6JRPB55i5bZuAeKtf";
 
         Map<String, Object> paramsMap = new HashMap<>();

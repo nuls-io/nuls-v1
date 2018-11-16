@@ -1251,6 +1251,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 // 合约转账(从合约转出)使用的交易时间为区块时间
                 ContractTransferTransaction contractTransferTx;
                 for (ContractTransfer transfer : transfers) {
+                    // 保存外部合约交易hash
                     transfer.setOrginHash(tx.getHash());
                     contractTransferResult = this.createContractTransferTx(transfer, time, toMaps, contractUsedCoinMap, blockHeight);
                     if (contractTransferResult.isFailed()) {
@@ -1263,7 +1264,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                         break;
                     }
                     contractTransferTx = contractTransferResult.getData();
-                    // 保存内部转账交易hash和外部合约交易hash
+                    // 保存内部转账交易hash
                     transfer.setHash(contractTransferTx.getHash());
                     successContractTransferTxs.put(contractTransferTx.getHash().getDigestHex(), contractTransferTx);
                 }
