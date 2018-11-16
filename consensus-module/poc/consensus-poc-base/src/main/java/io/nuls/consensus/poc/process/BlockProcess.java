@@ -36,7 +36,6 @@ import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
@@ -95,7 +94,7 @@ public class BlockProcess {
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
-    private NulsProtocolProcess_1 nulsProtocolProcess = NulsProtocolProcess_1.getInstance();
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {

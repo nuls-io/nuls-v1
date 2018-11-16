@@ -32,7 +32,6 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.NulsProtocolProcess;
-import io.nuls.consensus.poc.process.NulsProtocolProcess_1;
 import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
@@ -63,7 +62,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
 
     private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
 
-    private NulsProtocolProcess_1 nulsProtocolProcess = NulsProtocolProcess_1.getInstance();
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
     @Autowired
     private BlockService blockService;

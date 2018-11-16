@@ -187,8 +187,8 @@ public class Chain implements Cloneable {
     public void initData(BlockHeader startHeader, List<BlockHeader> headerList, List<Block> blockList) {
         this.startBlockHeader = startHeader;
         this.endBlockHeader = headerList.get(headerList.size() - 1);
-        this.blockHeaderList = headerList;
-        this.blockList = blockList;
+        this.blockHeaderList = new LinkedList<>(headerList);
+        this.blockList = new LinkedList<>(blockList);
     }
 
     public void initData(Block block) {

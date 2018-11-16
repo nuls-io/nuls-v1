@@ -74,8 +74,9 @@ public class BlockMonitorProcess {
         }
         int count = 0;
         Set<String> addressSet = new HashSet<>();
-        for (Block block : blockList) {
-            addressSet.add(AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+        for (int i = blockList.size() - 1; i >= 0; i--) {
+            Block block = blockList.get(i);
+            addressSet.add(block.getHeader().getPackingAddressStr());
             count++;
             if (count > minCount) {
                 break;
