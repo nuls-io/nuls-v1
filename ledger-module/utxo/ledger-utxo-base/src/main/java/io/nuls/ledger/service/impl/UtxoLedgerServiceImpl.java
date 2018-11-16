@@ -201,6 +201,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     int fromIndex = (int) byteBuffer.readVarInt();
 
                     Transaction fromTx = utxoLedgerTransactionStorageService.getTx(fromTxHash);
+                    if (fromTx == null) {
+                        System.out.println("-------------------fromTx is null:" + fromTxHash);
+                        System.out.println("-------------------tx:" + tx.getHash().getDigestHex() + ",height:" + tx.getBlockHeight());
+                        System.out.println("-------------------bestBlockHeight:" + NulsContext.getInstance().getBestHeight());
+
+                        Log.error("-------------------fromTx is null:" + fromTxHash);
+                        Log.error("-------------------tx:" + tx.getHash().getDigestHex() + ",height:" + tx.getBlockHeight() +",type=" + tx.getType());
+                        Log.error("-------------------bestBlockHeight:" + NulsContext.getInstance().getBestHeight());
+                    }
                     recovery = fromTx.getCoinData().getTo().get(fromIndex);
                     recovery.setFrom(from.getFrom());
 //                    Log.info("rollback save utxo:::" + Hex.encode(from.()));
@@ -286,8 +295,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             //交易签名反序列化
             if (transaction.needVerifySignature() && fromSize > 0) {
                 try {
-                    transactionSignature.parse(transaction.getTransactionSignature(),0);
-                }catch (NulsException e){
+                    transactionSignature.parse(transaction.getTransactionSignature(), 0);
+                } catch (NulsException e) {
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
                 }
             }
@@ -335,30 +344,29 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
                     boolean signtureValidFlag = false;
-                    if(transaction.needVerifySignature()){
-                        if(transactionSignature != null){
-                            if(fromAddressBytes != null && fromAddressBytes.length != Address.ADDRESS_LENGTH && transactionSignature.getScripts() != null
-                                    && transactionSignature.getScripts().size()>0){
+                    if (transaction.needVerifySignature()) {
+                        if (transactionSignature != null) {
+                            if (fromAddressBytes != null && fromAddressBytes.length != Address.ADDRESS_LENGTH && transactionSignature.getScripts() != null
+                                    && transactionSignature.getScripts().size() > 0) {
                                 Script scriptPubkey = new Script(fromAddressBytes);
-                                for (Script scriptSig:transactionSignature.getScripts()) {
-                                    signtureValidFlag = scriptSig.correctlyNulsSpends(transaction,0,scriptPubkey);
-                                    if(signtureValidFlag) {
+                                for (Script scriptSig : transactionSignature.getScripts()) {
+                                    signtureValidFlag = scriptSig.correctlyNulsSpends(transaction, 0, scriptPubkey);
+                                    if (signtureValidFlag) {
                                         break;
                                     }
                                 }
-                            }
-                            else {
-                                if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() != 0){
-                                    for (P2PHKSignature signature:transactionSignature.getP2PHKSignatures()) {
-                                        signtureValidFlag = AddressTool.checkPublicKeyHash(realAddressBytes,signature.getSignerHash160());
-                                        if(signtureValidFlag) {
+                            } else {
+                                if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() != 0) {
+                                    for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                                        signtureValidFlag = AddressTool.checkPublicKeyHash(realAddressBytes, signature.getSignerHash160());
+                                        if (signtureValidFlag) {
                                             break;
                                         }
                                     }
                                 }
                             }
                         }
-                        if(!signtureValidFlag){
+                        if (!signtureValidFlag) {
                             Log.warn("public key hash160 check error.");
                             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
                         }
@@ -416,7 +424,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 Coin to = tos.get(i);
 
                 // 如果不是调用合约的类型，并且合约地址作为nuls接收者，则返回错误，非合约交易不能转入nuls(CoinBase交易不过此验证)
-                if(ContractConstant.TX_TYPE_CALL_CONTRACT != transaction.getType()
+                if (ContractConstant.TX_TYPE_CALL_CONTRACT != transaction.getType()
                         && AddressTool.validContractAddress(to.getOwner())) {
                     Log.error("Ledger verify error: {}.", ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER.getEnMsg());
                     return ValidateResult.getFailedResult(CLASS_NAME, ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
@@ -442,7 +450,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
@@ -455,7 +463,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {
@@ -615,15 +623,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     /**
      * get UTXO by key
-     *
+     * <p>
      * 根据key获取UTXO
+     *
      * @param address
      * @return Coin
      */
     @Override
-    public  List<Coin> getAllUtxo(byte[] address){
+    public List<Coin> getAllUtxo(byte[] address) {
         List<Coin> coinList = new ArrayList<>();
-        Collection<Entry<byte[], byte[]>> rawList =utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
+        Collection<Entry<byte[], byte[]>> rawList = utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
         for (Entry<byte[], byte[]> coinEntry : rawList) {
             Coin coin = new Coin();
             try {

@@ -78,7 +78,7 @@ public class ChainContainerTest extends BaseChainTest {
         bestBlock = chainContainer.getBestBlock();
         assertEquals(bestBlock.getHeader().getHeight(), 0L);
 
-        for(int i = 0 ; i < 100 ; i++) {
+        for (int i = 0; i < 100; i++) {
 
             newBlock = newBlock(bestBlock);
 
@@ -133,10 +133,10 @@ public class ChainContainerTest extends BaseChainTest {
         testAddAgent();
 
         assertEquals(chainContainer.getCurrentRound().getMemberCount(), 2);
-        for(int i = 3 ; i > 0 ; i--) {
+        for (int i = 3; i > 0; i--) {
             Block bestBlock = chainContainer.getBestBlock();
             boolean success = chainContainer.rollback(bestBlock);
-            assert(success);
+            assert (success);
         }
         assertEquals(chainContainer.getCurrentRound().getMemberCount(), 1);
     }
@@ -146,7 +146,7 @@ public class ChainContainerTest extends BaseChainTest {
 
         Block forkBlock = null;
 
-        for(int i = 0 ; i < 20 ; i++) {
+        for (int i = 0; i < 20; i++) {
 
             Block bestBlock = chainContainer.getBestBlock();
             Block newBlock = newBlock(bestBlock);
@@ -157,19 +157,16 @@ public class ChainContainerTest extends BaseChainTest {
             bestBlock = chainContainer.getBestBlock();
             assertEquals(bestBlock.getHeader().getHeight(), 1L + i);
 
-            if(i == 10) {
+            if (i == 10) {
                 forkBlock = bestBlock;
             }
         }
 
         Chain chain = new Chain();
-        chain.setEndBlockHeader(forkBlock.getHeader());
-        chain.setStartBlockHeader(forkBlock.getHeader());
-        chain.getBlockList().add(forkBlock);
+        chain.addBlock(forkBlock);
 
         Block newBlock = newBlock(forkBlock);
-        chain.setEndBlockHeader(newBlock.getHeader());
-        chain.getBlockList().add(newBlock);
+        chain.addBlock(newBlock);
 
         ChainContainer otherChainContainer = new ChainContainer(chain);
         ChainContainer newForkChainContainer = chainContainer.getBeforeTheForkChain(otherChainContainer);
@@ -181,7 +178,7 @@ public class ChainContainerTest extends BaseChainTest {
     public void testGetAfterTheForkChain() {
         Block forkBlock = null;
 
-        for(int i = 0 ; i < 30 ; i++) {
+        for (int i = 0; i < 30; i++) {
 
             Block bestBlock = chainContainer.getBestBlock();
             Block newBlock = newBlock(bestBlock);
@@ -192,19 +189,16 @@ public class ChainContainerTest extends BaseChainTest {
             bestBlock = chainContainer.getBestBlock();
             assertEquals(bestBlock.getHeader().getHeight(), 1L + i);
 
-            if(i == 20) {
+            if (i == 20) {
                 forkBlock = bestBlock;
             }
         }
 
         Chain chain = new Chain();
-        chain.setEndBlockHeader(forkBlock.getHeader());
-        chain.setStartBlockHeader(forkBlock.getHeader());
-        chain.getBlockList().add(forkBlock);
+        chain.addBlock(forkBlock);
 
         Block newBlock = newBlock(forkBlock);
-        chain.setEndBlockHeader(newBlock.getHeader());
-        chain.getBlockList().add(newBlock);
+        chain.addBlock(newBlock);
 
         ChainContainer otherChainContainer = new ChainContainer(chain);
         ChainContainer newForkChainContainer = chainContainer.getAfterTheForkChain(otherChainContainer);
@@ -216,7 +210,7 @@ public class ChainContainerTest extends BaseChainTest {
 
         BlockHeader blockHeader = block.getHeader();
         List<Transaction> txs = block.getTxs();
-                
+
         Transaction<Agent> agentTx = new CreateAgentTransaction();
         Agent agent = new Agent();
         agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));

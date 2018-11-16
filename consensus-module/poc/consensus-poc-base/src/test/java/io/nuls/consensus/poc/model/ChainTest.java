@@ -49,7 +49,7 @@ public class ChainTest {
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100l);
         block.setHeader(blockHeader);
-        chain.getBlockList().add(block);
+        chain.getAllBlockList().add(block);
 
         Block bestBlock = chain.getBestBlock();
         assertNotNull(bestBlock);

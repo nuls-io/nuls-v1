@@ -62,6 +62,17 @@ public interface VersionManagerStorageService {
      */
     Result saveProtocolInfoPo(ProtocolInfoPo protocolInfoPo);
 
+    Result saveProtocolInfoList(long blockHeight, List<ProtocolInfoPo> protocolInfoPoList);
+
+    List<ProtocolInfoPo> getProtocolInfoList(long blockHeight);
+
+    void removeProtocolInfoList(long blockHeight);
+
+    Result saveProtocolTempInfoList(long blockHeight, List<ProtocolTempInfoPo> tempInfoPoList);
+
+    List<ProtocolTempInfoPo> getProtocolTempInfoList(long blockHeight);
+
+    void removeProtocolTempInfoList(long blockHeight);
     /**
      *
      * @param version 版本号

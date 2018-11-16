@@ -62,9 +62,9 @@ public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
         if (cacheBody != null) {
 //            Log.info("---------------------cacheBody is not null------------------------------" +  cacheBody.toString());
             Node node1 = nodeManager.getNode(cacheBody.getId());
-            if(node1 != null) {
-                node1.setFailCount(0);
-            }
+//            if(node1 != null) {
+//                node1.setFailCount(0);
+//            }
             return null;
         }
         //尝试建立连接

@@ -37,6 +37,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.service.DownloadService;
 import io.nuls.protocol.utils.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
@@ -63,9 +64,16 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+
 
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
+
+        if (!downloadService.isDownloadSuccess().isSuccess()) {
+            return;
+        }
+
         SmallBlock smallBlock = event.getMsgBody();
         if (null == smallBlock) {
             Log.warn("recieved a null smallBlock!");

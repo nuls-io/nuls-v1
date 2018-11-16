@@ -57,6 +57,7 @@ public class BlockHeader extends BaseNulsData {
 
     private transient int size;
     private transient byte[] packingAddress;
+    private transient String packingAddressStr;
 
     public BlockHeader() {
     }
@@ -185,6 +186,12 @@ public class BlockHeader extends BaseNulsData {
         return packingAddress;
     }
 
+    public String getPackingAddressStr() {
+        if (null == packingAddressStr) {
+            this.packingAddressStr = AddressTool.getStringAddressByBytes(getPackingAddress());
+        }
+        return packingAddressStr;
+    }
 
     public byte[] getExtend() {
         return extend;

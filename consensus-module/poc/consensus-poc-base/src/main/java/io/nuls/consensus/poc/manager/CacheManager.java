@@ -78,11 +78,7 @@ public class CacheManager {
 
         Chain masterChain = new Chain();
 
-        masterChain.setBlockHeaderList(blockHeaderList);
-        masterChain.setBlockList(blockList);
-
-        masterChain.setStartBlockHeader(blockList.get(0).getHeader());
-        masterChain.setEndBlockHeader(blockList.get(blockList.size() - 1).getHeader());
+        masterChain.initData(blockList.get(0).getHeader(),blockHeaderList,blockList);
         masterChain.setAgentList(agentList);
         masterChain.setDepositList(depositList);
         masterChain.setYellowPunishList(yellowPunishList);

@@ -164,10 +164,13 @@ public interface ProtocolConstant extends NulsConstant {
     int MIN_PROTOCOL_UPGRADE_DELAY = 0;
     // pierre test comment out
 
+    long START_CHECK_PROTOCOL_HEIGHT = 1L;
+
+
     /**
      * 最小转账金额
      * Minimum transfer amount
      */
-    Na MININUM_TRANSFER_AMOUNT = Na.parseNuls(0.0001);
+    Na MININUM_TRANSFER_AMOUNT = Na.parseNuls(0.01);
 
 }

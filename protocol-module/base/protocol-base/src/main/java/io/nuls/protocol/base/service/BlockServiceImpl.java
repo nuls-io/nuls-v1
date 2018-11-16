@@ -359,10 +359,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
-        boolean b = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
-        if (!b) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR);
-        }
+
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());

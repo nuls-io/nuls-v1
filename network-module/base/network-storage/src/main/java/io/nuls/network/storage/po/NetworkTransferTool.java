@@ -36,7 +36,7 @@ public class NetworkTransferTool {
         po.setPort(node.getSeverPort());
         po.setLastTime(node.getLastTime());
         po.setLastFailTime(node.getLastFailTime());
-        po.setFailCount(node.getFailCount());
+//        po.setFailCount(node.getFailCount());
         return po;
     }
 
@@ -46,7 +46,7 @@ public class NetworkTransferTool {
         po.setPort(node.getSeverPort());
         po.setLastTime(node.getLastTime());
         po.setLastFailTime(node.getLastFailTime());
-        po.setFailCount(node.getFailCount());
+//        po.setFailCount(node.getFailCount());
     }
 
     public static Node toNode(NodePo po) {
@@ -55,7 +55,7 @@ public class NetworkTransferTool {
         node.setIp(po.getIp());
         node.setPort(po.getPort());
         node.setSeverPort(po.getPort());
-        node.setFailCount(0);
+//        node.setFailCount(0);
         node.setLastTime(po.getLastTime());
         node.setLastFailTime(po.getLastFailTime());
         return node;

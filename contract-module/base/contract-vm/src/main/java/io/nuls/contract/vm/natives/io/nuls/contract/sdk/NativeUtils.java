@@ -26,10 +26,7 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.sdk.Utils;
-import io.nuls.contract.vm.Frame;
-import io.nuls.contract.vm.MethodArgs;
-import io.nuls.contract.vm.ObjectRef;
-import io.nuls.contract.vm.Result;
+import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
@@ -37,6 +34,7 @@ import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.util.JsonUtils;
+import io.nuls.core.tools.crypto.Sha3Hash;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,6 +60,18 @@ public class NativeUtils {
                     return SUPPORT_NATIVE;
                 } else {
                     return emit(methodCode, methodArgs, frame);
+                }
+            case sha3:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return sha3(methodCode, methodArgs, frame);
+                }
+            case sha3Bytes:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return sha3Bytes(methodCode, methodArgs, frame);
                 }
             default:
                 if (check) {
@@ -117,12 +127,12 @@ public class NativeUtils {
             return null;
         }
 
-        ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
+        Map<String, FieldCode> fields = frame.methodArea.allFields(objectRef.getVariableType().getType());
         Map<String, Object> map = frame.heap.getFields(objectRef);
         Map<String, Object> jsonMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String name = entry.getKey();
-            FieldCode fieldCode = classCode.fields.get(name);
+            FieldCode fieldCode = fields.get(name);
             if (fieldCode != null && !fieldCode.isSynthetic) {
                 Object value = entry.getValue();
                 jsonMap.put(name, toJson(fieldCode, value, frame));
@@ -202,6 +212,46 @@ public class NativeUtils {
             this.payload = payload;
         }
 
+    }
+
+    public static final String sha3 = TYPE + "." + "sha3" + "(Ljava/lang/String;)Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Utils#sha3(String)
+     */
+    private static Result sha3(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.SHA3);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef ref = null;
+        if (objectRef != null) {
+            String src = frame.heap.runToString(objectRef);
+            String sha3 = Sha3Hash.sha3(src);
+            ref = frame.heap.newString(sha3);
+        }
+        Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
+    }
+
+    public static final String sha3Bytes = TYPE + "." + "sha3" + "([B)Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Utils#sha3(byte[])
+     */
+    private static Result sha3Bytes(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.SHA3);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef ref = null;
+        if (objectRef != null) {
+            byte[] bytes = (byte[]) frame.heap.getObject(objectRef);
+            String sha3 = Sha3Hash.sha3(bytes);
+            ref = frame.heap.newString(sha3);
+        }
+        Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
     }
 
 }

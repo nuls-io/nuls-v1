@@ -36,10 +36,12 @@ import io.nuls.account.ledger.base.util.CoinComparatorDesc;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.model.MultipleAddressTransferModel;
+import io.nuls.account.ledger.model.TransactionDataResult;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
+import io.nuls.account.ledger.util.CoinDataTool;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.model.MultiSigAccount;
@@ -432,26 +434,46 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException {
+    public CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) {
         if (null == price) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
         lock.lock();
         try {
-            CoinDataResult coinDataResult = new CoinDataResult();
-            coinDataResult.setEnough(false);
-
-
             List<Coin> coinList = balanceManager.getCoinListByAddress(address);
+            coinList = coinList.stream()
+                    .filter(coin1 -> coin1.usable() && !Na.ZERO.equals(coin1.getNa()))
+                    .sorted(CoinComparator.getInstance())
+                    .collect(Collectors.toList());
+            CoinDataResult coinDataResult = CoinDataTool.getCoinData(address, amount, size, price, coinList);
+            return coinDataResult;
+        } finally {
+            lock.unlock();
+        }
+    }
 
+
+    public TransactionDataResult createTransferTx(byte[] address, Na amount, Na price, byte[] to, byte[] remark) {
+        TransactionDataResult result = new TransactionDataResult();
+        result.setEnough(false);
+        TransferTransaction tx = new TransferTransaction();
+        tx.setRemark(remark);
+        tx.setTime(TimeService.currentTimeMillis());
+        CoinData coinData = new CoinData();
+        lock.lock();
+        try {
+            int size = tx.size();
+            int signType = 0;
+            List<Coin> coinList = balanceManager.getCoinListByAddress(address);
             coinList = coinList.stream()
                     .filter(coin1 -> coin1.usable() && !Na.ZERO.equals(coin1.getNa()))
                     .sorted(CoinComparator.getInstance())
                     .collect(Collectors.toList());
 
             if (coinList.isEmpty()) {
-                return coinDataResult;
+                return result;
             }
+
             List<Coin> coins = new ArrayList<>();
             Na values = Na.ZERO;
             // 累加到足够支付转出额与手续费
@@ -462,51 +484,63 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (i == 127) {
                     size += 1;
                 }
-                //每次累加一条未花费余额时，需要重新计算手续费
-                Na fee = TransactionFeeCalculator.getFee(size, price);
-                values = values.add(coin.getNa());
-
                 /**
                  * 判断是否是脚本验证UTXO
                  * */
-                int signType = coinDataResult.getSignType();
+                signType = result.getSignType();
                 if (signType != 3) {
                     if ((signType & 0x01) == 0 && coin.getTempOwner().length == 23) {
-                        coinDataResult.setSignType((byte) (signType | 0x01));
+                        result.setSignType((byte) (signType | 0x01));
                         size += P2PHKSignature.SERIALIZE_LENGTH;
                     } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
-                        coinDataResult.setSignType((byte) (signType | 0x02));
+                        result.setSignType((byte) (signType | 0x02));
                         size += P2PHKSignature.SERIALIZE_LENGTH;
                     }
                 }
 
-                //需要判断是否找零，如果有找零，则需要重新计算手续费
-                if (values.isGreaterThan(amount.add(fee))) {
-                    Na change = values.subtract(amount.add(fee));
-                    Coin changeCoin = new Coin();
-                    if (address[2] == NulsContext.P2SH_ADDRESS_TYPE) {
-                        changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
-                    } else {
-                        changeCoin.setOwner(address);
-                    }
-                    changeCoin.setNa(change);
-                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
-                    if (values.isLessThan(amount.add(fee))) {
-                        continue;
-                    }
-                    changeCoin.setNa(values.subtract(amount.add(fee)));
-                    if (!changeCoin.getNa().equals(Na.ZERO)) {
-                        coinDataResult.setChange(changeCoin);
-                    }
-                }
-                coinDataResult.setFee(fee);
-                if (values.isGreaterOrEquals(amount.add(fee))) {
-                    coinDataResult.setEnough(true);
-                    coinDataResult.setCoinList(coins);
+                values = values.add(coin.getNa());
+                if (values.isGreaterOrEquals(amount)) {
+                    result.setEnough(true);
                     break;
                 }
             }
-            return coinDataResult;
+
+            if (!result.isEnough()) {
+                return result;
+            }
+            //如果为多签地址则以脚本方式存储
+            Coin toCoin;
+            if (to[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                Script scriptPubkey = SignatureUtil.createOutputScript(to);
+                toCoin = new Coin(scriptPubkey.getProgram(), values);
+            } else {
+                toCoin = new Coin(to, values);
+            }
+            coinData.getTo().add(toCoin);
+
+
+            //如果金额足够，判断是否找零，以及计算手续费
+            if (values.isGreaterThan(amount)) {
+                Na change = values.subtract(amount);
+                Coin changeCoin = new Coin();
+                if (address[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                } else {
+                    changeCoin.setOwner(address);
+                }
+                changeCoin.setNa(change);
+                coinData.getTo().add(changeCoin);
+            }
+            size += coinData.size();
+
+            Na fee = TransactionFeeCalculator.getFee(size, price);
+            toCoin.setNa(amount.subtract(fee));
+
+            coinData.setFrom(coins);
+            tx.setCoinData(coinData);
+
+            result.setTransaction(tx);
+            return result;
         } finally {
             lock.unlock();
         }
@@ -565,7 +599,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             max = max.subtract(fee);
             return Result.getSuccess().setData(max);
         } catch (Exception e) {
-            Log.error(e.fillInStackTrace());
+            Log.error(e);
             return Result.getFailed(TransactionErrorCode.DATA_ERROR);
         } finally {
             lock.unlock();
@@ -794,6 +828,80 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
+    public Result sendToAddress(byte[] from, byte[] to, Na values, String password, byte[] remark, Na price) {
+        try {
+
+            Result<Account> accountResult = accountService.getAccount(from);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            // 检查to是否为合约地址，如果是合约地址，则返回错误
+            if (contractService.isContractAddress(to)) {
+                return Result.getFailed(ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
+            }
+            if (price == null) {
+                price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+            }
+
+            TransactionDataResult txResult = createTransferTx(from, values, price, to, remark);
+            if (!txResult.isEnough()) {
+                return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
+            }
+            Transaction tx = txResult.getTransaction();
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //生成签名
+            List<ECKey> signEckeys = new ArrayList<>();
+            List<ECKey> scriptEckeys = new ArrayList<>();
+            ECKey eckey = account.getEcKey(password);
+            //如果最后一位为1则表示该交易包含普通签名
+            if ((txResult.getSignType() & 0x01) == 0x01) {
+                signEckeys.add(eckey);
+            }
+            //如果倒数第二位位为1则表示该交易包含脚本签名
+            if ((txResult.getSignType() & 0x02) == 0x02) {
+                scriptEckeys.add(eckey);
+            }
+            SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
+
+            // 保存未确认交易到本地账户
+            Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
+            if (saveResult.isFailed()) {
+                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
+                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
+                    Result rs = getMaxAmountOfOnce(from, tx, price);
+                    if (rs.isSuccess()) {
+                        Na maxAmount = (Na) rs.getData();
+                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                    }
+                    return rs;
+                }
+                return saveResult;
+            }
+//          transactionService.newTx(tx);
+            Result sendResult = transactionService.broadcastTx(tx);
+            if (sendResult.isFailed()) {
+                this.deleteTransaction(tx);
+                return sendResult;
+            }
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    @Override
     public Result dapp(byte[] from, String password, byte[] data, byte[] remark) {
         Result<Account> accountResult = accountService.getAccount(from);
         if (accountResult.isFailed()) {
@@ -871,7 +979,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, String password, Na amount, String remark, Na price) {
+    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, Na amount, String remark, Na price) {
         try {
             for (MultipleAddressTransferModel from : fromList) {
                 Result<Account> accountResult = accountService.getAccount(from.getAddress());
@@ -880,9 +988,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
                 Account account = accountResult.getData();
                 if (account.isEncrypted() && account.isLocked()) {
-                    AssertUtil.canNotEmpty(password, "the password can not be empty");
-                    if (!account.validatePassword(password)) {
-                        return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                    AssertUtil.canNotEmpty(from.getPassword(), "the password can not be empty");
+                    if (!account.validatePassword(from.getPassword())) {
+                        Result result = Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                        result.setMsg(result.getErrorCode().getMsg() + ",address :" + AddressTool.getStringAddressByBytes(from.getAddress()));
+                        return result;
                     }
                 }
             }
@@ -939,7 +1049,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Result<Account> accountResult = accountService.getAccount(fromList.get(index).getAddress());
                 Account account = accountResult.getData();
                 //用于生成ECKey
-                ECKey ecKey = account.getEcKey(password);
+                ECKey ecKey = account.getEcKey(fromList.get(index).getPassword());
                 // CoinDataResult coinDataResult = coinDataResult;
                 //如果最后一位为1则表示该交易包含普通签名
                 if ((coinDataResult.getSignType() & 0x01) == 0x01) {
@@ -978,6 +1088,51 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
+    }
+
+    @Override
+    public Result sendFrom(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, Na amount, String remark, Na price) {
+//        try {
+//            for (MultipleAddressTransferModel from : fromList) {
+//                Result<Account> accountResult = accountService.getAccount(from.getAddress());
+//                if (accountResult.isFailed()) {
+//                    return accountResult;
+//                }
+//                Account account = accountResult.getData();
+//                if (account.isEncrypted() && account.isLocked()) {
+//                    AssertUtil.canNotEmpty(from.getPassword(), "the password can not be empty");
+//                    if (!account.validatePassword(from.getPassword())) {
+//                        Result result = Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+//                        result.setMsg(result.getErrorCode().getMsg() + ",address :" + AddressTool.getStringAddressByBytes(from.getAddress()));
+//                        return result;
+//                    }
+//                }
+//            }
+//
+//            for (MultipleAddressTransferModel to : toList) {
+//                // 检查to是否为合约地址，如果是合约地址，则返回错误
+//                if (contractService.isContractAddress(to.getAddress())) {
+//                    return Result.getFailed(ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
+//                }
+//            }
+//            TransferTransaction tx = new TransferTransaction();
+//            if (StringUtils.isNotBlank(remark)) {
+//                try {
+//                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+//                } catch (UnsupportedEncodingException e) {
+//                    Log.error(e);
+//                }
+//            }
+//
+//
+//        } catch (IOException e) {
+//            Log.error(e);
+//            return Result.getFailed(KernelErrorCode.IO_ERROR);
+//        } catch (NulsException e) {
+//            Log.error(e);
+//            return Result.getFailed(e.getErrorCode());
+//        }
+        return null;
     }
 
     private CoinDataResult getCoinDataMultipleAdresses(List<MultipleAddressTransferModel> fromList, Na amount, int size, Na price) {

@@ -33,6 +33,7 @@ import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.manager.HandlerManager;
+import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.MessageBusService;
@@ -69,7 +70,8 @@ public class MessageBusServiceImpl implements MessageBusService {
     @Override
     public void receiveMessage(BaseMessage message, Node node) {
         try {
-            this.processorManager.offer(new ProcessData(message, node));
+            MessageCacher.put(message, node);
+            this.processorManager.offer(new ProcessData(message.getHash(), message.getClass()));
         } catch (Exception e) {
             Log.error(e);
         }

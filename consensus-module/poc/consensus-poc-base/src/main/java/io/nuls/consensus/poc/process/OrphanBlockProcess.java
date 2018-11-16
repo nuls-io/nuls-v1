@@ -155,7 +155,7 @@ public class OrphanBlockProcess implements Runnable {
 
         for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator() ; it.hasNext() ; ) {
             ChainContainer chainContainer = it.next();
-            for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+            for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
                     return true;
                 }
@@ -164,14 +164,14 @@ public class OrphanBlockProcess implements Runnable {
 
         for (Iterator<ChainContainer> it = chainManager.getChains().iterator() ; it.hasNext() ; ) {
             ChainContainer chainContainer = it.next();
-            for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+            for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
                     return true;
                 }
             }
         }
 
-        List<BlockHeader> masterChainBlockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
+        List<BlockHeader> masterChainBlockHeaderList = chainManager.getMasterChain().getChain().getAllBlockHeaderList();
         int size = (int) (masterChainBlockHeaderList.size() - PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT * 1.05);
         if (size < 0) {
             size = 0;

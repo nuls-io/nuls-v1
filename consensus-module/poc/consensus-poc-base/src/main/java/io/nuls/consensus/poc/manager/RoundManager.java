@@ -92,8 +92,12 @@ public class RoundManager {
     }
 
     public boolean clearRound(int count) {
-        if (roundList.size() > count) {
-            roundList = roundList.subList(roundList.size() - count, roundList.size());
+        boolean doit = false;
+        while (roundList.size() > count) {
+            doit = true;
+            roundList.remove(0);
+        }
+        if (doit) {
             MeetingRound round = roundList.get(0);
             round.setPreRound(null);
         }
@@ -122,7 +126,7 @@ public class RoundManager {
         if (currentRound.getPreRound() == null) {
 
             BlockExtendsData extendsData = null;
-            List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+            List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
             for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
                 BlockHeader blockHeader = blockHeaderList.get(i);
                 extendsData = new BlockExtendsData(blockHeader.getExtend());
@@ -274,8 +278,27 @@ public class RoundManager {
 
         List<Deposit> depositTempList = new ArrayList<>();
 
+        BlockExtendsData roundData = new BlockExtendsData(startBlockHeader.getExtend());
+
+        long roundStart = roundData.getRoundIndex() - PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        if (roundStart < 0) {
+            roundStart = 0;
+        }
+        long roundEnd = roundData.getRoundIndex() - 1;
+
+        Map<String, Integer> blockCountMap = getBlockCountMap(roundStart, roundEnd);
+        Map<String, Integer> punishCountMap = getPunishCountMap(roundStart, roundEnd, PunishType.YELLOW.getCode());
+        Map<NulsDigestData, List<Deposit>> agentDepositMap = getDepositListMap(startBlockHeader.getHeight());
+
         List<Agent> agentList = getAliveAgentList(startBlockHeader.getHeight());
         for (Agent agent : agentList) {
+
+
+            List<Deposit> cdlist = agentDepositMap.get(agent.getTxHash());
+
+            if (null == cdlist) {
+                continue;
+            }
 
             MeetingMember member = new MeetingMember();
             member.setAgent(agent);
@@ -286,8 +309,10 @@ public class RoundManager {
             member.setOwnDeposit(agent.getDeposit());
             member.setCommissionRate(agent.getCommissionRate());
             member.setRoundStartTime(round.getStartTime());
+            member.setPackingAddressStr(agent.getPackingAddressStr());
+            member.setAgentAddressStr(agent.getAgentAddressStr());
 
-            List<Deposit> cdlist = getDepositListByAgentId(agent.getTxHash(), startBlockHeader.getHeight());
+
             for (Deposit dtx : cdlist) {
                 member.setTotalDeposit(member.getTotalDeposit().add(dtx.getDeposit()));
                 depositTempList.add(dtx);
@@ -296,7 +321,7 @@ public class RoundManager {
             agent.setTotalDeposit(member.getTotalDeposit().getValue());
             boolean isItIn = member.getTotalDeposit().isGreaterOrEquals(PocConsensusProtocolConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
             if (isItIn) {
-                member.setCreditVal(calcCreditVal(member, startBlockHeader));
+                member.setCreditVal(calcCreditVal(blockCountMap.get(member.getPackingAddressStr()), punishCountMap.get(member.getAgentAddressStr())));
                 agent.setCreditVal(member.getRealCreditVal());
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(agent.getDeposit().getValue(), member.getCalcCreditVal()));
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(member.getTotalDeposit().getValue(), member.getCalcCreditVal()));
@@ -322,10 +347,10 @@ public class RoundManager {
         });
     }
 
-    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
+    private Map<NulsDigestData, List<Deposit>> getDepositListMap(long startBlockHeight) {
 
         List<Deposit> depositList = chain.getDepositList();
-        List<Deposit> resultList = new ArrayList<>();
+        Map<NulsDigestData, List<Deposit>> map = new HashMap<>();
 
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Deposit deposit = depositList.get(i);
@@ -335,13 +360,15 @@ public class RoundManager {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (!deposit.getAgentHash().equals(agentHash)) {
-                continue;
+            List<Deposit> list = map.get(deposit.getAgentHash());
+            if (null == list) {
+                list = new ArrayList<>();
+                map.put(deposit.getAgentHash(), list);
             }
-            resultList.add(deposit);
+            list.add(deposit);
         }
 
-        return resultList;
+        return map;
     }
 
     private List<Agent> getAliveAgentList(long startBlockHeight) {
@@ -359,31 +386,41 @@ public class RoundManager {
         return resultList;
     }
 
-    private double calcCreditVal(MeetingMember member, BlockHeader blockHeader) {
-
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
-
-        long roundStart = roundData.getRoundIndex() - PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT;
-        if (roundStart < 0) {
-            roundStart = 0;
+    private double calcCreditVal(Integer blockCount, Integer punishCount) {
+        if (null == blockCount) {
+            blockCount = 0;
         }
-        long blockCount = getBlockCountByAddress(member.getPackingAddress(), roundStart, roundData.getRoundIndex() - 1);
-        long sumRoundVal = getPunishCountByAddress(member.getAgentAddress(), roundStart, roundData.getRoundIndex() - 1, PunishType.YELLOW.getCode());
+
+        if (null == punishCount) {
+            punishCount = 0;
+        }
+
+        //每一轮的惩罚都有可能包含上一轮次的惩罚记录，即计算从a到a+99轮的惩罚记录时，a轮的惩罚中可能是惩罚某个地址在a-1轮未出块，导致100轮最多可能有101个惩罚记录，在这里处理下
+        //Each round of punishment is likely to contain a rounds punishment record, calculated from a to a + 99 rounds of punishment record,
+        // a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
+        // lead to round up to 100 May be 101 punishment record, treatment here
+        if (punishCount > 100) {
+            punishCount = 100;
+        }
+
+
         double ability = DoubleUtils.div(blockCount, PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
-        double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusProtocolConstant.CREDIT_MAGIC_NUM, sumRoundVal),
+        double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusProtocolConstant.CREDIT_MAGIC_NUM, punishCount),
                 DoubleUtils.mul(PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT));
 
-        return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
+        double value = DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
+        return value;
     }
 
-    private long getPunishCountByAddress(byte[] address, long roundStart, long roundEnd, int code) {
-        long count = 0;
+    private Map<String, Integer> getPunishCountMap(long roundStart, long roundEnd, int code) {
         List<PunishLogPo> punishList = new ArrayList<>(chain.getYellowPunishList());
 
         if (code == PunishType.RED.getCode()) {
             punishList = chain.getRedPunishList();
         }
+
+        Map<String, Integer> map = new HashMap<>();
 
         for (int i = punishList.size() - 1; i >= 0; i--) {
             PunishLogPo punish = punishList.get(i);
@@ -394,24 +431,19 @@ public class RoundManager {
             if (punish.getRoundIndex() < roundStart) {
                 break;
             }
-            if (Arrays.equals(punish.getAddress(), address)) {
-                count++;
+            Integer count = map.get(punish.getAddressStr());
+            if (null == count) {
+                count = 0;
             }
+            map.put(punish.getAddressStr(), count + 1);
         }
-        //每一轮的惩罚都有可能包含上一轮次的惩罚记录，即计算从a到a+99轮的惩罚记录时，a轮的惩罚中可能是惩罚某个地址在a-1轮未出块，导致100轮最多可能有101个惩罚记录，在这里处理下
-        //Each round of punishment is likely to contain a rounds punishment record, calculated from a to a + 99 rounds of punishment record,
-        // a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
-        // lead to round up to 100 May be 101 punishment record, treatment here
-        if (count > 100) {
-            return 100;
-        }
-        return count;
+
+        return map;
     }
 
-    private long getBlockCountByAddress(byte[] packingAddress, long roundStart, long roundEnd) {
-        long count = 0;
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-
+    private Map<String, Integer> getBlockCountMap(long roundStart, long roundEnd) {
+        List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
+        Map<String, Integer> map = new HashMap<>();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
             BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
@@ -422,17 +454,20 @@ public class RoundManager {
             if (roundData.getRoundIndex() < roundStart) {
                 break;
             }
-            if (Arrays.equals(blockHeader.getPackingAddress(), packingAddress)) {
-                count++;
+
+            Integer count = map.get(blockHeader.getPackingAddressStr());
+            if (null == count) {
+                count = 0;
             }
+            map.put(blockHeader.getPackingAddressStr(), count + 1);
         }
-        return count;
+        return map;
     }
 
     private BlockHeader getFirstBlockHeightOfPreRoundByRoundIndex(long roundIndex) {
         BlockHeader firstBlockHeader = null;
         long startRoundIndex = 0L;
-        List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chain.getAllBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
             long currentRoundIndex = new BlockExtendsData(blockHeader.getExtend()).getRoundIndex();

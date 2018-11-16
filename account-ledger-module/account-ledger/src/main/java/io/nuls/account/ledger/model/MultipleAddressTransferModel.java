@@ -31,6 +31,8 @@ package io.nuls.account.ledger.model;
 public class MultipleAddressTransferModel {
     //地址
     private byte[] address;
+    //密码
+    private String password;
     //金额
     private long amount;
 
@@ -48,5 +50,13 @@ public class MultipleAddressTransferModel {
 
     public void setAddress(byte[] address) {
         this.address = address;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

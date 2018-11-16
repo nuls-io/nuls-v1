@@ -45,9 +45,6 @@ public class MulitpleTransactionForm {
     @ApiModelProperty(name = "remark", value = "备注")
     private String remark;
 
-    @ApiModelProperty(name = "password", value = "密码")
-    private String password;
-
     public List<MulipleTxFromDto> getInputs() {
         return inputs;
     }
@@ -70,14 +67,6 @@ public class MulitpleTransactionForm {
 
     public void setRemark(String remark) {
         this.remark = remark;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
 }

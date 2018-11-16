@@ -47,7 +47,6 @@ import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -153,7 +152,6 @@ public class ForkChainProcess {
             }
 
             if (!newChain.equals(chainManager.getMasterChain())) {
-
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
                 //ChainContainer resultChain = verifyNewChain(newChain);
@@ -164,7 +162,7 @@ public class ForkChainProcess {
                 //Combined with the new bifurcated block chain, combine and verify one by one
                 //结合新分叉的块链， 逐个组合并验证
                 List<Object[]> verifyResultList = new ArrayList<>();
-                for (Block forkBlock : newChain.getChain().getBlockList()) {
+                for (Block forkBlock : newChain.getChain().getAllBlockList()) {
                     Result success = resultChain.verifyAndAddBlock(forkBlock, true, false);
                     if (success.isFailed()) {
                         resultChain = null;
@@ -202,6 +200,7 @@ public class ForkChainProcess {
             }
 
             clearExpiredChain();
+
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
@@ -288,7 +287,7 @@ public class ForkChainProcess {
             sb.append("end hash : " + chain.getChain().getEndBlockHeader().getHash() + " \n");
         }
 
-        List<BlockHeader> blockHeaderList = chain.getChain().getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chain.getChain().getAllBlockHeaderList();
 
         if (blockHeaderList != null && blockHeaderList.size() > 0) {
             sb.append("start blockHeaders height : " + blockHeaderList.get(0).getHeight() + " \n");
@@ -297,7 +296,7 @@ public class ForkChainProcess {
             sb.append("end blockHeaders hash : " + blockHeaderList.get(blockHeaderList.size() - 1).getHash() + " \n");
         }
 
-        List<Block> block = chain.getChain().getBlockList();
+        List<Block> block = chain.getChain().getAllBlockList();
 
         if (block != null && block.size() > 0) {
             sb.append("start blocks height : " + block.get(0).getHeader().getHeight() + " \n");
@@ -332,7 +331,7 @@ public class ForkChainProcess {
         // 判断该孤立链是否和主链相连
         BlockHeader startBlockHeader = orphanChain.getChain().getStartBlockHeader();
 
-        List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
+        List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getAllBlockHeaderList();
 
         int count = blockHeaderList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT ? PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT : blockHeaderList.size();
         for (int i = blockHeaderList.size() - 1; i >= blockHeaderList.size() - count; i--) {
@@ -361,18 +360,14 @@ public class ForkChainProcess {
                 continue;
             }
 
-            blockHeaderList = chain.getBlockHeaderList();
+            blockHeaderList = chain.getAllBlockHeaderList();
 
             for (int i = 0; i < blockHeaderList.size(); i++) {
                 BlockHeader header = blockHeaderList.get(i);
                 if (startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                     //yes connectioned
                     orphanChain.getChain().setPreChainId(chain.getPreChainId());
-                    orphanChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
-
-                    orphanChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i + 1));
-                    orphanChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i + 1));
-
+                    orphanChain.getChain().initData(chain.getStartBlockHeader(), blockHeaderList.subList(0, i + 1), chain.getAllBlockList().subList(0, i + 1));
                     chainManager.getChains().add(orphanChain);
 
                     if (i == blockHeaderList.size() - 1) {
@@ -394,9 +389,7 @@ public class ForkChainProcess {
             if (orphan.getChain().getEndBlockHeader().getHash().equals(orphanChain.getChain().getStartBlockHeader().getPreHash()) &&
                     orphan.getChain().getEndBlockHeader().getHeight() + 1 == orphanChain.getChain().getStartBlockHeader().getHeight()) {
                 Chain chain = orphan.getChain();
-                chain.setEndBlockHeader(orphanChain.getChain().getEndBlockHeader());
-                chain.getBlockHeaderList().addAll(orphanChain.getChain().getBlockHeaderList());
-                chain.getBlockList().addAll(orphanChain.getChain().getBlockList());
+                chain.initData(orphanChain.getChain().getEndBlockHeader(), orphanChain.getChain().getAllBlockHeaderList(), orphanChain.getChain().getAllBlockList());
                 return true;
             }
         }
@@ -420,7 +413,7 @@ public class ForkChainProcess {
 
         //Combined with the new bifurcated block chain, combine and verify one by one
         //结合新分叉的块链， 逐个组合并验证
-        for (Block forkBlock : needVerifyChain.getChain().getBlockList()) {
+        for (Block forkBlock : needVerifyChain.getChain().getAllBlockList()) {
             Result success = forkChain.verifyAndAddBlock(forkBlock, true, false);
             if (success.isFailed()) {
                 return null;
@@ -453,7 +446,7 @@ public class ForkChainProcess {
         ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(originalForkChain);
 
         //rollbackTransaction
-        List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
+        List<Block> rollbackBlockList = oldChain.getChain().getAllBlockList();
 
         ChainLog.debug("rollbackTransaction the master chain , need rollbackTransaction block count is {}, master chain is {} : {} - {} , service best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
 
@@ -482,7 +475,7 @@ public class ForkChainProcess {
             newMasterChain.initRound();
             NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
 
-            if (oldChain.getChain().getBlockList().size() > 0) {
+            if (oldChain.getChain().getAllBlockList().size() > 0) {
                 chainManager.getChains().add(oldChain);
             }
         } else {
@@ -514,7 +507,7 @@ public class ForkChainProcess {
     private boolean doChange(List<Block> successList, ChainContainer originalForkChain, List<Object[]> verifyResultList) {
         boolean changeSuccess = true;
         //add new block
-        List<Block> addBlockList = originalForkChain.getChain().getBlockList();
+        List<Block> addBlockList = originalForkChain.getChain().getAllBlockList();
 
         Result<Block> preBlockResult = blockService.getBlock(addBlockList.get(0).getHeader().getPreHash());
         Block preBlock = preBlockResult.getData();
@@ -778,16 +771,6 @@ public class ForkChainProcess {
     private void clearMasterChainData() {
         Chain masterChain = chainManager.getMasterChain().getChain();
         long bestHeight = masterChain.getEndBlockHeader().getHeight();
-
-        List<BlockHeader> blockHeaderList = masterChain.getBlockHeaderList();
-        List<Block> blockList = masterChain.getBlockList();
-
-        if (blockHeaderList.size() > 30000) {
-            masterChain.setBlockHeaderList(blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size()));
-        }
-        if (blockList.size() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
-            masterChain.setBlockList(blockList.subList(blockList.size() - PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size()));
-        }
 
         List<Agent> agentList = masterChain.getAgentList();
         List<Deposit> depositList = masterChain.getDepositList();

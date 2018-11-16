@@ -40,6 +40,7 @@ import io.nuls.kernel.model.*;
 
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.VarInt;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -75,6 +76,33 @@ public class LevelDBServiceTest {
         area = "pierre-test";
         key = "testkey";
         createArea(area);
+    }
+
+    @Test
+    public void testList() {
+
+        List<DBTestEntity> list = new ArrayList<>();
+
+        DBTestEntity entity = new DBTestEntity();
+        entity.setBlockHeight(1000);
+        entity.setTime(System.nanoTime());
+        list.add(entity);
+
+        entity = new DBTestEntity();
+        entity.setBlockHeight(2000);
+        entity.setTime(System.nanoTime());
+        list.add(entity);
+
+        Result result = dbService.putModel(area, new VarInt(1).encode(), list);
+        if(result.isFailed()) {
+            System.out.println(result.getErrorCode());
+            System.out.println(result.getMsg());
+        }
+
+        List<DBTestEntity> list2 = dbService.getModel(area, new VarInt(1).encode(),List.class);
+
+        System.out.println(list2.size());
+
     }
 
     private static void setCommonFields(Transaction tx) {
@@ -140,7 +168,7 @@ public class LevelDBServiceTest {
 
             DBTestEntity e = new DBTestEntity();
             try {
-                e.parse(resultBytes,0);
+                e.parse(resultBytes, 0);
             } catch (NulsException e1) {
                 Log.error(e1);
             }
@@ -237,7 +265,7 @@ public class LevelDBServiceTest {
     }
 
 
-    public void snapshotOfAddress() throws Exception{
+    public void snapshotOfAddress() throws Exception {
         Map<String, Na> balanceMap = new HashMap<>();
         List<byte[]> valueList = valueList("ledger_utxo");
         Coin coin;
@@ -247,7 +275,7 @@ public class LevelDBServiceTest {
         byte[] hash160;
         for (byte[] bytes : valueList) {
             coin = new Coin();
-            coin.parse(bytes,0);
+            coin.parse(bytes, 0);
             //
             hash160 = new byte[20];
             //System.arraycopy(coin.getOwner(), 2, hash160, 0, 20);
@@ -255,7 +283,7 @@ public class LevelDBServiceTest {
             address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
             strAddress = address.toString();
             balance = balanceMap.get(strAddress);
-            if(balance == null) {
+            if (balance == null) {
                 balance = Na.ZERO;
             }
             balance = balance.add(coin.getNa());
@@ -395,7 +423,7 @@ public class LevelDBServiceTest {
         put(area, bytes("set3"), bytes("set3value"));
         Set<byte[]> keys = keySet(area);
         Set<String> keysStr = new HashSet<>();
-        for(byte[] bytes : keys) {
+        for (byte[] bytes : keys) {
             keysStr.add(asString(bytes));
         }
         Assert.assertEquals(3, keys.size());
@@ -434,7 +462,7 @@ public class LevelDBServiceTest {
                 if ("set03".equals(s1)) {
                     return 1;
                 }
-                if("set03".equals(s2)) {
+                if ("set03".equals(s2)) {
                     return -1;
                 }
                 return s1.compareTo(s2);
@@ -533,7 +561,7 @@ public class LevelDBServiceTest {
                 if ("set3".equals(s1)) {
                     return 1;
                 }
-                if("set3".equals(s2)) {
+                if ("set3".equals(s2)) {
                     return -1;
                 }
                 return s1.compareTo(s2);
@@ -603,7 +631,7 @@ public class LevelDBServiceTest {
                 if ("set3".equals(s1)) {
                     return 1;
                 }
-                if("set3".equals(s2)) {
+                if ("set3".equals(s2)) {
                     return -1;
                 }
                 return s1.compareTo(s2);

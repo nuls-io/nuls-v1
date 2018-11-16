@@ -41,6 +41,7 @@ import java.util.Arrays;
 public class PunishLogPo extends BaseNulsData {
     private byte type;
     private byte[] address;
+    private String addressStr;
     private long time;
     private long height;
     private long roundIndex;
@@ -144,6 +145,13 @@ public class PunishLogPo extends BaseNulsData {
 
     public void setEvidence(byte[] evidence) {
         this.evidence = evidence;
+    }
+
+    public String getAddressStr() {
+        if (addressStr == null) {
+            addressStr = AddressTool.getStringAddressByBytes(address);
+        }
+        return addressStr;
     }
 
     @Override

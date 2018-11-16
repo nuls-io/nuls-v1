@@ -51,6 +51,9 @@ public interface ContractTxService {
     Result contractCreateTx(String sender, Long gasLimit, Long price,
                             byte[] contractCode, String[][] args, String password, String remark);
 
+    Result validateContractCreateTx(Long gasLimit, Long price,
+                                    byte[] contractCode, String[][] args);
+
     LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender);
 
     void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult);
@@ -93,6 +96,9 @@ public interface ContractTxService {
     Result contractCallTx(String sender, Na value, Long gasLimit, Long price, String contractAddress,
                           String methodName, String methodDesc, String[][] args, String password, String remark);
 
+    Result validateContractCallTx(String sender, Long gasLimit, Long price, String contractAddress,
+                                  String methodName, String methodDesc, String[][] args);
+
     /**
      * 计算交易手续费
      *
@@ -120,4 +126,6 @@ public interface ContractTxService {
      * @return
      */
     Result contractDeleteTx(String sender, String contractAddress, String password, String remark);
+
+    Result validateContractDeleteTx(String sender, String contractAddress);
 }

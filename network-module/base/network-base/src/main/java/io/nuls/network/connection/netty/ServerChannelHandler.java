@@ -151,15 +151,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 //    }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        Log.info("----------------- server exceptionCaught -------------------");
-        if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
-            Log.error(cause);
-        }
-        ctx.channel().close();
-    }
-
-    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
@@ -192,6 +183,20 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         if (node != null) {
             nodeManager.removeNode(nodeId);
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+//        Log.info("----------------- server exceptionCaught -------------------");
+        if (!(cause instanceof IOException) ) {
+            SocketChannel channel = (SocketChannel) ctx.channel();
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            Log.error("----------------nodeId:" +nodeId);
+            Log.error(cause);
+//            nodeManager.deleteNodeFromDB(nodeId);
+//            return;
+        }
+        ctx.channel().close();
     }
 
 }

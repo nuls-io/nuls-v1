@@ -101,4 +101,7 @@ public interface PocConsensusConstant {
     long RED_PUNISH_LOCK_TIME = 60 * 24 * 3600000L;
 
     double RED_PUNISH_CREDIT_VAL = -1D;
+
+    long POC_START_PROCESS_PROTOCOL_VERSION_HEIGHT = 1;
+    int MAX_BLOCK_HEADER_COUNT = 30000;
 }

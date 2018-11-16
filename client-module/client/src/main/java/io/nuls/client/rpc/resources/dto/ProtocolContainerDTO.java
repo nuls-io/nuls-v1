@@ -88,7 +88,7 @@ public class ProtocolContainerDTO {
     public ProtocolContainerDTO(ProtocolContainer protocolContainer){
         this.version = protocolContainer.getVersion();
         this.percent = protocolContainer.getPercent();
-        this.currentPercent = protocolContainer.getPrePercent();
+        this.currentPercent = protocolContainer.getCurrentPercent();
         this.roundIndex = protocolContainer.getRoundIndex();
         this.delay = protocolContainer.getDelay();
         this.currentDelay = protocolContainer.getCurrentDelay();
@@ -100,7 +100,7 @@ public class ProtocolContainerDTO {
     public ProtocolContainerDTO(ProtocolTempInfoPo tempInfoPo){
         this.version = tempInfoPo.getVersion();
         this.percent = tempInfoPo.getPercent();
-        this.currentPercent = tempInfoPo.getPrePercent();
+        this.currentPercent = tempInfoPo.getCurrentPercent();
         this.roundIndex = tempInfoPo.getRoundIndex();
         this.delay = tempInfoPo.getDelay();
         this.currentDelay = tempInfoPo.getCurrentDelay();

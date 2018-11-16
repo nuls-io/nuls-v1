@@ -45,13 +45,12 @@ import io.nuls.protocol.base.download.utils.DownloadUtils;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ln
@@ -61,17 +60,14 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
-    private NulsThreadFactory factory = new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download");
 
     private NetworkNewestBlockInfos newestInfos;
-    private Queue<Block> blockQueue;
     private String queueName;
 
     private int maxDowncount = 10;
 
-    public DownloadThreadManager(NetworkNewestBlockInfos newestInfos, Queue<Block> blockQueue) {
+    public DownloadThreadManager(NetworkNewestBlockInfos newestInfos) {
         this.newestInfos = newestInfos;
-        this.blockQueue = blockQueue;
         this.queueName = queueName;
     }
 
@@ -88,133 +84,15 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         List<Node> nodes = newestInfos.getNodes();
-        NulsDigestData netBestHash = newestInfos.getNetBestHash();
         long netBestHeight = newestInfos.getNetBestHeight();
-        Block localBestBlock = blockService.getBestBlock().getData();
-        NulsDigestData localBestHash = localBestBlock.getHeader().getHash();
-        long localBestHeight = localBestBlock.getHeader().getHeight();
-
-        ThreadPoolExecutor executor = TaskManager.createThreadPool(nodes.size(), 0,
-                new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download-thread"));
-
-        List<FutureTask<ResultMessage>> futures = new ArrayList<>();
-
-        long totalCount = netBestHeight - localBestHeight;
-
-        long laveCount = totalCount;
-
-        long downCount = (long) Math.ceil((double) totalCount / (maxDowncount * nodes.size()));
-
-        for (long i = 0; i < downCount; i++) {
-
-            long startHeight = (localBestHeight + 1) + i * maxDowncount * nodes.size();
-
-            for (int j = nodes.size() - 1; j >= 0; j--) {
-                Node node = nodes.get(j);
-                if (!node.isHandShake()) {
-                    nodes.remove(j);
-                }
-            }
-            for (int j = 0; j < nodes.size(); j++) {
-                long start = startHeight + j * maxDowncount;
-                int size = maxDowncount;
-
-                boolean isEnd = false;
-                if (start + size >= netBestHeight) {
-                    size = (int) (netBestHeight - start) + 1;
-                    isEnd = true;
-                }
-
-                DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
-
-                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
-
-                executor.execute(factory.newThread(downloadThreadFuture));
-
-                futures.add(downloadThreadFuture);
-
-                if (isEnd) {
-                    break;
-                }
-            }
-            for (FutureTask<ResultMessage> task : futures) {
-                ResultMessage result = null;
-                try {
-                    result = task.get();
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-                List<Block> blockList = null;
-
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
-                    blockList = retryDownload(executor, result);
-                }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
-                    blockList = retryDownload(executor, result);
-                }
-                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
-                    blockList = retryDownload(executor, result);
-                }
-
-                if (blockList == null) {
-                    executor.shutdown();
-                    resetNetwork("attempts to download blocks from all available nodes failed");
-                    return true;
-                }
-
-                for (Block block : blockList) {
-                    blockQueue.offer(block);
-                }
-            }
-            futures.clear();
-        }
-
-        executor.shutdown();
-
+        long localBestHeight = blockService.getBestBlock().getData().getHeader().getHeight();
+        RequestThread requestThread = new RequestThread(nodes, localBestHeight + 1, netBestHeight);
+        CollectThread collectThread = CollectThread.initInstance(localBestHeight + 1, netBestHeight, requestThread);
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-collect", collectThread);
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-request", requestThread);
         return true;
     }
 
-    private List<Block> retryDownload(ThreadPoolExecutor executor, ResultMessage result) throws InterruptedException, ExecutionException {
-
-        //try download to other nodes
-        List<Node> otherNodes = new ArrayList<>();
-
-        Node defultNode = result.getNode();
-
-        for (Node node : newestInfos.getNodes()) {
-            if (!node.getId().equals(defultNode.getId())) {
-                otherNodes.add(node);
-            }
-        }
-
-        for (Node node : otherNodes) {
-            result.setNode(node);
-            List<Block> blockList = downloadBlockFromNode(executor, result);
-            if (blockList != null && blockList.size() > 0) {
-                return blockList;
-            }
-        }
-
-        //if fail , down again
-        result.setNode(defultNode);
-
-        return downloadBlockFromNode(executor, result);
-    }
-
-    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, ResultMessage result) throws ExecutionException, InterruptedException {
-        DownloadThread downloadThread = new DownloadThread(result.getStartHash(), result.getEndHash(), result.getStartHeight(), result.getSize(), result.getNode());
-
-        FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
-        executor.execute(new Thread(downloadThreadFuture));
-
-        List<Block> blockList = null;
-        try {
-            blockList = downloadThreadFuture.get().getBlockList();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return blockList;
-    }
 
     private boolean checkFirstBlock() throws NulsException {
 
@@ -253,9 +131,12 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
         List<Node> nodes = newestInfos.getNodes();
 
+        long localHeight = localBestBlock.getHeader().getHeight();
+        NulsDigestData localBestHash = localBestBlock.getHeader().getHash();
+
         for (Node node : nodes) {
-            Block remoteBlock = DownloadUtils.getBlockByHash(localBestBlock.getHeader().getHash(), node);
-            if (remoteBlock != null && remoteBlock.getHeader().getHeight() == localBestBlock.getHeader().getHeight()) {
+            Block block = DownloadUtils.getBlockByHash(localBestHash, node);
+            if (block != null && localHeight == block.getHeader().getHeight()) {
                 return;
             }
         }

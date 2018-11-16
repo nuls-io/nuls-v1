@@ -69,6 +69,8 @@ public class Agent extends TransactionLogicData {
     private transient long totalDeposit;
     private transient NulsDigestData txHash;
     private transient int memberCount;
+    private transient String agentAddressStr;
+    private transient String packingAddressStr;
 
     @Override
     public int size() {
@@ -209,6 +211,20 @@ public class Agent extends TransactionLogicData {
 
     public boolean canDeposit() {
         return getAvailableDepositAmount() >= PocConsensusProtocolConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue();
+    }
+
+    public String getAgentAddressStr() {
+        if (null == this.agentAddressStr) {
+            this.agentAddressStr = AddressTool.getStringAddressByBytes(this.agentAddress);
+        }
+        return agentAddressStr;
+    }
+
+    public String getPackingAddressStr() {
+        if (null == this.packingAddressStr) {
+            this.packingAddressStr = AddressTool.getStringAddressByBytes(this.packingAddress);
+        }
+        return packingAddressStr;
     }
 
     @Override
