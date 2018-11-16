@@ -38,7 +38,7 @@ public interface PocConsensusConstant {
      * coinbase奖励的锁定块数
      */
     // pierre test comment out
-    int COINBASE_UNLOCK_HEIGHT = 10;
+    int COINBASE_UNLOCK_HEIGHT = 100;
 
     /**
      * value = 5000000/3154600
