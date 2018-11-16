@@ -90,7 +90,6 @@ public class ForkChainProcess {
         }
         Lockers.CHAIN_LOCK.lock();
         try {
-
             printChainStatusLog();
 
             // Monitor the status of the orphan chain, if it is available, join the verification chain
@@ -98,7 +97,6 @@ public class ForkChainProcess {
             monitorOrphanChains();
 
             long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
-
             ChainContainer newChain = chainManager.getMasterChain();
             if (null == newChain) {
                 return false;
@@ -154,7 +152,7 @@ public class ForkChainProcess {
             if (!newChain.equals(chainManager.getMasterChain())) {
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
-                //ChainContainer resultChain = verifyNewChain(newChain);
+//                ChainContainer resultChain = verifyNewChain(newChain);
                 //Verify the new chain, combined with the current latest chain, to get the status of the branch node
                 //验证新的链，结合当前最新的链，获取到分叉节点时的状态
                 ChainContainer resultChain = chainManager.getMasterChain().getBeforeTheForkChain(newChain);
