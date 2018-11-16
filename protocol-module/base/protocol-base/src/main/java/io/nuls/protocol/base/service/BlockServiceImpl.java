@@ -359,7 +359,10 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
-
+        boolean txsResult = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
+        if(!txsResult){
+            return Result.getFailed();
+        }
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());
@@ -372,8 +375,6 @@ public class BlockServiceImpl implements BlockService {
             accountLedgerService.rollbackTransactions(block.getTxs());
             // 回滚合约相关交易
             contractService.rollbackTransactionList(block.getTxs());
-            boolean txsResult = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
-            return result.setSuccess(txsResult);
         } catch (Exception e) {
             Log.warn("rollbackTransaction local tx failed", e);
         }
