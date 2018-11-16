@@ -127,14 +127,14 @@ public class BlockServiceImpl implements BlockService {
         for (NulsDigestData hash : headerPo.getTxHashList()) {
             Transaction tx = ledgerService.getTx(hash);
             txList.add(tx);
-            if(isNeedContractTransfer) {
+            if (isNeedContractTransfer) {
                 //pierre add 增加合约转账(从合约转出)交易到查询的区块中
                 contractTransfer(tx, txList);
             }
         }
         Block block = new Block();
         BlockHeader blockHeader = PoConvertUtil.fromBlockHeaderPo(headerPo);
-        if(isNeedContractTransfer) {
+        if (isNeedContractTransfer) {
             blockHeader.setTxCount(txList.size());
         }
         block.setHeader(blockHeader);
@@ -143,16 +143,16 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private void contractTransfer(Transaction tx, List<Transaction> txList) {
-        if(tx instanceof CallContractTransaction) {
+        if (tx instanceof CallContractTransaction) {
             CallContractTransaction callTx = (CallContractTransaction) tx;
             ContractResult contractResult = callTx.getContractResult();
-            if(contractResult != null) {
+            if (contractResult != null) {
                 List<ContractTransfer> transfers = contractResult.getTransfers();
                 // 合约调用交易存在合约转账(从合约转出)交易，则从全网账本中查出完整交易添加到交易集合中
-                if(transfers != null && transfers.size() > 0) {
-                    for(ContractTransfer transfer : transfers) {
+                if (transfers != null && transfers.size() > 0) {
+                    for (ContractTransfer transfer : transfers) {
                         Transaction contractTx = ledgerService.getTx(transfer.getHash());
-                        if(contractTx != null) {
+                        if (contractTx != null) {
                             txList.add(contractTx);
                         }
                     }
@@ -227,7 +227,7 @@ public class BlockServiceImpl implements BlockService {
      * 根据区块摘要获取区块（从存储中）
      * Get the block (from storage) according to the block hash
      *
-     * @param hash 区块摘要/block hash
+     * @param hash                   区块摘要/block hash
      * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
      * @return 区块/block
      */
@@ -262,7 +262,7 @@ public class BlockServiceImpl implements BlockService {
      * 根据区块高度获取区块（从存储中）
      * Get the block (from storage) according to the block height
      *
-     * @param height 区块高度/block height
+     * @param height                 区块高度/block height
      * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
      * @return 区块/block
      */
@@ -359,7 +359,10 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
-
+        boolean txsResult = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
+        if(!txsResult){
+            return Result.getFailed();
+        }
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());

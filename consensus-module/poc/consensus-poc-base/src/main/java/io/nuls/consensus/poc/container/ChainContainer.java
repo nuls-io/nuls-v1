@@ -641,16 +641,13 @@ public class ChainContainer implements Cloneable {
     }
 
     public boolean rollback(Block block) {
-
-        Block bestBlock = chain.getBestBlock();
-
-        if (block == null || !block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
-            Log.warn("rollbackTransaction block is not best block");
+        int length = chain.getAllBlockList().size();
+        if (block == null || length == 0) {
             return false;
         }
-
-        int length = chain.getAllBlockList().size();
-        if (length == 0) {
+        Block bestBlock = chain.getBestBlock();
+        if (!block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+            Log.warn("rollbackTransaction block is not best block");
             return false;
         }
         if (length <= 2) {
@@ -658,7 +655,7 @@ public class ChainContainer implements Cloneable {
         }
 
 
-        BlockHeader rollbackBlockHeader =  chain.rollbackBlock();
+        BlockHeader rollbackBlockHeader = chain.rollbackBlock();
 
         // update txs
         List<Agent> agentList = chain.getAgentList();
@@ -742,11 +739,14 @@ public class ChainContainer implements Cloneable {
      * @return ChainContainer
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
+        if (chain.getEndBlockHeader().getHeight() < chainContainer.getChain().getEndBlockHeader().getHeight()) {
+            return this;
+        }
 
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
 
-        newChain.initData(chain.getStartBlockHeader(),chain.getAllBlockHeaderList(),chain.getAllBlockList());
+        newChain.initData(chain.getStartBlockHeader(), new LinkedList<>(chain.getAllBlockHeaderList()), new LinkedList<>(chain.getAllBlockList()));
 
         if (chain.getAgentList() != null) {
             List<Agent> agentList = new ArrayList<>();

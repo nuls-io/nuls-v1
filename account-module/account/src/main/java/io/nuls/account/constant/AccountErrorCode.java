@@ -57,4 +57,5 @@ public interface AccountErrorCode extends KernelErrorCode {
     ErrorCode INPUT_TOO_SMALL = ErrorCode.init("50021");
     ErrorCode MUST_BURN_A_NULS = ErrorCode.init("50022");
     ErrorCode SIGN_COUNT_TOO_LARGE = ErrorCode.init("50023");
+    ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("50024");
 }

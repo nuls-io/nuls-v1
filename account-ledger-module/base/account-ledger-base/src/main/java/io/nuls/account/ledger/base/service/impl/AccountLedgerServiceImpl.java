@@ -1784,6 +1784,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<Script> scripts = new ArrayList<>();
             Result<MultiSigAccount> result = accountService.getMultiSigAccount(fromAddr);
             MultiSigAccount multiSigAccount = result.getData();
+            //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
+            if(!multiSigAccount.getPubKeyList().contains(account.getPubKey())){
+                return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
             Script redeemScript = getRedeemScript(multiSigAccount);
             if (redeemScript == null) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
