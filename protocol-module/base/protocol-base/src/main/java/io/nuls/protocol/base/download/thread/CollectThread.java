@@ -68,7 +68,6 @@ public class CollectThread implements Runnable {
         while (true) {
             try {
                 if (startHeight > endHeight) {
-                    this.init();
                     break;
                 }
                 pushBlock();
@@ -76,7 +75,7 @@ public class CollectThread implements Runnable {
                 Log.error(e);
             }
         }
-
+        this.init();
     }
 
     private void init() {
@@ -89,7 +88,7 @@ public class CollectThread implements Runnable {
     private void pushBlock() throws InterruptedException {
         Block block = map.get(startHeight);
         if (null == block) {
-            block = waitBlock();
+            block = waitBlock(startHeight);
         }
         Result result = consensusService.addBlock(block);
         if (result.isSuccess()) {
@@ -98,20 +97,18 @@ public class CollectThread implements Runnable {
         }
     }
 
-    private Block waitBlock() throws InterruptedException {
+    private Block waitBlock(long height) throws InterruptedException {
         Block block = null;
         long totalWait = 0;
-        while (null == block) {
+        while (null == block && height == startHeight) {
             Thread.sleep(10L);
             totalWait += 10;
             if (totalWait > 5000) {
-                this.requestThread.retryDownload(startHeight, getRequestSize());
+                this.requestThread.retryDownload(height, getRequestSize());
                 totalWait = 0;
             }
             block = map.get(startHeight);
         }
-
-
         return block;
     }
 

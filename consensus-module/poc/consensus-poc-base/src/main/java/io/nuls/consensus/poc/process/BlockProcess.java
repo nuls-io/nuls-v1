@@ -518,8 +518,8 @@ public class BlockProcess {
 
             Chain forkChain = chainContainer.getChain();
             List<BlockHeader> headerList = forkChain.getAllBlockHeaderList();
-
-            for (int i = headerList.size() - 1; i >= 0; i--) {
+            int size = headerList.size();
+            for (int i = size - 1; i >= 0; i--) {
                 BlockHeader header = headerList.get(i);
 
                 if (header.getHash().equals(blockHeader.getHash())) {
