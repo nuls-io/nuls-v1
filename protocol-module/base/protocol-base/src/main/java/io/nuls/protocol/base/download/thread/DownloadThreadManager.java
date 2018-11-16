@@ -106,7 +106,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         if (newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
             BlockHeader header = blockService.getBlockHeader(newestInfos.getNetBestHash()).getData();
 
-            if (null == header && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount() && DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d) {
+            if (null == header && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount() && DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.5d) {
                 for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
                     consensusService.rollbackBlock(localBestBlock);
                     localBestBlock = blockService.getBestBlock().getData();
@@ -117,16 +117,16 @@ public class DownloadThreadManager implements Callable<Boolean> {
             }
         } else {
             //check need rollbackTx
-            checkRollback(localBestBlock, 0);
+            return checkRollback(localBestBlock, 0);
         }
         return true;
     }
 
-    private void checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
+    private boolean checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
 
         if (rollbackCount >= 10) {
 //            resetNetwork("number of rollbackTx blocks greater than 10 during download");
-            return;
+            return false;
         }
 
         List<Node> nodes = newestInfos.getNodes();
@@ -137,7 +137,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         for (Node node : nodes) {
             Block block = DownloadUtils.getBlockByHash(localBestHash, node);
             if (block != null && localHeight == block.getHeader().getHeight()) {
-                return;
+                return true;
             }
         }
 
@@ -145,12 +145,13 @@ public class DownloadThreadManager implements Callable<Boolean> {
             consensusService.rollbackBlock(localBestBlock);
         } else {
 //            resetNetwork("the number of available nodes is insufficient for rollbackTx blocks");
-            return;
+            return false;
         }
 
         localBestBlock = blockService.getBestBlock().getData();
 
-        checkRollback(localBestBlock, rollbackCount + 1);
+        return checkRollback(localBestBlock, rollbackCount + 1);
+
     }
 
     private void resetNetwork(String reason) {
