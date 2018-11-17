@@ -484,6 +484,9 @@ public class AliasService {
             byte[] addressBytes = AddressTool.getAddress(addr);
             Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(addr);
             MultiSigAccount multiSigAccount = sigAccountResult.getData();
+            if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
+                return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
             Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
             if(redeemScript == null){
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
