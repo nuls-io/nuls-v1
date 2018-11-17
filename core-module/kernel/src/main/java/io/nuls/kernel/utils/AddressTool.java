@@ -35,6 +35,9 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Address;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * @author: Niels Wang
@@ -247,5 +250,18 @@ public class AddressTool {
             return false;
         }
         return true;
+    }
+
+    public static boolean validSignAddress(List<byte[]> bytesList, byte[] bytes){
+        if(bytesList == null || bytesList.size() == 0 || bytes == null){
+            return false;
+        }else{
+            for (byte[] tempBytes:bytesList) {
+                if(Arrays.equals(bytes,tempBytes)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
