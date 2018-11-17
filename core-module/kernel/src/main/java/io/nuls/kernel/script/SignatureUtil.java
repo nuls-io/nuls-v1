@@ -341,7 +341,25 @@ public class SignatureUtil {
     }
 
     /**
-     * 获取脚本中的公钥
+     * 从赎回脚本中获取多签账户的公钥列表
+     *
+     * @param redeemScript 赎回脚本
+     */
+    public static List<byte[]> getPublicKeyList(Script redeemScript) {
+        if(redeemScript == null) {
+            return  null;
+        }
+        List<byte[]> publicKeyList = new ArrayList<>();
+        List<ScriptChunk> chunks = redeemScript.getChunks();
+        int publicKeyCount = Script.decodeFromOpN(chunks.get(chunks.size()-2).opcode);
+        for(int i = 1;i<=publicKeyCount;i++){
+            publicKeyList.add(chunks.get(i).data);
+        }
+        return publicKeyList;
+    }
+
+    /**
+     * 获取脚本中的公钥生成地址
      */
     public static String getScriptAddress(List<ScriptChunk> chunks) {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {

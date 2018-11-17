@@ -1785,7 +1785,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Result<MultiSigAccount> result = accountService.getMultiSigAccount(fromAddr);
             MultiSigAccount multiSigAccount = result.getData();
             //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-            if(!multiSigAccount.getPubKeyList().contains(account.getPubKey())){
+            if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
                 return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
             Script redeemScript = getRedeemScript(multiSigAccount);
@@ -2055,6 +2055,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(txByte));
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            //验证签名地址账户是否属于多签账户
+            List<byte[]> pubkeys = SignatureUtil.getPublicKeyList(transactionSignature.getScripts().get(0));
+            if(pubkeys == null || pubkeys.size() == 0 || !AddressTool.validSignAddress(pubkeys,account.getPubKey())){
+                return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
             return txMultiProcess(tx, transactionSignature, account, password);
         } catch (NulsException e) {
             Log.error(e);
