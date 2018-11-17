@@ -25,7 +25,6 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
-import com.sun.xml.internal.ws.api.message.AddressingUtils;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.manager.BalanceManager;
