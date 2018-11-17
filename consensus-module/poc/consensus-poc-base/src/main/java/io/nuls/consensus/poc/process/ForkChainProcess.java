@@ -128,10 +128,7 @@ public class ForkChainProcess {
                 if (newChainHeight > newestBlockHeight
                         || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
                         || (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress)) {
-                    if (newChainBlockHeader.getHeight() == newChainHeight && hashEquals && sameAddress) {
-                        Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
-                        Log.info("-+-+-+-+-+-+-+-+- height: " + newChainHeight + ", Right hash：" + Hex.encode(rightHash));
-                        /** ******************************************************************************************************** */
+
                         try {
                             Log.info("");
                             Log.info("****************************************************");
@@ -142,8 +139,7 @@ public class ForkChainProcess {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        /** ******************************************************************************************************** */
-                    }
+
                     newChain = forkChain;
                     newestBlockHeight = newChainHeight;
                 }

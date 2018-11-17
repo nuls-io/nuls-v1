@@ -157,6 +157,7 @@ public class ConsensusScheduler {
         clear();
         initDatas();
 
+
         return true;
     }
 
