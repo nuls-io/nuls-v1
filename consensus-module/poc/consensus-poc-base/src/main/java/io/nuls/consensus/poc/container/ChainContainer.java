@@ -739,7 +739,7 @@ public class ChainContainer implements Cloneable {
      * @return ChainContainer
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
-        if (chain.getEndBlockHeader().getHeight() < chainContainer.getChain().getEndBlockHeader().getHeight()) {
+        if (chain.getEndBlockHeader().getHeight() < chainContainer.getChain().getStartBlockHeader().getHeight()) {
             return this;
         }
 
