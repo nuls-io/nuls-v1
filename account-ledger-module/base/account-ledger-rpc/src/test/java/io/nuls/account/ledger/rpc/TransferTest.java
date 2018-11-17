@@ -57,7 +57,7 @@ public class TransferTest extends BaseTest {
 //        List<String> addressList = getAddressList();
 //
 //        for (String toAddress : addressList) {
-            String address = "TTayoJ1siL3PfUbcbk1ERdYKUHx9EAzb";
+            String address = "TTarACyVheCaPdGDwPv33yEGWvB35wdD";
             String toAddress = "TTakRBwcrXvn2EfapZnKhvHujGZhrTJK";//01385ef69371c8fe003d2339158333e6b383eaf7a93a38a77d022cf06024c82a
             long amount = 1001000L;
             String password = "";
