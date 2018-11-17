@@ -3,17 +3,12 @@
   "time": "1531152000000",
   "txs": [
     {
-      "address": "TTaoMpuLtP4NmiVZWAQpngopcvoDNULS",
-      "amount": 10000000,
+      "address": "TTayV3V7J93hjwzcCp4yxd1Rh9puq3Km",
+      "amount": 20000000,
       "lockTime": 0
     },
     {
-      "address": "TTaoMpuLtP4NmiVZWAQpngopcvoDNULS",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "TTarYnUfsftmm7DrStandCEdd4SNiELS",
+      "address": "TTaja441YYSp4FqN7DLrPxj9acPzmSCG",
       "amount": 10000000,
       "lockTime": 0
     },
