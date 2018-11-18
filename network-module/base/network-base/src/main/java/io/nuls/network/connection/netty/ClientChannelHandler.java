@@ -93,6 +93,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null) {
+            node.setStatus(Node.WAIT);
             nodeManager.removeNode(node);
         } else {
             SocketChannel socketChannel = (SocketChannel) ctx.channel();
@@ -145,7 +146,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 node.setCanConnect(false);
             }
         }
-        if(cause instanceof TooLongFrameException) {
+        if (cause instanceof TooLongFrameException) {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             node.setCanConnect(false);

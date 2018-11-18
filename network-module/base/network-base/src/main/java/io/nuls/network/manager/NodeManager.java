@@ -208,7 +208,7 @@ public class NodeManager implements Runnable {
      * 添加主动连接节点，并创建连接
      */
     public boolean addNode(Node node) {
-        if(node.getIp().equals("222.183.234.88") ||node.getIp().equals("222.183.238.45") ||node.getIp().equals("85.26.34.202")) {
+        if (node.getIp().equals("222.183.234.88") || node.getIp().equals("222.183.238.45") || node.getIp().equals("85.26.34.202")) {
             System.out.println(1);
         }
         //判断是否是本地地址
@@ -340,11 +340,11 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if(node.isCanConnect()) {
-            if(!disConnectNodes.containsKey(node.getId())) {
-                disConnectNodes.put(node.getId(),node);
+        if (node.isCanConnect()) {
+            if (!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(), node);
             }
-        }else {
+        } else {
             disConnectNodes.remove(node.getId());
             getNetworkStorageService().deleteNode(node.getId());
         }
@@ -558,25 +558,13 @@ public class NodeManager implements Runnable {
                 for (Node node : getSeedNodes()) {
                     addNode(node);
                 }
-            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
+            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
                     }
                 }
             }
-
-//            //定期尝试重新连接，检测网络节点
-//            long now = TimeService.currentTimeMillis();
-//            for (Node node : disConnectNodes.values()) {
-//                if (node.getStatus() == Node.WAIT) {
-//                    if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
-//                        connectionManager.connectionNode(node);
-//                    } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
-//                        connectionManager.connectionNode(node);
-//                    }
-//                }
-//            }
         }
     }
 
