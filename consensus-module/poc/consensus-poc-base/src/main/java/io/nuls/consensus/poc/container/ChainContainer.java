@@ -62,6 +62,7 @@ import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author ln
@@ -749,7 +750,7 @@ public class ChainContainer implements Cloneable {
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
 
-        newChain.initData(chain.getStartBlockHeader(), new ArrayList<>(chain.getAllBlockHeaderList()), new ArrayList<>(chain.getAllBlockList()));
+        newChain.initData(chain.getStartBlockHeader(), new CopyOnWriteArrayList<>(chain.getAllBlockHeaderList()), new CopyOnWriteArrayList<>(chain.getAllBlockList()));
 
         if (chain.getAgentList() != null) {
             List<Agent> agentList = new ArrayList<>();
