@@ -553,12 +553,13 @@ public class NodeManager implements Runnable {
 
             if (handShakeNodes.size() > 9) {
                 removeSeedNode();
-            } else if (handShakeNodes.size() <= 3) {
+            } else if (handShakeNodes.size() <= 2) {
                 //如果已连接成功数太少，立刻尝试连接种子节点
                 for (Node node : getSeedNodes()) {
                     addNode(node);
                 }
-            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
+            }
+            if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
