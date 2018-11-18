@@ -184,7 +184,7 @@ public class ForkChainProcess {
             }
 
             if (forkChainBestHeader.getHeight() > newestBlockHeight
-                    || (forkChainBestHeader.getHeight() == newestBlockHeight && forkChainBestHeader.getTime() < masterBestHeader.getTime())) {
+                    || (forkChainBestHeader.getHeight() == newestBlockHeight && changeContainer != null && forkChainBestHeader.getTime() < changeContainer.getChain().getEndBlockHeader().getTime())) {
                 changeContainer = forkChain;
                 newestBlockHeight = forkChainBestHeader.getHeight();
                 rightHash = forkChainBestHeader.getHash().getDigestBytes();
@@ -251,6 +251,7 @@ public class ForkChainProcess {
             NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
 
             if (oldChain.getChain().getAllBlockList().size() > 0) {
+                Collections.reverse(rollbackBlockList);
                 chainManager.getChains().add(oldChain);
             }
         } else {
@@ -561,7 +562,13 @@ public class ForkChainProcess {
                 if (startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                     //yes connectioned
                     orphanChain.getChain().setPreChainId(chain.getPreChainId());
-                    orphanChain.getChain().initData(chain.getStartBlockHeader(), blockHeaderList.subList(0, i + 1), chain.getAllBlockList().subList(0, i + 1));
+//                    orphanChain.getChain().initData(chain.getStartBlockHeader(), blockHeaderList.subList(0, i + 1), chain.getAllBlockList().subList(0, i + 1));
+
+                    List<Block> blockList = chain.getAllBlockList().subList(0, i + 1);
+                    for (int m = blockList.size() - 1 ; m >= 0; m--) {
+                        orphanChain.getChain().addPreBlock(blockList.get(m));
+                    }
+
                     chainManager.getChains().add(orphanChain);
 
                     if (i == blockHeaderList.size() - 1) {
@@ -582,8 +589,16 @@ public class ForkChainProcess {
         for (ChainContainer orphan : chainManager.getOrphanChains()) {
             if (orphan.getChain().getEndBlockHeader().getHash().equals(orphanChain.getChain().getStartBlockHeader().getPreHash()) &&
                     orphan.getChain().getEndBlockHeader().getHeight() + 1 == orphanChain.getChain().getStartBlockHeader().getHeight()) {
+
+//                Chain chain = orphan.getChain();
+//                chain.initData(orphanChain.getChain().getEndBlockHeader(), orphanChain.getChain().getAllBlockHeaderList(), orphanChain.getChain().getAllBlockList());
+
                 Chain chain = orphan.getChain();
-                chain.initData(orphanChain.getChain().getEndBlockHeader(), orphanChain.getChain().getAllBlockHeaderList(), orphanChain.getChain().getAllBlockList());
+                List<Block> blockList = orphanChain.getChain().getAllBlockList();
+                for(Block block : blockList) {
+                    chain.addBlock(block);
+                }
+
                 return true;
             }
         }

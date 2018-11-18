@@ -831,9 +831,11 @@ public class ChainContainer implements Cloneable {
 
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 canAdd = true;
-                if (i + 1 < blockList.size()) {
-                    chain.setPreChainId(chainContainer.getChain().getId());
-                }
+                chain.setPreChainId(getChain().getId());
+
+//                if (i + 1 < blockList.size()) {
+//                    chain.setPreChainId(getChain().getId());
+//                }
                 continue;
             }
         }

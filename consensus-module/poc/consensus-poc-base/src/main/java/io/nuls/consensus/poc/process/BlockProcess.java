@@ -535,8 +535,8 @@ public class BlockProcess {
 
                     // Check whether it is forked or connected. If it is a connection, add it.
                     // 检查是分叉还是连接，如果是连接，则加上即可
-                    if (i == headerList.size() - 1) {
-                        chainContainer.getChain().addBlock(block);
+                    if (i == size - 1) {
+                        forkChain.addBlock(block);
                         return true;
                     }
 
