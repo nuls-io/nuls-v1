@@ -558,7 +558,9 @@ public class NodeManager implements Runnable {
                 for (Node node : getSeedNodes()) {
                     addNode(node);
                 }
-            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
+            }
+
+            if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
