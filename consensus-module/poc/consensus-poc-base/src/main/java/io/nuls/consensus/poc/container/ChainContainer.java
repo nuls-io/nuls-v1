@@ -231,7 +231,10 @@ public class ChainContainer implements Cloneable {
         NulsDigestData preHash = blockHeader.getPreHash();
 
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
-
+        if (bestBlockHeader.getHash().equals(blockHeader.getHash())) {
+            Log.error("receive same hash, block height " + blockHeader.getHeight() + ",hash :" + blockHeader.getHash());
+            return Result.getFailed();
+        }
         if (!preHash.equals(bestBlockHeader.getHash())) {
             Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash() + ", prehash : " + preHash);
             Log.error("preblock height " + chain.getEndBlockHeader().getHeight() + " prehash is error! EndBlockHeader hash:" + chain.getEndBlockHeader().getHash() + ", prehash : " + blockHeader.getPreHash());
