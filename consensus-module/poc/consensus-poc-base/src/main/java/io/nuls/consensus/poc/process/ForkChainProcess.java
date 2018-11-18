@@ -179,6 +179,7 @@ public class ForkChainProcess {
                 if (!ArraysTool.arrayEquals(smallHash, masterBestHeader.getHash().getDigestBytes())) {
                     rightHash = smallHash;
                     changeContainer = forkChain;
+                    newestBlockHeight = masterBestHeader.getHeight();
                     break;
                 }
             }

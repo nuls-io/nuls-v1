@@ -749,7 +749,7 @@ public class ChainContainer implements Cloneable {
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
 
-        newChain.initData(chain.getStartBlockHeader(), new LinkedList<>(chain.getAllBlockHeaderList()), new LinkedList<>(chain.getAllBlockList()));
+        newChain.initData(chain.getStartBlockHeader(), new ArrayList<>(chain.getAllBlockHeaderList()), new ArrayList<>(chain.getAllBlockList()));
 
         if (chain.getAgentList() != null) {
             List<Agent> agentList = new ArrayList<>();
