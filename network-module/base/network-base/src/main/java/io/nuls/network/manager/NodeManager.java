@@ -559,7 +559,6 @@ public class NodeManager implements Runnable {
                     addNode(node);
                 }
             }
-
             if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
