@@ -60,7 +60,7 @@ public interface MessageBusConstant extends NulsConstant {
     /**
      * The default size of ringBuffer
      */
-    int DEFAULT_RING_BUFFER_SIZE = 1 << 15;
+    int DEFAULT_RING_BUFFER_SIZE = 1 << 20;
 
     /**
      * 消息类型为通用消息hash的消息
