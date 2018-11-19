@@ -85,6 +85,9 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         if (header.getTime() > (TimeService.currentTimeMillis() + ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000)) {
             return;
         }
+        if (header.getTime() < (TimeService.currentTimeMillis() - ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000)) {
+            return;
+        }
 
         if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
             return;

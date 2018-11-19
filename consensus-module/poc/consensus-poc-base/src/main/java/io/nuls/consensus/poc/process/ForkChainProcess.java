@@ -233,7 +233,11 @@ public class ForkChainProcess {
         //Need descending order
         //需要降序排列
         Collections.reverse(rollbackBlockList);
-
+        if(rollbackBlockList.get(0).getHeader().getHeight() != chainManager.getMasterChain().getBestBlock().getHeader().getHeight()) {
+            Log.error("------------------------回滚的起始高度不是主链最新高度");
+            Log.error("----------------------- masterChain:" + chainManager.getMasterChain().getBestBlock().getHeader().getHeight() + ",hash:" + chainManager.getMasterChain().getBestBlock().getHeader().getHash().getDigestHex());
+            Log.error("----------------------- rollbackBlockList:" + rollbackBlockList.get(0).getHeader().getHeight() + ",hash:" + rollbackBlockList.get(0).getHeader().getHash().getDigestHex());
+        }
         boolean rollbackResult = rollbackBlocks(rollbackBlockList);
         if (!rollbackResult) {
             return false;

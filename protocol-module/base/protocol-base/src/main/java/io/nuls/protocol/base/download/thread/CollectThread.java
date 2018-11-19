@@ -90,6 +90,9 @@ public class CollectThread implements Runnable {
         if (null == block) {
             block = waitBlock(startHeight);
         }
+        if (null == block) {
+            return;
+        }
         Result result = consensusService.addBlock(block);
         if (result.isSuccess()) {
             map.remove(block.getHeader().getHeight());
