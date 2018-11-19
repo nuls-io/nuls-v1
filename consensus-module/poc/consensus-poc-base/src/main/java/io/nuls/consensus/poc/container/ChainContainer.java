@@ -630,7 +630,7 @@ public class ChainContainer implements Cloneable {
             Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
             return false;
         }
-        Log.info("++++++++++ RedPunish verification passed, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
+//        Log.info("++++++++++ RedPunish verification passed, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
         return true;
     }
 
@@ -743,9 +743,6 @@ public class ChainContainer implements Cloneable {
      * @return ChainContainer
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
-        if (chain.getEndBlockHeader().getHeight() < chainContainer.getChain().getStartBlockHeader().getHeight()) {
-            return this;
-        }
 
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
