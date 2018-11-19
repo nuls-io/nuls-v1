@@ -81,27 +81,37 @@ public class RoundManager {
         if (roundList == null || roundList.size() == 0) {
             initRound();
         } else {
-            MeetingRound lastRound = roundList.get(roundList.size() - 1);
-            Block bestBlcok = chain.getBestBlock();
-            BlockExtendsData blockRoundData = new BlockExtendsData(bestBlcok.getHeader().getExtend());
-            if (blockRoundData.getRoundIndex() < lastRound.getIndex()) {
-                roundList.clear();
-                initRound();
+            Lockers.ROUND_LOCK.lock();
+            try {
+                MeetingRound lastRound = roundList.get(roundList.size() - 1);
+                Block bestBlcok = chain.getBestBlock();
+                BlockExtendsData blockRoundData = new BlockExtendsData(bestBlcok.getHeader().getExtend());
+                if (blockRoundData.getRoundIndex() < lastRound.getIndex()) {
+                    roundList.clear();
+                    initRound();
+                }
+            }finally {
+                Lockers.ROUND_LOCK.unlock();
             }
         }
     }
 
     public boolean clearRound(int count) {
+        Lockers.ROUND_LOCK.lock();
         boolean doit = false;
-        while (roundList.size() > count) {
-            doit = true;
-            roundList.remove(0);
+        try {
+            while (roundList.size() > count) {
+                doit = true;
+                roundList.remove(0);
+            }
+            if (doit) {
+                MeetingRound round = roundList.get(0);
+                round.setPreRound(null);
+            }
+            return true;
+        }finally {
+            Lockers.ROUND_LOCK.unlock();
         }
-        if (doit) {
-            MeetingRound round = roundList.get(0);
-            round.setPreRound(null);
-        }
-        return true;
     }
 
     public MeetingRound getCurrentRound() {
