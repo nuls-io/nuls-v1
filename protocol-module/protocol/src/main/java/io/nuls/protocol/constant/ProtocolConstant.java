@@ -159,11 +159,11 @@ public interface ProtocolConstant extends NulsConstant {
     short PROTOCOL_GET_SMALL_BLOCK = 19;
     short PROTOCOL_GET_TRANSACTION = 20;
     //协议升级要求最低覆盖率
-    int MIN_PROTOCOL_UPGRADE_RATE = 60;
+    int MIN_PROTOCOL_UPGRADE_RATE = 70;
     //协议升级要求最低延迟块数
     int MIN_PROTOCOL_UPGRADE_DELAY = 1000;
 
-    long START_CHECK_PROTOCOL_HEIGHT = 1L;
+    long START_CHECK_PROTOCOL_HEIGHT = 1110000L;
     // pierre test comment out
 
     /**
