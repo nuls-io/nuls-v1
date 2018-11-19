@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -98,53 +99,59 @@ public class OrphanBlockProcess implements Runnable {
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return;
         }
-        Block block = blockContainer.getBlock();
 
-        // 只处理本地误差配置的块个数以内的孤块
-        long bestBlockHeight = chainManager.getBestBlockHeight();
+        Lockers.CHAIN_LOCK.lock();
+        try {
+            Block block = blockContainer.getBlock();
 
-        if (Math.abs(bestBlockHeight - block.getHeader().getHeight()) > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
-            return;
-        }
+            // 只处理本地误差配置的块个数以内的孤块
+            long bestBlockHeight = chainManager.getBestBlockHeight();
 
-        // Because it is not possible to ensure that there will be repeated reception, priority is given to
-        // 因为不能确保是否会有重复收到的情况，所以在此优先去重
-        boolean hasExist = checkHasExist(block.getHeader().getHash());
-        if (hasExist) {
-            return;
-        }
+            if (Math.abs(bestBlockHeight - block.getHeader().getHeight()) > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
+                return;
+            }
 
-        ChainLog.debug("process isolated block, bestblockheight:{}, isolated {} - {}", bestBlockHeight, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+            // Because it is not possible to ensure that there will be repeated reception, priority is given to
+            // 因为不能确保是否会有重复收到的情况，所以在此优先去重
+            boolean hasExist = checkHasExist(block.getHeader().getHash());
+            if (hasExist) {
+                return;
+            }
 
-        // Checks if the current orphaned block is connected to an existing orphaned chain
-        // 检查当前孤立块是否和已经存在的孤立链连接
-        boolean success = chainManager.checkIsBeforeOrphanChainAndAdd(block);
+            ChainLog.debug("process isolated block, bestblockheight:{}, isolated {} - {}", bestBlockHeight, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
-        ChainLog.debug("checkIsBeforeIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+            // Checks if the current orphaned block is connected to an existing orphaned chain
+            // 检查当前孤立块是否和已经存在的孤立链连接
+            boolean success = chainManager.checkIsBeforeOrphanChainAndAdd(block);
 
-        if (success) {
-            // Connect to the current isolated chain and continue to find the previous block
-            // 和当前的孤立链连接，继续寻找上一区块
+            ChainLog.debug("checkIsBeforeIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+
+            if (success) {
+                // Connect to the current isolated chain and continue to find the previous block
+                // 和当前的孤立链连接，继续寻找上一区块
+                foundAndProcessPreviousBlock(blockContainer);
+                return;
+            }
+            success = chainManager.checkIsAfterOrphanChainAndAdd(block);
+
+            ChainLog.debug("checkIsAfterIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+
+            if (success) {
+                // Successfully found and connected, no action required
+                // 成功找到，并且连接上了，接下来不需要做任何操作
+                return;
+            }
+
+            // Not found, then create a new isolated chain, then find the previous block
+            // 没有找到，那么新建一条孤立链，接着寻找上一个区块
+            chainManager.newOrphanChain(block);
+
+            ChainLog.debug("new a isolated chain , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+
             foundAndProcessPreviousBlock(blockContainer);
-            return;
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
-        success = chainManager.checkIsAfterOrphanChainAndAdd(block);
-
-        ChainLog.debug("checkIsAfterIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-
-        if (success) {
-            // Successfully found and connected, no action required
-            // 成功找到，并且连接上了，接下来不需要做任何操作
-            return;
-        }
-
-        // Not found, then create a new isolated chain, then find the previous block
-        // 没有找到，那么新建一条孤立链，接着寻找上一个区块
-        chainManager.newOrphanChain(block);
-
-        ChainLog.debug("new a isolated chain , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-
-        foundAndProcessPreviousBlock(blockContainer);
     }
 
     /*
@@ -153,7 +160,7 @@ public class OrphanBlockProcess implements Runnable {
      */
     private boolean checkHasExist(NulsDigestData blockHash) {
 
-        for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator() ; it.hasNext() ; ) {
+        for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator(); it.hasNext(); ) {
             ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
@@ -162,7 +169,7 @@ public class OrphanBlockProcess implements Runnable {
             }
         }
 
-        for (Iterator<ChainContainer> it = chainManager.getChains().iterator() ; it.hasNext() ; ) {
+        for (Iterator<ChainContainer> it = chainManager.getChains().iterator(); it.hasNext(); ) {
             ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
