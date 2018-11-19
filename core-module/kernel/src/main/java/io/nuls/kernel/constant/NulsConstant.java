@@ -128,4 +128,11 @@ public interface NulsConstant {
      */
     byte[] SIGN_HOLDER = new byte[]{(byte) 0x00, (byte) 0x00};
 
+    /**
+     * 钱包状态
+     * SYNCHING
+     */
+    public static final int SYNCHING = 1;
+    public static final int RUNNING = 2;
+    public static final int ROLLBACK = 3;
 }

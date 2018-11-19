@@ -36,6 +36,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.BlockHeader;
@@ -126,7 +127,6 @@ public class ConsensusScheduler {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
-
             //获取最新的记录版本信息的高度
             Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
             if (consensusVersionHeight == null) {
@@ -175,7 +175,7 @@ public class ConsensusScheduler {
         try {
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.LOADING_CACHE);
             cacheManager.load();
-
+            NulsContext.WALLET_STATUS = NulsConstant.SYNCHING;
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         } catch (Exception e) {
             throw new NulsRuntimeException(e);

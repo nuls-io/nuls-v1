@@ -25,6 +25,7 @@
 package io.nuls.utxo.accounts.task;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -43,6 +44,9 @@ public class UtxoAccountsThread implements Runnable {
     public void run() {
         Lockers.SYN_UTXO_ACCOUNTS_LOCK.lock();
         try {
+            if (NulsContext.WALLET_STATUS != NulsConstant.RUNNING) {
+                return;
+            }
             long hadSynBlockHeight = utxoAccountsStorageService.getHadSynBlockHeight();
             long end = NulsContext.getInstance().getBestHeight();
             for (long i = hadSynBlockHeight + 1; i <= end; i++) {

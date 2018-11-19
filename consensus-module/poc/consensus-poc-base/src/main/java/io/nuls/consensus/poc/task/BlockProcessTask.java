@@ -34,6 +34,7 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.ledger.service.LedgerService;
@@ -97,7 +98,7 @@ public class BlockProcessTask implements Runnable {
                             continue;
                         }
                         try {
-                            transactionService.rollbackTx(tx,blockContainer.getBlock().getHeader());
+                            transactionService.rollbackTx(tx, blockContainer.getBlock().getHeader());
                         } catch (Exception e) {
                             Log.error(e);
                         }
@@ -118,6 +119,7 @@ public class BlockProcessTask implements Runnable {
         if (downloadService.isDownloadSuccess().isSuccess() && ConsensusStatusContext.getConsensusStatus() == ConsensusStatus.WAIT_RUNNING &&
                 (blockContainer == null || blockContainer.getStatus() == BlockContainerStatus.RECEIVED)) {
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.RUNNING);
+            NulsContext.WALLET_STATUS = NulsConstant.RUNNING;
         }
     }
 }
