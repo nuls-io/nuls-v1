@@ -31,6 +31,7 @@ import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,15 +44,15 @@ import java.util.List;
 public class TimeService implements Runnable {
 
     private TimeService() {
-        urlList.add("sgp.ntp.org.cn");
+//        urlList.add("sgp.ntp.org.cn");
         urlList.add("cn.ntp.org.cn");
         urlList.add("time1.apple.com");
         urlList.add("ntp3.aliyun.com");
         urlList.add("ntp5.aliyun.com");
         urlList.add("us.ntp.org.cn");
         urlList.add("kr.ntp.org.cn");
-        urlList.add("de.ntp.org.cn");
-        urlList.add("jp.ntp.org.cn");
+//        urlList.add("de.ntp.org.cn");
+//        urlList.add("jp.ntp.org.cn");
         urlList.add("ntp7.aliyun.com");
     }
 
@@ -93,13 +94,11 @@ public class TimeService implements Runnable {
      * 同步网络时间
      */
     private void syncWebTime() {
-
         int count = 0;
         long sum = 0L;
 
         for (int i = 0; i < urlList.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
-
             long netTime = getWebTime(urlList.get(i));
 
             if (netTime == 0) {
@@ -112,10 +111,10 @@ public class TimeService implements Runnable {
             count++;
             sum += value;
         }
+
         if (count > 0) {
             netTimeOffset = sum / count;
         }
-
         lastSyncTime = currentTimeMillis();
     }
 
@@ -132,9 +131,9 @@ public class TimeService implements Runnable {
             client.setDefaultTimeout(1000);
             client.setSoTimeout(1000);
             InetAddress inetAddress = InetAddress.getByName(address);
-            Log.debug("start ask time....");
+//            Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
-            Log.debug("done!");
+//            Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
             return 0L;
