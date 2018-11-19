@@ -184,6 +184,7 @@ public class ForkChainProcess {
                     rightHash = smallHash;
                     changeContainer = forkChain;
                     newestBlockHeight = masterBestHeader.getHeight();
+                    Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
                     break;
                 }
             }
@@ -197,7 +198,6 @@ public class ForkChainProcess {
         }
 
         if (changeContainer != null) {
-            Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
             Log.info("-+-+-+-+-+-+-+-+- height: " + newestBlockHeight + ", Right hash：" + Hex.encode(rightHash));
             /** ******************************************************************************************************** */
             try {

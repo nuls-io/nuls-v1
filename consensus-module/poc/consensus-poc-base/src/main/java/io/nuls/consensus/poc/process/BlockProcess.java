@@ -514,9 +514,10 @@ public class BlockProcess {
         NulsDigestData preHash = blockHeader.getPreHash();
 
         // check the preHash is in the waitVerifyChainList
-        for (ChainContainer chainContainer : chainManager.getChains()) {
 
-            Chain forkChain = chainContainer.getChain();
+        Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
+        while (iterator.hasNext()) {
+            Chain forkChain = iterator.next().getChain();
             List<BlockHeader> headerList = forkChain.getAllBlockHeaderList();
             int size = headerList.size();
             for (int i = size - 1; i >= 0; i--) {
