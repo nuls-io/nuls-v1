@@ -49,6 +49,7 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -85,6 +86,7 @@ public class ForkChainProcess {
 
     public boolean doProcess() throws IOException, NulsException {
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
+            NulsContext.WALLET_STATUS = NulsConstant.SYNCHING;
             return false;
         }
         Lockers.CHAIN_LOCK.lock();
@@ -102,6 +104,7 @@ public class ForkChainProcess {
             //寻找可切换的链
             ChainContainer wantToChangeChain = findWantToChangeChain(masterBestHeader);
             if (wantToChangeChain != null) {
+                NulsContext.WALLET_STATUS = NulsConstant.ROLLBACK;
                 //验证新的链，结合当前最新的链，获取到分叉节点时的状态
                 ChainContainer resultChain = chainManager.getMasterChain().getBeforeTheForkChain(wantToChangeChain);
                 List<Object[]> verifyResultList = new ArrayList<>();
@@ -145,6 +148,7 @@ public class ForkChainProcess {
             }
             clearExpiredChain();
         } finally {
+            NulsContext.WALLET_STATUS = NulsConstant.RUNNING;
             Lockers.CHAIN_LOCK.unlock();
         }
         return true;
@@ -566,7 +570,7 @@ public class ForkChainProcess {
 //                    orphanChain.getChain().initData(chain.getStartBlockHeader(), blockHeaderList.subList(0, i + 1), chain.getAllBlockList().subList(0, i + 1));
 
                     List<Block> blockList = chain.getAllBlockList().subList(0, i + 1);
-                    for (int m = blockList.size() - 1 ; m >= 0; m--) {
+                    for (int m = blockList.size() - 1; m >= 0; m--) {
                         orphanChain.getChain().addPreBlock(blockList.get(m));
                     }
 
@@ -596,7 +600,7 @@ public class ForkChainProcess {
 
                 Chain chain = orphan.getChain();
                 List<Block> blockList = orphanChain.getChain().getAllBlockList();
-                for(Block block : blockList) {
+                for (Block block : blockList) {
                     chain.addBlock(block);
                 }
 

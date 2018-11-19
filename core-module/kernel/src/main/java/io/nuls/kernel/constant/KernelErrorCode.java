@@ -68,4 +68,6 @@ public interface KernelErrorCode {
     ErrorCode PUBKEY_REPEAT = ErrorCode.init("10033");
     ErrorCode COIN_OWNER_ERROR = ErrorCode.init("10034");
     ErrorCode NONEWVER = ErrorCode.init("10035");
+    ErrorCode WALLET_STATUS_SYNCHING = ErrorCode.init("10036");
+    ErrorCode WALLET_STATUS_ROLLBACK = ErrorCode.init("10037");
 }

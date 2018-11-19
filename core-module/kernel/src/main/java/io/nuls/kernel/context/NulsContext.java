@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class NulsContext {
 
+    public static volatile Integer WALLET_STATUS = 1;
+
     /**
      * 当前钱包最新协议版本(用于系统升级，默认为1，启动时会根据当前钱包的协议配置做修改)
      * System protocol version.
