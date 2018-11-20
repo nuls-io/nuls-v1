@@ -133,7 +133,7 @@ public class ConnectionManager {
             list = new ArrayList<>();
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
-            MessageLog.debug(Hex.encode(bytes));
+//            MessageLog.debug(Hex.encode(bytes));
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
             while (!byteBuffer.isFinished()) {
                 MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
