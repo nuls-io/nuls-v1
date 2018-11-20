@@ -54,7 +54,7 @@ public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
         BalanceManager balanceManager = NulsContext.getServiceBean(BalanceManager.class);
         balanceManager.initAccountBalance();
         ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(1, new NulsThreadFactory(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER, "CheckUnConfirmTxThread"));
-        executor.scheduleAtFixedRate(NulsContext.getServiceBean(CheckUnConfirmTxThread.class), 10, 10, TimeUnit.MINUTES);
+        executor.scheduleAtFixedRate(NulsContext.getServiceBean(CheckUnConfirmTxThread.class), 1, 10, TimeUnit.MINUTES);
     }
 
     @Override
