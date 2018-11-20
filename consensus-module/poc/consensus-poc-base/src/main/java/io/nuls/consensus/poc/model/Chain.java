@@ -36,7 +36,6 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author ln
@@ -55,8 +54,8 @@ public class Chain implements Cloneable {
     private List<PunishLogPo> redPunishList;
 
     public Chain() {
-        blockHeaderList = new CopyOnWriteArrayList<>();
-        blockList = new CopyOnWriteArrayList<>();
+        blockHeaderList = new ArrayList<>();
+        blockList = new ArrayList<>();
         id = StringUtils.getNewUUID();
     }
 
