@@ -653,6 +653,18 @@ public class AccountServiceImpl implements AccountService {
             }
             accountList.add(account);
         }
+        List<AliasPo> aliasList = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo:aliasList) {
+            if (aliasPo.getAddress()[2] != NulsContext.P2SH_ADDRESS_TYPE) {
+                continue;
+            }
+            for (MultiSigAccount multiSigAccount:accountList) {
+                if (Arrays.equals(aliasPo.getAddress(), multiSigAccount.getAddress().getAddressBytes())) {
+                    multiSigAccount.setAlias(aliasPo.getAlias());
+                    break;
+                }
+            }
+        }
         return new Result<List<MultiSigAccount>>().setData(accountList);
     }
 
