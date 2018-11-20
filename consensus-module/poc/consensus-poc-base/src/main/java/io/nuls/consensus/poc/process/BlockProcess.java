@@ -547,7 +547,7 @@ public class BlockProcess {
 
                     Chain newForkChain = new Chain();
 
-                    newForkChain.initData(forkChain.getStartBlockHeader(), headerList.subList(0, i + 1), blockList.subList(0, i + 1));
+                    newForkChain.initData(forkChain.getStartBlockHeader(), new ArrayList<>(headerList.subList(0, i + 1)), new ArrayList<>(blockList.subList(0, i + 1)));
                     newForkChain.addBlock(block);
 
 

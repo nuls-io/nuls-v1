@@ -48,7 +48,6 @@ import io.nuls.protocol.service.BlockService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 系统启动时加载缓存的处理器
@@ -74,7 +73,7 @@ public class CacheLoader {
      */
     public List<Block> loadBlocks(int size) {
 
-        List<Block> blockList = new CopyOnWriteArrayList<>();
+        List<Block> blockList = new ArrayList<>();
 
         Block block = blockService.getBestBlock().getData();
 
@@ -111,7 +110,7 @@ public class CacheLoader {
      */
     public List<BlockHeader> loadBlockHeaders(int size) {
 
-        List<BlockHeader> blockHeaderList = new CopyOnWriteArrayList<>();
+        List<BlockHeader> blockHeaderList = new ArrayList<>();
 
         BlockHeader blockHeader = blockService.getBestBlockHeader().getData();
 
