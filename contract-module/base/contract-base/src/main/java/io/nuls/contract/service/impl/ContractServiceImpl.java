@@ -748,7 +748,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     }
                     return Result.getSuccess().setData(contractExecutedResult);
                 } else {
-                    Log.info("contractExecutedResult failed. {}", contractExecutedResult.toString());
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("contractExecutedResult failed. {}", contractExecutedResult.toString());
+                    }
                     return Result.getFailed().setData(contractExecutedResult);
                 }
             }
@@ -792,7 +794,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             BigInteger preBalance = vmContext.getBalance(contractAddress, height);
             ContractResult contractResult = result.getData();
             if(!contractResult.isSuccess()) {
-                Log.info("contractResult failed. {}", contractResult.toString());
+                if(Log.isDebugEnabled()) {
+                    Log.debug("contractResult failed. {}", contractResult.toString());
+                }
             }
             contractResult.setPreBalance(preBalance);
             // 刷新临时余额
