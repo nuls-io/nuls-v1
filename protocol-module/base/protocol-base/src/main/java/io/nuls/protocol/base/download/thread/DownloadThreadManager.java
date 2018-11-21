@@ -124,7 +124,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
     private boolean checkRollback(Block localBestBlock, int rollbackCount) throws NulsException {
 
-        if (rollbackCount >= 10) {
+        if (rollbackCount >= 20) {
 //            resetNetwork("number of rollbackTx blocks greater than 10 during download");
             return false;
         }

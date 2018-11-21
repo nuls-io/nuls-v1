@@ -126,8 +126,8 @@ public class NulsProtocolProcess {
         container.getAddressSet().add(packingAddress);
         container.setRoundIndex(extendsData.getRoundIndex());
 
-//        Log.info("========== 统计协议 ==========");
-//        Log.info("========== 上一轮协议覆盖率：" + container.getCurrentPercent() + " -->>> " + container.getPercent());
+        Log.info("========== 统计协议 ==========");
+        Log.info("========== 上一轮协议覆盖率：" + container.getCurrentPercent() + " -->>> " + container.getPercent());
 
         //当进入延迟升级时，需要累计延迟块数
         if (container.getStatus() == ProtocolContainer.DELAY_LOCK) {
