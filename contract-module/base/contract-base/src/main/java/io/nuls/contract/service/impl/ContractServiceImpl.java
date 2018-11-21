@@ -830,26 +830,22 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         // 增加转入, 扣除转出
         List<ContractTransfer> transfers = contractExecutedResult.getTransfers();
         if(transfers != null && transfers.size() > 0) {
-            //Na outAmount = Na.ZERO;
-            //Na inAmount = Na.ZERO;
             LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
             LinkedHashMap<String, Na> contractOutNa = contracts[0];
             LinkedHashMap<String, Na> contractInNa = contracts[1];
             byte[] contractBytes;
-            Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
-            for(Map.Entry<String, Na> out : outs) {
-                contractBytes = asBytes(out.getKey());
-                vmContext.getBalance(contractBytes, height);
-                contractBalanceManager.minusTempBalance(contractBytes, out.getValue());
-            }
             Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
             for(Map.Entry<String, Na> in : ins) {
                 contractBytes = asBytes(in.getKey());
                 vmContext.getBalance(contractBytes, height);
                 contractBalanceManager.addTempBalance(contractBytes, in.getValue());
             }
-            //contractBalanceManager.addTempBalance(contractAddress, inAmount.getValue());
-            //contractBalanceManager.minusTempBalance(contractAddress, outAmount.getValue());
+            Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
+            for(Map.Entry<String, Na> out : outs) {
+                contractBytes = asBytes(out.getKey());
+                vmContext.getBalance(contractBytes, height);
+                contractBalanceManager.minusTempBalance(contractBytes, out.getValue());
+            }
         }
     }
 
@@ -884,12 +880,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     contractInNa.put(contract, na.add(transferValue));
                 }
             }
-            //if(ArraysTool.arrayEquals(transfer.getFrom(), contractAddress)) {
-            //    outAmount = outAmount.add(transfer.getValue());
-            //}
-            //if(ArraysTool.arrayEquals(transfer.getTo(), contractAddress)) {
-            //    inAmount = inAmount.add(transfer.getValue());
-            //}
         }
         return contracts;
     }
@@ -904,25 +894,20 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 增加转出, 扣除转入
             List<ContractTransfer> transfers = contractResult.getTransfers();
             if(transfers != null && transfers.size() > 0) {
-                //Na outAmount = Na.ZERO;
-                //Na inAmount = Na.ZERO;
                 LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
                 LinkedHashMap<String, Na> contractOutNa = contracts[0];
                 LinkedHashMap<String, Na> contractInNa = contracts[1];
                 byte[] contractBytes;
-                Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
-                for(Map.Entry<String, Na> in : ins) {
-                    contractBytes = asBytes(in.getKey());
-                    contractBalanceManager.minusTempBalance(contractBytes, in.getValue());
-                }
                 Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
                 for(Map.Entry<String, Na> out : outs) {
                     contractBytes = asBytes(out.getKey());
                     contractBalanceManager.addTempBalance(contractBytes, out.getValue());
                 }
-
-                //contractBalanceManager.addTempBalance(contractAddress, outAmount.getValue());
-                //contractBalanceManager.minusTempBalance(contractAddress, inAmount.getValue());
+                Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
+                for(Map.Entry<String, Na> in : ins) {
+                    contractBytes = asBytes(in.getKey());
+                    contractBalanceManager.minusTempBalance(contractBytes, in.getValue());
+                }
             }
             // 扣除转入
             long value = callContractData.getValue();
