@@ -46,8 +46,8 @@ public class TestLotOfTransfer implements Contract {
     }
 
     public String transfer(int loop) {
+        Address address = new Address("NsdtgQGAxXPh53oZxAWjVpnHnK7mu4wY");
         for (int i = 0; i < loop; i++) {
-            Address address = new Address("NsdtgQGAxXPh53oZxAWjVpnHnK7mu4wY");
             address.transfer(BigInteger.valueOf(10000));
         }
         return name;
