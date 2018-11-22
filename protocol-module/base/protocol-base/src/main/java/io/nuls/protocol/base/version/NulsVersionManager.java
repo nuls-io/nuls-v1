@@ -331,4 +331,5 @@ public class NulsVersionManager {
     public static void setConsensusVersionMap(Map<String, Integer> consensusVersionMap) {
         NulsVersionManager.consensusVersionMap = consensusVersionMap;
     }
+
 }
