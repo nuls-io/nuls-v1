@@ -24,6 +24,8 @@
  */
 package io.nuls.protocol.base.handler;
 
+import io.nuls.core.tools.log.BlockLog;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -54,6 +56,11 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
         }
         SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
         smallBlockMessage.setMsgBody(smallBlock);
-        messageBusService.sendToNode(smallBlockMessage, fromNode, true);
+        Result result = messageBusService.sendToNode(smallBlockMessage, fromNode, true);
+        if (result.isSuccess()) {
+            Log.error("---send smallBlockMessage success, height:" + smallBlock.getHeader().getHeight() + "hash: " + smallBlock.getHeader().getHash().getDigestHex());
+        } else {
+            Log.error("---send smallBlockMessage fail, height:" + smallBlock.getHeader().getHeight() + "hash: " + smallBlock.getHeader().getHash().getDigestHex());
+        }
     }
 }

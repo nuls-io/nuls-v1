@@ -45,8 +45,10 @@ import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.VersionMessage;
 import io.nuls.network.util.HeartBeatThread;
 import io.nuls.network.util.NetworkThreadPool;
+import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
+import io.nuls.protocol.model.SmallBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -175,8 +177,18 @@ public class ConnectionManager {
             }
             asynExecute(message, node);
         } else {
+            SmallBlockMessage smallBlockMessage = null;
+            if (message.getHeader().getMsgType() == 11 && message.getHeader().getModuleId() == 3) {
+                smallBlockMessage = (SmallBlockMessage) message;
+            }
             if (!node.isHandShake()) {
+                if (smallBlockMessage != null) {
+                    Log.error("---receive smallblock but not handShake, from:" + node.getIp() + ",height:" + smallBlockMessage.getMsgBody().getHeader().getHeight() + "hash:" + smallBlockMessage.getMsgBody().getHeader().getHash().getDigestHex());
+                }
                 return;
+            }
+            if (smallBlockMessage != null) {
+                Log.error("---receive smallblock , from:" + node.getIp() + ",height:" + smallBlockMessage.getMsgBody().getHeader().getHeight() + "hash:" + smallBlockMessage.getMsgBody().getHeader().getHash().getDigestHex());
             }
             messageBusService.receiveMessage(message, node);
         }

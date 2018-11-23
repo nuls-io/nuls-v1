@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.base.handler;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -53,9 +54,13 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);
+
         if (result.isFailed()) {
+            Log.error("---send getSmallBlockMessage fail, from：" + fromNode.getIp() + ",block hash: " + hash.getDigestHex());
             SmallBlockDuplicateRemoval.removeForward(hash);
             return;
+        } else {
+            Log.error("---send getSmallBlockMessage success, from：" + fromNode.getIp() + ",block hash: " + hash.getDigestHex());
         }
     }
 
