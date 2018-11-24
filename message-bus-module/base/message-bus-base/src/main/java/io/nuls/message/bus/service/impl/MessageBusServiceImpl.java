@@ -73,6 +73,7 @@ public class MessageBusServiceImpl implements MessageBusService {
         try {
             String uuid = StringUtils.getNewUUID();
             MessageCacher.put(uuid,message, node);
+            this.processorManager.offer(new ProcessData(uuid, message.getClass()));
         } catch (Exception e) {
             Log.error(e);
         }
