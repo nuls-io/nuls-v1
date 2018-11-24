@@ -25,24 +25,21 @@
 
 package io.nuls.message.bus.model;
 
-import io.nuls.network.model.Node;
-import io.nuls.protocol.message.base.BaseMessage;
-
 /**
  * @author: Charlie
  */
-public class ProcessData<NulsDigestData> {
+public class ProcessData<String> {
 
-    private final NulsDigestData data;
+    private final String data;
 
     private Class type;
 
-    public ProcessData(NulsDigestData data,Class type){
+    public ProcessData(String data,Class type){
         this.data = data;
         this.type = type;
     }
 
-    public NulsDigestData getData(){
+    public String getData(){
         return data;
     }
 

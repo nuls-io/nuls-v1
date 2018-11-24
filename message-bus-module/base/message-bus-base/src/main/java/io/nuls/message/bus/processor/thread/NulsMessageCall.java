@@ -35,7 +35,7 @@ import io.nuls.protocol.message.base.BaseMessage;
 /**
  * @author: Charlie
  */
-public class NulsMessageCall<T extends NulsDigestData> implements Runnable {
+public class NulsMessageCall<T extends String> implements Runnable {
 
     private final ProcessData<T> data;
     private final NulsMessageHandler<BaseMessage> handler;
