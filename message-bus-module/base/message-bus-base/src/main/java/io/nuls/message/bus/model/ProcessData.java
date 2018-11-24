@@ -25,29 +25,27 @@
 
 package io.nuls.message.bus.model;
 
+import io.nuls.network.model.Node;
+import io.nuls.protocol.message.base.BaseMessage;
+
 /**
  * @author: Charlie
  */
-public class ProcessData<String> {
+public class ProcessData<T extends BaseMessage> {
 
-    private final String data;
+    private T data;
+    private Node node;
 
-    private Class type;
-
-    public ProcessData(String data,Class type){
+    public ProcessData(T data, Node node) {
         this.data = data;
-        this.type = type;
+        this.node = node;
     }
 
-    public String getData(){
+    public T getData() {
         return data;
     }
 
-    public Class getType() {
-        return type;
-    }
-
-    public void setType(Class type) {
-        this.type = type;
+    public Node getNode() {
+        return node;
     }
 }
