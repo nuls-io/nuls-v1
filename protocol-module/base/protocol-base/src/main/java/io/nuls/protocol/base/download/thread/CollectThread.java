@@ -70,9 +70,6 @@ public class CollectThread implements Runnable {
                 if (startHeight > endHeight) {
                     break;
                 }
-                if (startHeight > (NulsContext.getInstance().getBestHeight() + 1000)) {
-                    Thread.sleep(100);
-                }
                 pushBlock();
             } catch (Exception e) {
                 Log.error(e);
