@@ -45,8 +45,10 @@ import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.VersionMessage;
 import io.nuls.network.util.HeartBeatThread;
 import io.nuls.network.util.NetworkThreadPool;
+import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
+import io.nuls.protocol.model.SmallBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;

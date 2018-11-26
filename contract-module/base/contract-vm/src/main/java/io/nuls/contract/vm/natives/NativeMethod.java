@@ -123,9 +123,6 @@ public class NativeMethod {
             case NativeSystem.TYPE:
                 result = NativeSystem.nativeRun(methodCode, methodArgs, frame, check);
                 break;
-//            case NativeThread.TYPE:
-//                result = NativeThread.nativeRun(methodCode, methodArgs, frame, check);
-//                break;
             case NativeThrowable.TYPE:
                 result = NativeThrowable.nativeRun(methodCode, methodArgs, frame, check);
                 break;

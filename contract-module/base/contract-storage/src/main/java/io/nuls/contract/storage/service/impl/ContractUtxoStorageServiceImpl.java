@@ -87,11 +87,6 @@ public class ContractUtxoStorageServiceImpl implements ContractUtxoStorageServic
         byte[] deleteUtxo;
         if(utxosToDelete != null) {
             for (byte[] key : utxosToDelete) {
-                /*deleteUtxo = getUTXO(key);
-                // 函数返回将要删除的UTXO
-                if(deleteUtxo != null) {
-                    deleteUtxoEntryList.add(new Entry<byte[], byte[]>(key, deleteUtxo));
-                }*/
                 batch.delete(key);
             }
         }

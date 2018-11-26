@@ -36,6 +36,7 @@ import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsVersion;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.base.version.NulsVersionManager;
@@ -88,6 +89,7 @@ public class NulsProtocolProcess {
             return;
         }
 
+        NulsVersionManager.getConsensusVersionMap().put(packingAddress, extendsData.getCurrentVersion());
         calculateCoverageEveryRound(blockHeader, extendsData, currentRound);
         containerRemoveAddress(packingAddress);
 
@@ -125,7 +127,7 @@ public class NulsProtocolProcess {
     private void processHigherVersion(BlockHeader blockHeader, BlockExtendsData extendsData, String packingAddress, ProtocolContainer container) {
         container.getAddressSet().add(packingAddress);
         container.setRoundIndex(extendsData.getRoundIndex());
-
+//
 //        Log.info("========== 统计协议 ==========");
 //        Log.info("========== 上一轮协议覆盖率：" + container.getCurrentPercent() + " -->>> " + container.getPercent());
 

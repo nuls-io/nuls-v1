@@ -31,26 +31,21 @@ import io.nuls.protocol.message.base.BaseMessage;
 /**
  * @author: Charlie
  */
-public class ProcessData<NulsDigestData> {
+public class ProcessData<T extends BaseMessage> {
 
-    private final NulsDigestData data;
+    private T data;
+    private Node node;
 
-    private Class type;
-
-    public ProcessData(NulsDigestData data,Class type){
+    public ProcessData(T data, Node node) {
         this.data = data;
-        this.type = type;
+        this.node = node;
     }
 
-    public NulsDigestData getData(){
+    public T getData() {
         return data;
     }
 
-    public Class getType() {
-        return type;
-    }
-
-    public void setType(Class type) {
-        this.type = type;
+    public Node getNode() {
+        return node;
     }
 }

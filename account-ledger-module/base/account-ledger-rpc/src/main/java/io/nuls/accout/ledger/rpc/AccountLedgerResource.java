@@ -292,7 +292,7 @@ public class AccountLedgerResource {
     @POST
     @Path("/multipleAddressTransfer")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多地址转账（from多个地址的密码必须一样）", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多地址转账", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
