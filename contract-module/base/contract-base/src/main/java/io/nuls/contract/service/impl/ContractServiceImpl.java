@@ -1262,7 +1262,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
             // 如果合约转账(从合约转出)出现错误，整笔合约交易视作合约执行失败
             if (!isCorrectContractTransfer) {
-                Log.error("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
+                if(Log.isDebugEnabled()) {
+                    Log.debug("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
+                }
                 // 执行合约产生的状态根回滚到上一个世界状态
                 stateRoot = preStateRoot;
                 contractResult.setStateRoot(stateRoot);

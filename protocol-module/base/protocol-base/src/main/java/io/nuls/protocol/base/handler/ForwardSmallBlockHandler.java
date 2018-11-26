@@ -31,6 +31,8 @@ import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.cache.TemporaryCacheManager;
+import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.utils.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.GetSmallBlockMessage;
@@ -41,6 +43,7 @@ import io.nuls.protocol.message.GetSmallBlockMessage;
 public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmallBlockMessage> {
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @Override
     public void onMessage(ForwardSmallBlockMessage message, Node fromNode) {
@@ -61,6 +64,28 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
             return;
         } else {
             Log.error("---send getSmallBlockMessage success, from：" + fromNode.getIp() + ",block hash: " + hash.getDigestHex());
+        }
+
+        waitForReceiveSmallBlockMessage(hash);
+    }
+
+    private void waitForReceiveSmallBlockMessage(NulsDigestData hash) {
+        try {
+            long beginTime = System.currentTimeMillis();
+            while(true) {
+                SmallBlock smallBlock = temporaryCacheManager.getSmallBlockByHash(hash);
+                if(smallBlock == null) {
+                    Thread.sleep(100L);
+                } else {
+                    break;
+                }
+                if(System.currentTimeMillis() - beginTime > 1000L) {
+                    SmallBlockDuplicateRemoval.removeForward(hash);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            SmallBlockDuplicateRemoval.removeForward(hash);
         }
     }
 
