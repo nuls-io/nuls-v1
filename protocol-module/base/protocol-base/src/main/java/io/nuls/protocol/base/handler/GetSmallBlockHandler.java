@@ -57,10 +57,9 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
         SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
         smallBlockMessage.setMsgBody(smallBlock);
         Result result = messageBusService.sendToNode(smallBlockMessage, fromNode, true);
-        if (result.isSuccess()) {
-            Log.error("---send smallBlockMessage success, height:" + smallBlock.getHeader().getHeight() + "hash: " + smallBlock.getHeader().getHash().getDigestHex());
-        } else {
+        if (!result.isSuccess()) {
             Log.error("---send smallBlockMessage fail, height:" + smallBlock.getHeader().getHeight() + "hash: " + smallBlock.getHeader().getHash().getDigestHex());
+            Log.error("----" + result.getMsg());
         }
     }
 }

@@ -59,13 +59,9 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);
 
         if (result.isFailed()) {
-            Log.error("---send getSmallBlockMessage fail, from：" + fromNode.getIp() + ",block hash: " + hash.getDigestHex());
             SmallBlockDuplicateRemoval.removeForward(hash);
             return;
-        } else {
-            Log.error("---send getSmallBlockMessage success, from：" + fromNode.getIp() + ",block hash: " + hash.getDigestHex());
         }
-
         waitForReceiveSmallBlockMessage(hash);
     }
 

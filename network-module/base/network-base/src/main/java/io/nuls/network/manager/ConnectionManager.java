@@ -177,18 +177,8 @@ public class ConnectionManager {
             }
             asynExecute(message, node);
         } else {
-            SmallBlockMessage smallBlockMessage = null;
-            if (message.getHeader().getMsgType() == 11 && message.getHeader().getModuleId() == 3) {
-                smallBlockMessage = (SmallBlockMessage) message;
-            }
             if (!node.isHandShake()) {
-                if (smallBlockMessage != null) {
-                    Log.error("---receive smallblock but not handShake, from:" + node.getIp() + ",height:" + smallBlockMessage.getMsgBody().getHeader().getHeight() + "hash:" + smallBlockMessage.getMsgBody().getHeader().getHash().getDigestHex());
-                }
                 return;
-            }
-            if (smallBlockMessage != null) {
-                Log.error("---receive smallblock , from:" + node.getIp() + ",height:" + smallBlockMessage.getMsgBody().getHeader().getHeight() + "hash:" + smallBlockMessage.getMsgBody().getHeader().getHash().getDigestHex());
             }
             messageBusService.receiveMessage(message, node);
         }
