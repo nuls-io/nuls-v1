@@ -94,10 +94,6 @@ public class ProgramResult {
         return revert;
     }
 
-    public void setRevert(boolean revert) {
-        this.revert = revert;
-    }
-
     public boolean isError() {
         return error;
     }

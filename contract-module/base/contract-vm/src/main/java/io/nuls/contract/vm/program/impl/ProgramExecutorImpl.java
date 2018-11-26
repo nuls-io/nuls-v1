@@ -35,7 +35,6 @@ import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.code.ClassCodes;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
-import io.nuls.contract.vm.exception.RevertException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
@@ -388,10 +387,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             //programResult.setStackTrace(e.getStackTraceMessage());
             logTime("error");
             return programResult.error(e.getMessage());
-        } catch (RevertException e) {
-            //log.error("", e);
-            return revert(e.getMessage());
-            //return revert(e.getMessage(), e.getStackTraceMessage());
         } catch (Exception e) {
             log.error("", e);
             ProgramResult programResult = revert(e.getMessage());
