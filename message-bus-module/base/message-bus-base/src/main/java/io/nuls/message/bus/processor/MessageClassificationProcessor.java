@@ -27,13 +27,11 @@ package io.nuls.message.bus.processor;
 import com.lmax.disruptor.EventHandler;
 import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.HandlerManager;
-import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.processor.thread.NulsMessageCall;
 import io.nuls.protocol.message.base.BaseMessage;
@@ -54,7 +52,14 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
 
     @Override
     public void onEvent(DisruptorData<ProcessData<E>> disruptorData, long l, boolean b) throws Exception {
+        try {
+            doHandlers(disruptorData);
+        } finally {
+            disruptorData.setData(null);
+        }
+    }
 
+    private void doHandlers(DisruptorData<ProcessData<E>> disruptorData) {
         if (null == disruptorData || disruptorData.getData() == null) {
             Log.warn("there is null data in disruptorData!");
             return;
@@ -65,19 +70,16 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         }
 
         ProcessData processData = disruptorData.getData();
-        Class<? extends BaseMessage> serviceId = processData.getType();
+        Class<? extends BaseMessage> serviceId = processData.getData().getClass();
         Set<NulsMessageHandler> handlers = handlerManager.getHandlerList(serviceId);
         ThreadPoolExecutor handlerExecutor = (ThreadPoolExecutor) handlerService.get(serviceId);
         if (handlerExecutor == null) {
             handlerExecutor = TaskManager.createThreadPool(1, 1000000, new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, "disruptor-processor"));
             handlerService.put(serviceId, handlerExecutor);
         }
+
         for (NulsMessageHandler handler : handlers) {
             handlerExecutor.execute(new NulsMessageCall(processData, handler));
-            int size = handlerExecutor.getQueue().size();
-            if (size > 1000 && (size % 1000 == 0)) {
-                Log.info(serviceId + " queue size::::::::::::::::::::" + size);
-            }
         }
     }
 
