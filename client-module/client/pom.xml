@@ -30,14 +30,14 @@
     <parent>
         <artifactId>client-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.4</version>
+        <version>1.1.4-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.client-module</groupId>
     <artifactId>client</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.4-beta</version>
 
     <properties>
         <glassfish.jersey.version>2.27</glassfish.jersey.version>
@@ -101,207 +101,207 @@
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-protocol</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-vm</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger-utxo-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger-utxo-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger-utxo-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.message-bus-module</groupId>
             <artifactId>message-bus</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.message-bus-module</groupId>
             <artifactId>message-bus-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-protocol</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>cache</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.utxo-accounts-module</groupId>
             <artifactId>utxo-accounts-base</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.utxo-accounts-module</groupId>
             <artifactId>utxo-accounts-rpc</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
     </dependencies>
     <build>

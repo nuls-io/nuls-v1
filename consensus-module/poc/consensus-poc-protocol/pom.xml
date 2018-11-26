@@ -29,37 +29,37 @@
     <parent>
         <artifactId>consensus-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.4</version>
+        <version>1.1.4-beta</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus-poc-protocol</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.4-beta</version>
 
     
     <dependencies>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-storage</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.1.4</version>
+            <version>1.1.4-beta</version>
         </dependency>
     </dependencies>
     <build>
