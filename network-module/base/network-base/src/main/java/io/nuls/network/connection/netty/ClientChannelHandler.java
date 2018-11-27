@@ -80,6 +80,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } else {
             //其他节点则正常保持连接
             node.setCanConnect(true);
+
             boolean result = nodeManager.processConnectedNode(node, channel);
             if (!result) {
                 channel.close();

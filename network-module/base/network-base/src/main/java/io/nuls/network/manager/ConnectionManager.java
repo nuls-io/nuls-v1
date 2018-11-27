@@ -155,7 +155,7 @@ public class ConnectionManager {
                     processMessage(message, node);
                 } else {
                     node.setStatus(Node.BAD);
-                    Log.debug("-------------------- receive message filter remove node ---------------------------" + node.getId());
+                    node.setCanConnect(false);
                     nodeManager.removeNode(node.getId());
                 }
             }
