@@ -40,6 +40,7 @@ import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.util.CoinDataComparator;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
@@ -613,20 +614,29 @@ public class ChainContainer implements Cloneable {
             return false;
         }
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, tx.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, tx.getBlockHeight());
+        CoinData txCoinData = new CoinData();
+        txCoinData.setFrom(new ArrayList<>(tx.getCoinData().getFrom()));
+        txCoinData.setTo(new ArrayList<>(tx.getCoinData().getTo()));
+
+        Collections.sort(coinData.getFrom(), CoinDataComparator.getInstance());
+        Collections.sort(coinData.getTo(), CoinDataComparator.getInstance());
+        Collections.sort(txCoinData.getFrom(), CoinDataComparator.getInstance());
+        Collections.sort(txCoinData.getTo(), CoinDataComparator.getInstance());
+
         if (NulsContext.MAIN_NET_VERSION <= 1) {
-            if (coinData.getTo().size() != tx.getCoinData().getTo().size()) {
+            if (coinData.getTo().size() != txCoinData.getTo().size()) {
                 Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
                 return false;
             }
             for (int i = 0; i < coinData.getTo().size(); i++) {
                 Coin coin1 = coinData.getTo().get(i);
-                Coin coin2 = tx.getCoinData().getTo().get(i);
+                Coin coin2 = txCoinData.getTo().get(i);
                 if (!Arrays.equals(coin1.getOwner(), coin2.getOwner()) || !coin1.getNa().equals(coin2.getNa())) {
                     Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
                     return false;
                 }
             }
-        } else if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
+        } else if (!Arrays.equals(coinData.serialize(), txCoinData.serialize())) {
             Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
             return false;
         }

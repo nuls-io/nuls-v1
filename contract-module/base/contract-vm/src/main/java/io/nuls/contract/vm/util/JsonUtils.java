@@ -220,31 +220,4 @@ public class JsonUtils {
         }
     }
 
-    public static byte[] compress(String data) {
-//        try {
-//            ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length());
-//            GZIPOutputStream gzip = new GZIPOutputStream(bos);
-//            gzip.write(data.getBytes());
-//            gzip.close();
-//            byte[] compressed = bos.toByteArray();
-//            bos.close();
-//            return compressed;
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-        return data.getBytes();
-    }
-
-    public static String decompress(byte[] compressed) {
-//        try {
-//            ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
-//            GZIPInputStream gis = new GZIPInputStream(bis);
-//            byte[] bytes = IOUtils.toByteArray(gis);
-//            return new String(bytes);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-        return new String(compressed);
-    }
-
 }

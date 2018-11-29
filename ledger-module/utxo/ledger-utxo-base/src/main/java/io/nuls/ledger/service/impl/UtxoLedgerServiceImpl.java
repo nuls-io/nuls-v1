@@ -44,6 +44,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PHKSignature;
 import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -346,13 +347,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     boolean signtureValidFlag = false;
                     if (transaction.needVerifySignature()) {
                         if (transactionSignature != null) {
-                            if (fromAddressBytes != null && fromAddressBytes.length != Address.ADDRESS_LENGTH && transactionSignature.getScripts() != null
+                            if (fromAddressBytes != null && transactionSignature.getScripts() != null
                                     && transactionSignature.getScripts().size() > 0) {
-                                Script scriptPubkey = new Script(fromAddressBytes);
-                                for (Script scriptSig : transactionSignature.getScripts()) {
-                                    signtureValidFlag = scriptSig.correctlyNulsSpends(transaction, 0, scriptPubkey);
-                                    if (signtureValidFlag) {
-                                        break;
+                                if(fromAddressBytes.length != Address.ADDRESS_LENGTH ){
+                                    Script scriptPubkey = new Script(fromAddressBytes);
+                                    for (Script scriptSig : transactionSignature.getScripts()) {
+                                        signtureValidFlag = scriptSig.correctlyNulsSpends(transaction, 0, scriptPubkey);
+                                        if (signtureValidFlag) {
+                                            break;
+                                        }
+                                    }
+                                }
+                                else{
+                                    for (Script scriptSig : transactionSignature.getScripts()) {
+                                        Script redeemScript = new Script(scriptSig.getChunks().get(scriptSig.getChunks().size()-1).data);
+                                        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+                                        Script publicScript = SignatureUtil.createOutputScript(address.getAddressBytes());
+                                        signtureValidFlag = scriptSig.correctlyNulsSpends(transaction, 0, publicScript);
+                                        if (signtureValidFlag) {
+                                            break;
+                                        }
                                     }
                                 }
                             } else {

@@ -174,7 +174,6 @@ public class BroadcastHandler {
         }
         try {
             MessageHeader header = message.getHeader();
-            byte[] serialize = header.serialize();
             header.setMagicNumber(networkParam.getPacketMagic());
 
             BaseNulsData body = message.getMsgBody();

@@ -288,9 +288,15 @@ public class NodeManager implements Runnable {
     public void removeNode(Node node) {
         lock.lock();
         try {
+            if (node.getIp().equals("222.186.180.162")) {
+                Log.error("----------removeNode:222.186.180.162,,,step1");
+            }
             if (node.getChannel() != null && node.getChannel().isActive()) {
                 node.getChannel().close();
                 return;
+            }
+            if (node.getIp().equals("222.186.180.162")) {
+                Log.error("----------removeNode:222.186.180.162,,,step2");
             }
             node.destroy();
             removeNodeFromGroup(node);
@@ -536,22 +542,22 @@ public class NodeManager implements Runnable {
                 e.printStackTrace();
             }
 
-           /* System.out.println("--------disConnectNodes:" + disConnectNodes.size());
-            for (Node node : disConnectNodes.values()) {
-                System.out.println(node.toString());
-            }
+//           System.out.println("--------disConnectNodes:" + disConnectNodes.size());
+//            for (Node node : disConnectNodes.values()) {
+//                System.out.println(node.toString());
+//            }
 
-            System.out.println("--------connectedNodes:" + connectedNodes.size());
-            for (Node node : connectedNodes.values()) {
-                System.out.println(node.toString());
-            }
+//            System.out.println("--------connectedNodes:" + connectedNodes.size());
+//            for (Node node : connectedNodes.values()) {
+//                System.out.println(node.toString());
+//            }
+//
+//            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
+//            for (Node node : handShakeNodes.values()) {
+//                System.out.println(node.toString());
+//            }
 
-            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
-            for (Node node : handShakeNodes.values()) {
-                System.out.println(node.toString());
-            }*/
-
-            if (handShakeNodes.size() > 9) {
+            if (handShakeNodes.size() > 8) {
                 removeSeedNode();
             } else if (handShakeNodes.size() <= 2) {
                 //如果已连接成功数太少，立刻尝试连接种子节点
@@ -559,11 +565,15 @@ public class NodeManager implements Runnable {
                     addNode(node);
                 }
             }
-            if (handShakeNodes.size() < networkParam.getMaxOutCount() / 2) {
+            if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
                     }
+                }
+            } else if (handShakeNodes.size() >= networkParam.getMaxOutCount() && connectedNodes.size() != 0) {
+                for (Node node : connectedNodes.values()) {
+                    removeNode(node);
                 }
             }
         }

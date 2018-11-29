@@ -23,29 +23,31 @@
  *
  */
 
-package io.nuls.message.bus.model;
+package io.nuls.consensus.poc.util;
 
-import io.nuls.network.model.Node;
-import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.kernel.model.Coin;
 
-/**
- * @author: Charlie
- */
-public class ProcessData<T extends BaseMessage> {
+import java.util.Comparator;
 
-    private T data;
-    private Node node;
+public class CoinDataComparator implements Comparator<Coin> {
 
-    public ProcessData(T data, Node node) {
-        this.data = data;
-        this.node = node;
+    private CoinDataComparator() {
+
     }
 
-    public T getData() {
-        return data;
+    private static CoinDataComparator instance = new CoinDataComparator();
+
+    public static CoinDataComparator getInstance() {
+        return instance;
     }
 
-    public Node getNode() {
-        return node;
+    @Override
+    public int compare(Coin o1, Coin o2) {
+        if (o1.getNa().getValue() < o2.getNa().getValue()) {
+            return 1;
+        } else if (o1.getNa().getValue() < o2.getNa().getValue()) {
+            return -1;
+        }
+        return new String(o1.getOwner()).compareTo(new String(o2.getOwner()));
     }
 }
