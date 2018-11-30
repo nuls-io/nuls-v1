@@ -25,11 +25,17 @@
 package io.nuls.accout.ledger.rpc.form;
 
 import io.nuls.accout.ledger.rpc.dto.MultipleTxToDto;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.nuls.core.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +115,7 @@ public class CreateP2shTransactionForm {
             if(separateData == null || separateData.length != 2){
                 return false;
             }
-            if (!AddressTool.validAddress(separateData[0])  || !StringUtils.isNuls(separateData[1])) {
+            if (!validAddress(separateData[0])  || !StringUtils.isNuls(separateData[1])) {
                 return false;
             }
         }
@@ -134,5 +140,47 @@ public class CreateP2shTransactionForm {
             toDatas.add(toData);
         }
         return  toDatas;
+    }
+
+    public static boolean validAddress(String address){
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+                return false;
+            }
+        } catch (NulsException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.MAIN_NET_VERSION <= 1 || NulsContext.CONTRACT_ADDRESS_TYPE == type) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {
+            return false;
+        }
+        try {
+            AddressTool.checkXOR(bytes);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }
