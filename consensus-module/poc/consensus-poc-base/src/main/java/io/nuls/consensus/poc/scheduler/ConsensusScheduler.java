@@ -29,6 +29,7 @@ package io.nuls.consensus.poc.scheduler;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.*;
@@ -154,10 +155,13 @@ public class ConsensusScheduler {
     }
 
     public boolean restart() {
-        clear();
-        initDatas();
-
-
+        Lockers.CHAIN_LOCK.lock();
+        try {
+            clear();
+            initDatas();
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
+        }
         return true;
     }
 
