@@ -75,7 +75,7 @@ public class CreateMultiTransferProcess implements CommandProcessor {
         if (StringUtils.isBlank(args[1]) || StringUtils.isBlank(args[2])) {
             return false;
         }
-        if(!CreateP2shTransactionForm.validToData(args[3])){
+        if(!StringUtils.validAddressSimple(args[3])){
             return false;
         }
         return true;
