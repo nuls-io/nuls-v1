@@ -202,18 +202,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     int fromIndex = (int) byteBuffer.readVarInt();
 
                     Transaction fromTx = utxoLedgerTransactionStorageService.getTx(fromTxHash);
-                    if (fromTx == null) {
-                        System.out.println("-------------------fromTx is null:" + fromTxHash);
-                        System.out.println("-------------------tx:" + tx.getHash().getDigestHex() + ",height:" + tx.getBlockHeight());
-                        System.out.println("-------------------bestBlockHeight:" + NulsContext.getInstance().getBestHeight());
-
-                        Log.error("-------------------fromTx is null:" + fromTxHash);
-                        Log.error("-------------------tx:" + tx.getHash().getDigestHex() + ",height:" + tx.getBlockHeight() +",type=" + tx.getType());
-                        Log.error("-------------------bestBlockHeight:" + NulsContext.getInstance().getBestHeight());
-                    }
                     recovery = fromTx.getCoinData().getTo().get(fromIndex);
                     recovery.setFrom(from.getFrom());
-//                    Log.info("rollback save utxo:::" + Hex.encode(from.()));
                     batch.put(from.getOwner(), recovery.serialize());
                 } catch (IOException e) {
                     Log.error(e);
