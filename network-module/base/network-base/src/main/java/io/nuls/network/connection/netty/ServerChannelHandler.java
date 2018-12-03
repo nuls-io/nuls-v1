@@ -74,7 +74,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
         String remoteIP = channel.remoteAddress().getHostString();
         severChannelRegister++;
-        Log.info("----------------------severChannel  Register count:" + severChannelRegister);
+//        Log.info("----------------------severChannel  Register count:" + severChannelRegister);
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
         if (networkParam.getLocalIps().contains(remoteIP)) {
             ctx.channel().close();

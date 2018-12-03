@@ -101,7 +101,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             SocketChannel socketChannel = (SocketChannel) ctx.channel();
             String remoteIP = socketChannel.remoteAddress().getHostString();
             int port = socketChannel.remoteAddress().getPort();
-            Log.info("-----------------client channelInactive  node is null -----------------" + remoteIP + ":" + port);
+//            Log.info("-----------------client channelInactive  node is null -----------------" + remoteIP + ":" + port);
         }
     }
 
@@ -120,7 +120,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
                 int port = socketChannel.remoteAddress().getPort();
-                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+//                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
             }
         } catch (Exception e) {
             throw e;
