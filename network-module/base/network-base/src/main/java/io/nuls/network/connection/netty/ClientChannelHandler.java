@@ -33,6 +33,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
@@ -109,16 +110,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
+            ByteBuf buf = (ByteBuf) msg;
 
             if (node != null) {
                 if (node.isAlive()) {
-                    ByteBuf buf = (ByteBuf) msg;
-                    try {
-                        connectionManager.receiveMessage(buf, node);
-                    } finally {
-                        buf.release();
-                    }
-                    //                NetworkThreadPool.doRead(buf, node);
+                    connectionManager.receiveMessage(buf, node);
                 }
             } else {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
@@ -128,6 +124,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             throw e;
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 

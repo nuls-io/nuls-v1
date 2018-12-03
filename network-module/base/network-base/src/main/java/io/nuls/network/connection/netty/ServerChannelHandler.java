@@ -32,6 +32,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.TooLongFrameException;
+import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
@@ -76,7 +77,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Log.info("----------------------severChannel  Register count:" + severChannelRegister);
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
         if (networkParam.getLocalIps().contains(remoteIP)) {
-//            Log.info("----------------------本机尝试连接本机地址关闭 ------------------------- " + nodeId);
             ctx.channel().close();
             return;
         }
@@ -87,7 +87,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
-//                    Log.info("--------------- 相同ip外网连接   -----------------" + nodeId);
                     ctx.channel().close();
                     return;
 //
@@ -162,17 +161,14 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-//                NetworkThreadPool.doRead(buf, node);
-                try {
-                    connectionManager.receiveMessage(buf, node);
-                } finally {
-                    buf.release();
-                }
+                connectionManager.receiveMessage(buf, node);
             }
         } catch (Exception e) {
 //            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
             e.printStackTrace();
             throw e;
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 

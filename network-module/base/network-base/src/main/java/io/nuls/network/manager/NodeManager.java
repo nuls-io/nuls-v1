@@ -208,14 +208,15 @@ public class NodeManager implements Runnable {
      * 添加主动连接节点，并创建连接
      */
     public boolean addNode(Node node) {
-        if (node.getIp().equals("222.183.234.88") || node.getIp().equals("222.183.238.45") || node.getIp().equals("85.26.34.202")) {
-            System.out.println(1);
-        }
+
         //判断是否是本地地址
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
         }
         if (node.getStatus() != Node.WAIT) {
+            return false;
+        }
+        if(!IpUtil.isboolIp(node.getIp())) {
             return false;
         }
         lock.lock();
@@ -234,7 +235,7 @@ public class NodeManager implements Runnable {
             if (count >= 50) {
                 return false;
             }
-
+            System.out.println(handShakeNodes.size());
             node.setType(Node.OUT);
             node.setTestConnect(false);
             disConnectNodes.put(node.getId(), node);
@@ -288,15 +289,9 @@ public class NodeManager implements Runnable {
     public void removeNode(Node node) {
         lock.lock();
         try {
-            if (node.getIp().equals("222.186.180.162")) {
-                Log.error("----------removeNode:222.186.180.162,,,step1");
-            }
             if (node.getChannel() != null && node.getChannel().isActive()) {
                 node.getChannel().close();
                 return;
-            }
-            if (node.getIp().equals("222.186.180.162")) {
-                Log.error("----------removeNode:222.186.180.162,,,step2");
             }
             node.destroy();
             removeNodeFromGroup(node);
@@ -311,7 +306,6 @@ public class NodeManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-//            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             getNetworkStorageService().deleteNode(nodeId);
         }
     }
