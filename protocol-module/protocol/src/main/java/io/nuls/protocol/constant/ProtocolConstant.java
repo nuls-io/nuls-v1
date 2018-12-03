@@ -162,8 +162,8 @@ public interface ProtocolConstant extends NulsConstant {
     int MIN_PROTOCOL_UPGRADE_RATE = 70;
     //协议升级要求最低延迟块数
     int MIN_PROTOCOL_UPGRADE_DELAY = 1000;
-
-    long START_CHECK_PROTOCOL_HEIGHT = 1L;
+    //开始检查协议升级的高度，主网是1140000
+    long START_CHECK_PROTOCOL_HEIGHT = 1140000L;
 
     /**
      * 最小转账金额

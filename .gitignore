@@ -23,12 +23,6 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 
-#config
-genesis-block.json
-logback.xml
-modules.ini
-nuls-version.xml
-
 # CMake
 cmake-build-debug/
 
