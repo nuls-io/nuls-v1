@@ -235,7 +235,6 @@ public class NodeManager implements Runnable {
             if (count >= 50) {
                 return false;
             }
-            System.out.println(handShakeNodes.size());
             node.setType(Node.OUT);
             node.setTestConnect(false);
             disConnectNodes.put(node.getId(), node);
