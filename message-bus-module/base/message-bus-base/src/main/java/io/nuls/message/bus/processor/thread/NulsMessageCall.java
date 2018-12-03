@@ -59,7 +59,7 @@ public class NulsMessageCall<T extends BaseMessage> implements Runnable {
                 Log.debug(data.getData().getClass() + ",use:" + (System.currentTimeMillis() - start));
             }
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         }
         return;
     }
