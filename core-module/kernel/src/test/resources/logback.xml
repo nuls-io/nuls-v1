@@ -19,8 +19,11 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_HOME}/${LOG_FILE}.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
-            <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
@@ -33,8 +36,11 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_HOME}/block.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
-            <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
@@ -48,8 +54,11 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_HOME}/consensus.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
-            <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
@@ -63,8 +72,11 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_HOME}/chain.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
-            <MaxFileSize>100MB</MaxFileSize>
             <MaxHistory>7</MaxHistory>
+            <!-- 按时间回滚的同时，按文件大小来回滚 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
