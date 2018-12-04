@@ -34,7 +34,7 @@
         </encoder>
     </appender>
 
-    <appender name="blockLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="BLOCK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- file被写入的文件名，可以是相对目录，也可以是绝对目录，如果上级目录不存在会自动创建，没有默认值。-->
         <file>${LOG_HOME}/block.log</file>
         <!-- append如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true。-->
@@ -56,7 +56,7 @@
         </encoder>
     </appender>
 
-    <appender name="messageLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="MESSAGE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- file被写入的文件名，可以是相对目录，也可以是绝对目录，如果上级目录不存在会自动创建，没有默认值。-->
         <file>${LOG_HOME}/message.log</file>
         <!-- append如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true。-->
@@ -78,7 +78,7 @@
         </encoder>
     </appender>
 
-    <appender name="chainLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="CHAIN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- file被写入的文件名，可以是相对目录，也可以是绝对目录，如果上级目录不存在会自动创建，没有默认值。-->
         <file>${LOG_HOME}/chain.log</file>
         <!-- append如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true。-->
@@ -100,7 +100,7 @@
         </encoder>
     </appender>
 
-    <appender name="consensusLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="CONSENSUS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- file被写入的文件名，可以是相对目录，也可以是绝对目录，如果上级目录不存在会自动创建，没有默认值。-->
         <file>${LOG_HOME}/consensus.log</file>
         <!-- append如果是 true，日志被追加到文件结尾，如果是 false，清空现存文件，默认是true。-->
