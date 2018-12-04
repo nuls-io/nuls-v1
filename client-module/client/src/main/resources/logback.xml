@@ -142,7 +142,7 @@
         <appender-ref ref="CONSENSUS_FILE"></appender-ref>
     </logger>
     <logger name="messageLog" level="DEBUG" additivity="false">
-        <appender-ref ref="MSG_FILE"></appender-ref>
+        <appender-ref ref="MESSAGE_FILE"></appender-ref>
     </logger>
 
     <!--    日志异步到数据库
