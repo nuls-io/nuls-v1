@@ -33,7 +33,6 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.network.cache.NodeCacheManager;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.rpc.model.NetworkInfoDto;
