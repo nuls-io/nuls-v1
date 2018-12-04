@@ -29,7 +29,6 @@ import io.nuls.network.connection.netty.NettyClient;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NetworkMessageHandlerFactory;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
@@ -39,7 +38,13 @@ import java.util.concurrent.*;
 
 public class NetworkThreadPool {
 
-    private static final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+
+    private static final ExecutorService executor = new ThreadPoolExecutor(1, 1,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>());
+
+
+    private static final ExecutorService executorConnector = new ThreadPoolExecutor(10, Integer.MAX_VALUE,
             60L, TimeUnit.SECONDS,
             new SynchronousQueue<Runnable>());
 
@@ -65,7 +70,7 @@ public class NetworkThreadPool {
 
     public static void doConnect(Node node) {
 
-        executor.submit(new Runnable() {
+        executorConnector.submit(new Runnable() {
             @Override
             public void run() {
                 NettyClient client = new NettyClient(node);

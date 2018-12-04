@@ -112,15 +112,13 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeAttribute.get();
             ByteBuf buf = (ByteBuf) msg;
 
-            if (node != null) {
-                if (node.isAlive()) {
-                    connectionManager.receiveMessage(buf, node);
-                }
+            if (node != null && node.isAlive()) {
+                connectionManager.receiveMessage(buf, node);
             } else {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
                 int port = socketChannel.remoteAddress().getPort();
-//                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
             }
         } catch (Exception e) {
             throw e;

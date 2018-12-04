@@ -162,6 +162,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
                 connectionManager.receiveMessage(buf, node);
+            } else {
+                Log.error("-----------------server channelRead  node is null -----------------" + nodeId);
             }
         } catch (Exception e) {
 //            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
