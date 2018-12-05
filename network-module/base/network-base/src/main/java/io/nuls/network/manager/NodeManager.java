@@ -216,7 +216,7 @@ public class NodeManager implements Runnable {
         if (node.getStatus() != Node.WAIT) {
             return false;
         }
-        if(!IpUtil.isboolIp(node.getIp())) {
+        if (!IpUtil.isboolIp(node.getIp())) {
             return false;
         }
         lock.lock();
@@ -228,15 +228,17 @@ public class NodeManager implements Runnable {
                 if (node.getIp().equals(n.getIp()) && n.getType() == Node.OUT) {
                     return false;
                 }
-                if (node.isCanConnect()) {
+                if (n.isCanConnect()) {
                     count++;
                 }
             }
-            if (count >= 50) {
+            if (count >= 20) {
                 return false;
             }
             node.setType(Node.OUT);
             node.setTestConnect(false);
+            System.out.println("------------------addNode:" + node.getId());
+            System.out.println(disConnectNodes.size());
             disConnectNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
