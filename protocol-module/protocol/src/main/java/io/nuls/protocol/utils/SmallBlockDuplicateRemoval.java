@@ -39,7 +39,7 @@ public class SmallBlockDuplicateRemoval {
     private static HashSetDuplicateProcessor processorOfForward = new HashSetDuplicateProcessor(1000);
 
     public static boolean needDownloadSmallBlock(NulsDigestData hash) {
-        return processorOfForward.insertAndCheck(hash);
+        return processorOfForward.check(hash);
     }
 
     public static boolean needProcess(NulsDigestData hash) {
