@@ -43,6 +43,7 @@ public class DateUtil {
     public final static long DATE_TIME = 1000 * 24 * 60 * 60;
     public final static long HOUR_TIME = 1000 * 60 * 60;
     public final static long MINUTE_TIME = 1000 * 60;
+    public final static long SECEND_TIME = 1000;
 
     public static String toGMTString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.UK);
