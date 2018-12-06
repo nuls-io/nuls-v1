@@ -19,25 +19,14 @@
  */
 package io.nuls.db.module.impl;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.module.AbstractDBModule;
-import org.iq80.leveldb.DBException;
 
 public class LevelDbModuleBootstrap extends AbstractDBModule {
 
     @Override
     public void init() {
-        try {
-            initLevelDBStorage();
-        } catch (Exception e) {
-            Log.error(e);
-            throw new DBException(e);
-        }
-    }
 
-    private void initLevelDBStorage() throws Exception {
-//        LevelDBManager.init();
     }
 
     @Override

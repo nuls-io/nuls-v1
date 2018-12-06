@@ -23,6 +23,7 @@
  */
 package io.nuls.db.service;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Result;
 
 public interface BatchOperation {
