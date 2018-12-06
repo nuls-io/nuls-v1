@@ -625,7 +625,7 @@ public class NodeManager implements Runnable {
 //                System.out.println(node.toString());
 //            }
             //todo 以下代码下个版本去掉
-            checkConnectSeedNode();
+//            checkConnectSeedNode();
 
             if (handShakeNodes.size() >= 10) {
                 removeSeedNode();
