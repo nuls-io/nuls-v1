@@ -88,6 +88,11 @@ public class Node extends BaseNulsData {
     public final static int BAD = 3;
     private volatile int status;
 
+    public final static int UNCHECK = 0;
+    public final static int FAILED = 1;
+    public final static int SUCCESS = 2;
+    private volatile int connectStatus;
+
     private Channel channel;
 
     @Override
@@ -336,5 +341,13 @@ public class Node extends BaseNulsData {
 
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    public int getConnectStatus() {
+        return connectStatus;
+    }
+
+    public void setConnectStatus(int connectStatus) {
+        this.connectStatus = connectStatus;
     }
 }

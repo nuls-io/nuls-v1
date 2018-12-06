@@ -639,12 +639,14 @@ public class NodeManager implements Runnable {
             if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
                 int size = networkParam.getMaxOutCount() - handShakeNodes.size();
                 int count = 0;
+                List<Node> nodeList = new ArrayList<>(disConnectNodes.values());
+                Collections.shuffle(nodeList);
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
                         count++;
                     }
-                    if (count == size) {
+                    if (count == size + 5) {
                         break;
                     }
                 }

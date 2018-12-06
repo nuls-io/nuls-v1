@@ -33,8 +33,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.storage.service.NetworkStorageService;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -78,10 +77,9 @@ public class NewNodeManager implements Runnable {
 
     //节点池，存放所有节点
     private Map<String, Node> nodeMap = new ConcurrentHashMap<>();
-    //存放连接成功但还未握手成功的节点
+    //存放正常尝试连接或已连接成功的节点
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-    //存放握手成功的节点
-    private Map<String, Node> handShakeNodes = new ConcurrentHashMap<>();
+
 
 
     /**
@@ -104,7 +102,6 @@ public class NewNodeManager implements Runnable {
                 isSeed = true;
             }
         }
-
     }
 
     /**
@@ -118,24 +115,24 @@ public class NewNodeManager implements Runnable {
             networkParam.getLocalIps().add(externalIp);
         }
 
-        //获取数据库存储的节点信息尝试连接，如果为空，则视为第一启动，直接连接种子节点
+        //获取数据库存储的节点信息尝试连接
         List<Node> nodeList = getNetworkStorageService().getLocalNodeList();
-        if (nodeList == null || nodeList.isEmpty()) {
+        if (nodeList != null && nodeList.isEmpty()) {
             for (Node node : nodeList) {
                 nodeMap.put(node.getId(), node);
+                if (node.getConnectStatus() == Node.SUCCESS) {
+                    tryToConnect(node);
+                }
             }
-
         } else {
+            //如果为空，则视为第一启动，直接连接种子节点
             nodeDiscoverHandler.setFirstRunning(true);
-            for (Node node : seedNodes) {
-                connectedNodes.put(node.getId(), node);
-                connectionManager.connectionNode(node);
-            }
+            tryToConnectSeed();
         }
     }
 
     /**
-     * 尝试做连接
+     * 尝试连接
      *
      * @param node
      * @return
@@ -151,6 +148,43 @@ public class NewNodeManager implements Runnable {
             return true;
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * 尝试连接种子节点
+     */
+    public void tryToConnectSeed() {
+        lock.lock();
+        try {
+            for (Node node : seedNodes) {
+                if (!connectValidate(node)) {
+                    continue;
+                }
+                connectedNodes.put(node.getId(), node);
+                connectionManager.connectionNode(node);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * 随机保留2个种子节点的连接，其他的全部断开
+     */
+    void removeSeedNode() {
+        List<Node> nodeList = new ArrayList<>(connectedNodes.values());
+        int count = 0;
+        List<String> seedIpList = networkParam.getSeedIpList();
+        Collections.shuffle(nodeList);
+
+        for (Node n : nodeList) {
+            if (seedIpList.contains(n.getIp())) {
+                count++;
+                if (count > 2) {
+                    //  removeNode(n);
+                }
+            }
         }
     }
 
@@ -193,6 +227,11 @@ public class NewNodeManager implements Runnable {
     @Override
     public void run() {
 
+    }
+
+
+    public Map<String, Node> getConnectedNodes() {
+        return connectedNodes;
     }
 
     private NetworkStorageService getNetworkStorageService() {
