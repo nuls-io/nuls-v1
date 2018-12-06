@@ -24,6 +24,7 @@
     <modules>
         <module>db</module>
         <module>leveldb/db-leveldb</module>
+        <module>rocksdb/db-rocks</module>
     </modules>
 
 

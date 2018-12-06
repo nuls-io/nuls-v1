@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,32 +20,35 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
+package io.nuls.db.service;
 
-package io.nuls.kernel.utils.queue.entity;
+public interface BatchOperation {
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.model.TransactionLogicData;
-import io.nuls.kernel.utils.NulsByteBuffer;
+    /**
+     * 增加或者更新操作
+     * Add or update operations.
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    boolean put(byte[] key, byte[] value) throws Exception;
 
-/**
- * @author: Niels Wang
- * @date: 2018/7/8
- */
-public class TestTransaction extends Transaction {
-    public TestTransaction( ) {
-        super(101);
-    }
+    /**
+     * 删除操作
+     * Delete operation
+     *
+     * @param key
+     * @return
+     */
+    boolean delete(byte[] key) throws Exception;
 
-    @Override
-    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return null;
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        return null;
-    }
+    /**
+     * 执行批量操作
+     * Perform batch operation
+     *
+     * @return
+     */
+    boolean executeBatch() throws Exception;
 }
