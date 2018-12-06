@@ -146,7 +146,7 @@ public class RocksDBManager {
      * @param AREAName 数据库表名称
      * @return Result 创建结果
      */
-    public static boolean createAREA(final String AREAName) throws Exception {
+    public static boolean createTable(final String AREAName) throws Exception {
         lock.lock();
         try {
             if (StringUtils.isBlank(AREAName)) {
@@ -194,8 +194,8 @@ public class RocksDBManager {
      * @param AREAName 数据库表名称
      * @return Result
      */
-    public static boolean destroyAREA(final String AREAName) throws NulsException {
-        if (!baseCheckAREA(AREAName)) {
+    public static boolean destroyTable(final String AREAName) throws NulsException {
+        if (!baseCheckTable(AREAName)) {
             throw new NulsException(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(AREAName)) {
@@ -250,7 +250,7 @@ public class RocksDBManager {
      *
      * @param AREAName 数据库表名称
      */
-    public static void closeAREA(final String AREAName) {
+    public static void closeTable(final String AREAName) {
         try {
             RocksDB db = AREAS.remove(AREAName);
             db.close();
@@ -266,7 +266,7 @@ public class RocksDBManager {
      * @param AREAName 数据库表名称
      * @return boolean 校验是否成功
      */
-    private static boolean baseCheckAREA(final String AREAName) {
+    private static boolean baseCheckTable(final String AREAName) {
         if (StringUtils.isBlank(AREAName) || !AREAS.containsKey(AREAName)) {
             return false;
         }
@@ -279,7 +279,7 @@ public class RocksDBManager {
      *
      * @return 所有数据表名称
      */
-    public static String[] listAREA() {
+    public static String[] listTable() {
         int i = 0;
         Enumeration<String> keys = AREAS.keys();
         String[] AREAs = new String[AREAS.size()];
@@ -303,7 +303,7 @@ public class RocksDBManager {
      * @return 保存是否成功
      */
     public static boolean put(final String AREA, final byte[] key, final byte[] value) throws Exception {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             throw new NulsException(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || value == null) {
@@ -328,7 +328,7 @@ public class RocksDBManager {
      * @return 删除是否成功
      */
     public static boolean delete(final String AREA, final byte[] key) throws Exception {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             throw new NulsException(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null) {
@@ -353,7 +353,7 @@ public class RocksDBManager {
      * @return 批量保存是否成功
      */
     public static boolean batchPut(final String AREA, final Map<byte[], byte[]> kvs) throws Exception {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             throw new NulsException(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (kvs == null || kvs.size() == 0) {
@@ -382,7 +382,7 @@ public class RocksDBManager {
      * @return 批量删除是否成功
      */
     public static boolean deleteKeys(final String AREA, final List<byte[]> keys) throws Exception {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             throw new NulsException(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (keys == null || keys.size() == 0) {
@@ -410,7 +410,7 @@ public class RocksDBManager {
      * @return 查询结果
      */
     public static byte[] get(final String AREA, final byte[] key) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         if (key == null) {
@@ -433,7 +433,7 @@ public class RocksDBManager {
      * @return 批量查询结果键值对集合
      */
     public static Map<byte[], byte[]> multiGet(final String AREA, final List<byte[]> keys) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         if (keys == null || keys.size() == 0) {
@@ -456,7 +456,7 @@ public class RocksDBManager {
      * @return 批量查询结果值字节数组集合
      */
     public static List<byte[]> multiGetValueList(final String AREA, final List<byte[]> keys) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         if (keys == null || keys.size() == 0) {
@@ -482,7 +482,7 @@ public class RocksDBManager {
      * @return 该表的所有键
      */
     public static List<byte[]> keyList(final String AREA) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         List<byte[]> list = new ArrayList<>();
@@ -507,7 +507,7 @@ public class RocksDBManager {
      * @return 该表的所有值
      */
     public static List<byte[]> valueList(final String AREA) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         List<byte[]> list = new ArrayList<>();
@@ -532,7 +532,7 @@ public class RocksDBManager {
      * @return 该表所有键值对集合
      */
     public static List<Entry<byte[], byte[]>> entryList(final String AREA) {
-        if (!baseCheckAREA(AREA)) {
+        if (!baseCheckTable(AREA)) {
             return null;
         }
         List<Entry<byte[], byte[]>> entryList = new ArrayList<>();
