@@ -62,6 +62,10 @@ public class HashSetDuplicateProcessor {
         return result;
     }
 
+    public boolean check(NulsDigestData hash) {
+        return !set1.contains(hash);
+    }
+
     public void remove(NulsDigestData hash) {
         set1.remove(hash);
         set2.remove(hash);
