@@ -604,6 +604,24 @@ public class LevelDBManager {
         }
     }
 
+    private static <T> T getModel(byte[] value, Class<T> clazz) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+            ModelWrapper model = new ModelWrapper();
+            ProtostuffIOUtil.mergeFrom(value, model, schema);
+            if (clazz != null && model.getT() != null) {
+                return clazz.cast(model.getT());
+            }
+            return (T) model.getT();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Set<byte[]> keySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
@@ -639,7 +657,6 @@ public class LevelDBManager {
             RocksDB db = AREAS.get(area);
             keyList = new ArrayList<>();
             iterator = db.newIterator();
-            String key;
             for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                 keyList.add(iterator.key());
             }
@@ -740,9 +757,8 @@ public class LevelDBManager {
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
             T t;
             for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                t = null;
                 key = iterator.key();
-                t = getModel(area, key, clazz);
+                t = getModel(iterator.value(), clazz);
                 entryList.add(new Entry<byte[], T>(key, t, comparator));
             }
             // 如果自定义了比较器，则执行排序
@@ -798,11 +814,9 @@ public class LevelDBManager {
             RocksDB db = AREAS.get(area);
             list = new ArrayList<>();
             iterator = db.newIterator();
-            Map.Entry<byte[], byte[]> entry;
             T t;
             for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                t = null;
-                t = getModel(area, iterator.key(), clazz);
+                t = getModel(iterator.value(), clazz);
                 list.add(t);
             }
         } catch (Exception e) {
