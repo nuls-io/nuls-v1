@@ -69,7 +69,6 @@ public class NetworkThreadPool {
     }
 
     public static void doConnect(Node node) {
-
         executorConnector.submit(new Runnable() {
             @Override
             public void run() {

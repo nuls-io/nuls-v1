@@ -78,7 +78,7 @@ public class NewNodeDiscoverHandler implements Runnable {
                 waitToAsk();
             } else {
                 int count = 0;
-                for (Node node : nodesManager.getConnectedNodes().values()) {
+                for (Node node : nodesManager.getHanderShakeNode().values()) {
                     if (node.isHandShake()) {
                         count++;
                     }
@@ -86,10 +86,14 @@ public class NewNodeDiscoverHandler implements Runnable {
 
                 if (count <= 2) {
                     //如果握手成功的节点不超过2个时，尝试连接种子节点
-                    nodesManager.tryToConnectSeed();
+                    nodesManager.connectSeedNode();
                 } else if (count > 10) {
                     //超过10个连接，则随机保留两个种子节点
                     nodesManager.removeSeedNode();
+                }
+                //如果握手成功数小于最大主动连接数，则尝试从池子里找到可连接的节点尝试做连接
+                if (count < networkParam.getMaxOutCount()) {
+                    nodesManager.findNodeAndConnect(networkParam.getMaxOutCount() - count);
                 }
             }
 
@@ -103,10 +107,9 @@ public class NewNodeDiscoverHandler implements Runnable {
 
     //记录上一次统计的连接成功的节点
     int lastCount = 0;
-
     private void waitToAsk() {
         int count = 0;
-        for (Node node : nodesManager.getConnectedNodes().values()) {
+        for (Node node : nodesManager.getHanderShakeNode().values()) {
             if (node.isHandShake()) {
                 count++;
             }
@@ -123,7 +126,7 @@ public class NewNodeDiscoverHandler implements Runnable {
      * 向已连接的节点询问其他更多节点
      */
     private void askMoreNode() {
-        for (Node node : nodesManager.getConnectedNodes().values()) {
+        for (Node node : nodesManager.getHanderShakeNode().values()) {
             GetNodesMessage message = new GetNodesMessage();
             NodeMessageBody body = new NodeMessageBody();
             message.setMsgBody(body);

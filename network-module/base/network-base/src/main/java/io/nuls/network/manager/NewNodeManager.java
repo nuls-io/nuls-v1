@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager;
 
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.constant.NetworkConstant;
@@ -39,6 +40,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 网络节点管理器
+ * 创建节点池存放所有节点
+ * 通过P2PNodeMessage获取到的节点，连接探测状态都标记为uncheck，放入到节点池类
+ * 种子节点或者是从其他已连接节点获取到的更多节点，连接探测状态都标记为failed，放入到节点池类
+ * 定期尝试连接池里的所有非握手成功状态的节点。连接成功的标记为success，若之前状态为uncheck的连接成功后，将改节点广播给其他节点，
+ * 连接失败的记录失败次数，失败次数过大，则从连接池里移除
  */
 public class NewNodeManager implements Runnable {
 
@@ -77,10 +83,8 @@ public class NewNodeManager implements Runnable {
 
     //节点池，存放所有节点
     private Map<String, Node> nodeMap = new ConcurrentHashMap<>();
-    //存放正常尝试连接或已连接成功的节点
-    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-
-
+    //已握手成功的连接池，存放已握手成功的主动连接和被动连接的节点，方便广播消息
+    private Map<String, Node> handerShakeNode = new ConcurrentHashMap<>();
 
     /**
      * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
@@ -105,8 +109,9 @@ public class NewNodeManager implements Runnable {
     }
 
     /**
-     * 启动的时候，从数据库里取出所有的节点，尝试连接
-     * 同时开启获取对方最新信息的线程
+     * 启动的时候，从数据库里取出所有的节点，放入节点池中
+     * 并立即尝试连接那些标记为可连接的节点，
+     * 如果是第一次启动则直接连接种子节点
      */
     public void start() {
         //获取我自己的外网ip，防止自己连自己外网的情况出现
@@ -118,21 +123,20 @@ public class NewNodeManager implements Runnable {
         //获取数据库存储的节点信息尝试连接
         List<Node> nodeList = getNetworkStorageService().getLocalNodeList();
         if (nodeList != null && nodeList.isEmpty()) {
-            for (Node node : nodeList) {
-                nodeMap.put(node.getId(), node);
-                if (node.getConnectStatus() == Node.SUCCESS) {
-                    tryToConnect(node);
-                }
-            }
-        } else {
             //如果为空，则视为第一启动，直接连接种子节点
             nodeDiscoverHandler.setFirstRunning(true);
-            tryToConnectSeed();
+            nodeList = seedNodes;
+        }
+        for (Node node : nodeList) {
+            nodeMap.put(node.getId(), node);
+            if (node.getConnectStatus() == Node.SUCCESS) {
+                tryToConnect(node);
+            }
         }
     }
 
     /**
-     * 尝试连接
+     * 尝试主动连接
      *
      * @param node
      * @return
@@ -140,10 +144,10 @@ public class NewNodeManager implements Runnable {
     public boolean tryToConnect(Node node) {
         lock.lock();
         try {
-            if (!connectValidate(node)) {
+            //如果节点已经处于连接状态，不要重复发送连接
+            if (node.isAlive()) {
                 return false;
             }
-            connectedNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
         } finally {
@@ -154,26 +158,20 @@ public class NewNodeManager implements Runnable {
     /**
      * 尝试连接种子节点
      */
-    public void tryToConnectSeed() {
-        lock.lock();
-        try {
-            for (Node node : seedNodes) {
-                if (!connectValidate(node)) {
-                    continue;
-                }
-                connectedNodes.put(node.getId(), node);
-                connectionManager.connectionNode(node);
+    public void connectSeedNode() {
+        for (Node node : seedNodes) {
+            if (!nodeMap.containsKey(node.getId())) {
+                nodeMap.put(node.getId(), node);
             }
-        } finally {
-            lock.unlock();
+            tryToConnect(node);
         }
     }
 
     /**
-     * 随机保留2个种子节点的连接，其他的全部断开
+     * 随机保留2个种子节点的连接，其他的种子节点都断开
      */
     void removeSeedNode() {
-        List<Node> nodeList = new ArrayList<>(connectedNodes.values());
+        List<Node> nodeList = new ArrayList<>(handerShakeNode.values());
         int count = 0;
         List<String> seedIpList = networkParam.getSeedIpList();
         Collections.shuffle(nodeList);
@@ -189,18 +187,53 @@ public class NewNodeManager implements Runnable {
     }
 
     /**
-     * 主动连接验证规则
-     * 1.本地地址不能连接
-     * 2.存在相同ip的不能连接
+     * 从池子里查找count个可连接的节点尝试做连接
+     *
+     * @param count
+     */
+    void findNodeAndConnect(int count) {
+
+        int successCount = 0;
+        for (Node node : nodeMap.values()) {
+            if (node.getConnectStatus() == Node.SUCCESS && !node.isAlive()) {
+                if (tryToConnect(node)) {
+                    successCount++;
+                }
+                if (successCount == count) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加新的节点到节点池
      *
      * @param node
      * @return
      */
-    private boolean connectValidate(Node node) {
+    public boolean addNode(Node node) {
+        if (!validateAddNode(node)) {
+            return false;
+        }
+        node.setConnectStatus(Node.FAILED);
+        nodeMap.put(node.getId(), node);
+        return true;
+    }
+
+    /**
+     * 添加主动节点规则
+     * 1.本地地址不能添加
+     * 2.存在相同ip的不能添加
+     *
+     * @param node
+     * @return
+     */
+    private boolean validateAddNode(Node node) {
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
         }
-        for (Node connectNode : connectedNodes.values()) {
+        for (Node connectNode : nodeMap.values()) {
             if (connectNode.getIp().equals(node.getIp())) {
                 return false;
             }
@@ -222,22 +255,63 @@ public class NewNodeManager implements Runnable {
 
 
     /**
+     * 获取已连接握手成功的节点
      *
+     * @return
+     */
+    public List<Node> getAvailableNodes() {
+        List<Node> nodeList = new ArrayList<>();
+        for (Node node : handerShakeNode.values()) {
+            if (node.isHandShake()) {
+                nodeList.add(node);
+            }
+        }
+        return nodeList;
+    }
+
+    /**
+     * 获取可连接的节点
+     *
+     * @return
+     */
+    public List<Node> getCanConnectNodes() {
+        List<Node> nodeList = new ArrayList<>();
+        for (Node node : nodeMap.values()) {
+            if (node.getConnectStatus() == Node.SUCCESS) {
+                nodeList.add(node);
+            }
+        }
+        return nodeList;
+    }
+
+
+    /**
+     * 定期尝试连接节点池中处于未连接状态的节点，更新节点状态
      */
     @Override
     public void run() {
-
+        while (true) {
+            for (Node node : nodeMap.values()) {
+                tryToConnect(node);
+            }
+            //TODO 这里考虑，失败的节点和uncheck的节点采用不同的时间去尝试连接
+            try {
+                Thread.sleep(60 * DateUtil.MINUTE_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-
-    public Map<String, Node> getConnectedNodes() {
-        return connectedNodes;
-    }
 
     private NetworkStorageService getNetworkStorageService() {
         if (null == this.networkStorageService) {
             this.networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
         }
         return this.networkStorageService;
+    }
+
+    public Map<String, Node> getHanderShakeNode() {
+        return handerShakeNode;
     }
 }

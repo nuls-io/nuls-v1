@@ -107,26 +107,6 @@ public class ConnectionManager {
     public void connectionNode(Node node) {
         node.setStatus(Node.CONNECT);
         NetworkThreadPool.doConnect(node);
-//        TaskManager.asynExecuteRunnable(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    NettyClient client = new NettyClient(node);
-//                    System.out.println("-----------------------run----" + node.getId());
-//                    client.start();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Log.error(e);
-//                }
-//            }
-//        });
-//        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
-//            @Override
-//            public void run() {
-//                NettyClient client = new NettyClient(node);
-//                client.start();
-//            }
-//        }, true);
     }
 
     public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
