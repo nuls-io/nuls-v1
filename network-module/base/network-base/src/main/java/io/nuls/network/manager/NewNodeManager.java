@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager;
 
+import io.netty.channel.Channel;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
@@ -128,7 +129,7 @@ public class NewNodeManager implements Runnable {
             nodeList = seedNodes;
         }
         for (Node node : nodeList) {
-            nodeMap.put(node.getId(), node);
+            nodeMap.put(node.getIp(), node);
             if (node.getConnectStatus() == Node.SUCCESS) {
                 tryToConnect(node);
             }
@@ -160,8 +161,8 @@ public class NewNodeManager implements Runnable {
      */
     public void connectSeedNode() {
         for (Node node : seedNodes) {
-            if (!nodeMap.containsKey(node.getId())) {
-                nodeMap.put(node.getId(), node);
+            if (!nodeMap.containsKey(node.getIp())) {
+                nodeMap.put(node.getIp(), node);
             }
             tryToConnect(node);
         }
@@ -216,8 +217,7 @@ public class NewNodeManager implements Runnable {
         if (!validateAddNode(node)) {
             return false;
         }
-        node.setConnectStatus(Node.FAILED);
-        nodeMap.put(node.getId(), node);
+        nodeMap.put(node.getIp(), node);
         return true;
     }
 
@@ -242,6 +242,22 @@ public class NewNodeManager implements Runnable {
     }
 
     /**
+     * 处理已经成功连接的节点
+     */
+    public boolean processConnectedNode(Node node, Channel channel) {
+        lock.lock();
+        try {
+            if (handerShakeNode.containsKey(node.getId())) {
+                return false;
+            }
+            node.setChannel(channel);
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * 是否是种子节点
      */
     public boolean isSeedNode(String ip) {
@@ -253,6 +269,10 @@ public class NewNodeManager implements Runnable {
         return false;
     }
 
+
+    public Node getNode(String ip) {
+        return nodeMap.get(ip);
+    }
 
     /**
      * 获取已连接握手成功的节点
