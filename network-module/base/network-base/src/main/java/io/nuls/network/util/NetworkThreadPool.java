@@ -74,7 +74,6 @@ public class NetworkThreadPool {
             public void run() {
                 NettyClient client = new NettyClient(node);
                 client.start();
-                System.out.println("---------------------------nettyClient end------------" + node.getIp());
             }
         });
     }
