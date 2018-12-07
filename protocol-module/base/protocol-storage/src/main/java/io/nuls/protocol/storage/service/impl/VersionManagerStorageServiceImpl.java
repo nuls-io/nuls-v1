@@ -65,46 +65,46 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
      */
     @Override
     public void afterPropertiesSet() {
-        Result result = this.dbService.createArea(ProtocolStorageConstant.NULS_VERSION_AREA);
+        Result result = dbService.createArea(ProtocolStorageConstant.NULS_VERSION_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_AREA);
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_AREA);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
+        result = dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
-        result = this.dbService.createArea(ProtocolStorageConstant.CONSENSUS_VERSION_AREA);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
-
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
+//        result = this.dbService.createArea(ProtocolStorageConstant.CONSENSUS_VERSION_AREA);
+//        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+//            throw new NulsRuntimeException(result.getErrorCode());
+//        }
+//
         result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());

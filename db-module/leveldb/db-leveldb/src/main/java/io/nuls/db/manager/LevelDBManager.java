@@ -355,6 +355,8 @@ public class LevelDBManager {
         Long cacheSize = getModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), Long.class);
         if (cacheSize != null) {
             options.cacheSize(cacheSize);
+        } else {
+            options.cacheSize(50 << 20);
         }
         File file = new File(dbPath);
         DBFactory factory = Iq80DBFactory.factory;
@@ -376,6 +378,8 @@ public class LevelDBManager {
         if (cacheSize != null) {
             putModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), cacheSize);
             options.cacheSize(cacheSize);
+        } else {
+            options.cacheSize(50 << 20);
         }
         if (comparator != null) {
             putModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), comparator);
@@ -639,6 +643,24 @@ public class LevelDBManager {
         }
     }
 
+    private static <T> T getModel(byte[] value, Class<T> clazz) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+            ModelWrapper model = new ModelWrapper();
+            ProtostuffIOUtil.mergeFrom(value, model, schema);
+            if (clazz != null && model.getT() != null) {
+                return clazz.cast(model.getT());
+            }
+            return (T) model.getT();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Set<byte[]> keySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
@@ -661,7 +683,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -695,7 +717,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -728,7 +750,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -772,7 +794,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -798,7 +820,7 @@ public class LevelDBManager {
                 t = null;
                 entry = iterator.peekNext();
                 key = entry.getKey();
-                t = getModel(area, entry.getKey(), clazz);
+                t = getModel(entry.getValue(), clazz);
                 entryList.add(new Entry<byte[], T>(key, t, comparator));
             }
             // 如果自定义了比较器，则执行排序
@@ -818,7 +840,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -863,7 +885,7 @@ public class LevelDBManager {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
-                t = getModel(area, entry.getKey(), clazz);
+                t = getModel(entry.getValue(), clazz);
                 list.add(t);
             }
         } catch (Exception e) {
@@ -874,7 +896,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -903,7 +925,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
