@@ -637,7 +637,6 @@ public class NodeManager implements Runnable {
             }
             //如果握手成功的节点小于配置主动连接的最大数，需要从未连接的节点里补充，直到达到最大主动连接配置为止
             if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
-                int size = networkParam.getMaxOutCount() - handShakeNodes.size();
                 int count = 0;
                 List<Node> nodeList = new ArrayList<>(disConnectNodes.values());
                 Collections.shuffle(nodeList);
@@ -646,7 +645,7 @@ public class NodeManager implements Runnable {
                         connectionManager.connectionNode(node);
                         count++;
                     }
-                    if (count == size + 5) {
+                    if(count == 10){
                         break;
                     }
                 }
