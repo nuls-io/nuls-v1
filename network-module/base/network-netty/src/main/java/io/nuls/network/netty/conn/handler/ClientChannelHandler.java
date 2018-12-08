@@ -50,8 +50,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
 
-        Log.error("----------------channelRegistered ---------");
-
         Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
 
         Node node = nodeAttribute.get();
@@ -63,15 +61,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-
-        Log.error("----------------channelUnregistered ---------");
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-
-        Log.error("----------------channelActive ---------");
 
         Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
 
@@ -87,8 +81,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-
-        Log.error("----------------channelInactive ---------");
 
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         socketChannel.close();
@@ -119,8 +111,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-
-        Log.error("----------------exceptionCaught ---------");
 
         Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
 

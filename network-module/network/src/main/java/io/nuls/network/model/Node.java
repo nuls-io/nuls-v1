@@ -59,7 +59,7 @@ public class Node extends BaseNulsData {
 
     private Long lastFailTime;
 
-    private Long bestBlockHeight;
+    private long bestBlockHeight;
 
     private NulsDigestData bestBlockHash;
 

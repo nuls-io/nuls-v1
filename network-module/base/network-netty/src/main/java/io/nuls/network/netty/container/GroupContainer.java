@@ -25,6 +25,7 @@
 
 package io.nuls.network.netty.container;
 
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.NodeGroup;
 
 import java.util.Map;
@@ -33,4 +34,40 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroupContainer {
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
+
+    public int getNodesCount() {
+        int total = 0;
+
+        NodeGroup inGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_IN_GROUP);
+        if(inGroup != null) {
+            total += inGroup.size();
+        }
+        NodeGroup outGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+        if(outGroup != null) {
+            total += outGroup.size();
+        }
+
+        return total;
+    }
+
+    public NodeGroup getNodeGroup(String groupName) {
+        NodeGroup group = nodeGroups.get(groupName);
+        return group;
+    }
+
+    public int getNodesCount(String groupName) {
+        NodeGroup group = nodeGroups.get(groupName);
+        if(group != null) {
+            return group.size();
+        }
+        return 0;
+    }
+
+    public Map<String, NodeGroup> getNodeGroups() {
+        return nodeGroups;
+    }
+
+    public void setNodeGroups(Map<String, NodeGroup> nodeGroups) {
+        this.nodeGroups = nodeGroups;
+    }
 }

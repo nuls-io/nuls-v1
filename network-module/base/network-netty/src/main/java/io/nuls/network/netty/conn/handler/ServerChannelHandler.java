@@ -60,13 +60,16 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         super.channelActive(ctx);
 
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        ConnectionManager.getInstance().nodeHasConnectioned(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), socketChannel);
+        boolean success = ConnectionManager.getInstance().nodeHasConnectioned(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), socketChannel);
+        if(!success) {
+            socketChannel.close();
+        }
     }
 
-//    @Override
-//    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//        super.channelInactive(ctx);
-//    }
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

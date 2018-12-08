@@ -37,6 +37,8 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
 
     private static NodesMessageHandler instance = new NodesMessageHandler();
 
+    private NodeManager nodeManager = NodeManager.getInstance();
+
     private NodesMessageHandler() {
 
     }
@@ -45,15 +47,12 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
-    private NodeManager nodeManager = NodeManager.getInstance();
-
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
         NodesMessage nodesMessage = (NodesMessage) message;
         NodeMessageBody body = nodesMessage.getMsgBody();
         for (Node newNode : body.getNodeList()) {
-
-            System.out.println(newNode.getId());
+            nodeManager.addNeedVerifyNode(newNode);
         }
         return null;
     }

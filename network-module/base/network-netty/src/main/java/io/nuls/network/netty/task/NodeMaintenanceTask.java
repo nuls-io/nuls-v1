@@ -24,21 +24,14 @@
  */
 package io.nuls.network.netty.task;
 
-import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.listener.EventListener;
-import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
-import io.nuls.network.protocol.message.HandshakeMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.*;
@@ -55,7 +48,6 @@ public class NodeMaintenanceTask implements Runnable {
 
     private final NodeManager nodeManager = NodeManager.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
-    private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private final NetworkParam networkParam;
 
@@ -108,7 +100,6 @@ public class NodeMaintenanceTask implements Runnable {
                 Log.info("node {} connect success !", node.getId());
 
                 nodeManager.nodeConnectSuccess(node);
-                sendHandshakeMessage(node);
             }
         });
 
@@ -125,14 +116,6 @@ public class NodeMaintenanceTask implements Runnable {
 
         Log.info("connect to node {} ··· , result {} ", node.getId(), success);
         return success;
-    }
-
-
-    private void sendHandshakeMessage(Node node) {
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
-                node.getIp());
-        broadcastHandler.broadcastToNode(new HandshakeMessage(body), node, true);
     }
 
     private List<Node> getNeedConnectNodes() {
@@ -159,6 +142,6 @@ public class NodeMaintenanceTask implements Runnable {
 
         Collections.shuffle(nodeList);
 
-        return nodeList.subList(0, maxCount + 1);
+        return nodeList.subList(0, maxCount);
     }
 }

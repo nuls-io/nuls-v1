@@ -34,6 +34,8 @@ public class ConnectionManager {
 
     private static ConnectionManager instance = new ConnectionManager();
 
+    private NodeManager nodeManager = NodeManager.getInstance();
+
     public static ConnectionManager getInstance() {
         return instance;
     }
@@ -57,7 +59,6 @@ public class ConnectionManager {
     }
 
     public boolean nodeHasConnectioned(String ip , int port, SocketChannel channel) {
-
-        return true;
+        return nodeManager.nodeConnectIn(ip, port, channel);
     }
 }
