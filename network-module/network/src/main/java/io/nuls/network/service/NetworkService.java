@@ -44,7 +44,7 @@ public interface NetworkService {
 
     /**
      * 断开一个已连接的节点
-     * Disconnect the connection with the node
+     * Disconnect the conn with the node
      *
      * @param nodeId the id of node
      */
