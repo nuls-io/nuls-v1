@@ -23,41 +23,38 @@
  *
  */
 
-package io.nuls.network.netty.container;
+package io.nuls.network.netty.message.handler;
 
+import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesIpMessage;
+import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
-public class NodesContainer {
+    private static NodesIpMessageHandler instance = new NodesIpMessageHandler();
 
-    private Map<String, Node> allNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
+    private NodesIpMessageHandler() {
 
-
-    public Map<String, Node> getAllNodes() {
-        return allNodes;
     }
 
-    public void setAllNodes(Map<String, Node> allNodes) {
-        this.allNodes = allNodes;
+    public static NodesIpMessageHandler getInstance() {
+        return instance;
     }
 
-    public Map<String, Node> getConnectedNodes() {
-        return connectedNodes;
-    }
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
-    public void setConnectedNodes(Map<String, Node> connectedNodes) {
-        this.connectedNodes = connectedNodes;
-    }
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
+        NodeMessageBody body = handshakeMessage.getMsgBody();
 
-    public Map<String, Node> getDisconnectNodes() {
-        return disconnectNodes;
-    }
-
-    public void setDisconnectNodes(Map<String, Node> disconnectNodes) {
-        this.disconnectNodes = disconnectNodes;
+//        for(String ip : body.getIpList()) {
+//            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
+//        }
+        return null;
     }
 }

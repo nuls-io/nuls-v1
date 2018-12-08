@@ -40,7 +40,7 @@ public class PlatformDepedentReporter extends Thread {
         while(true) {
             doReport();
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

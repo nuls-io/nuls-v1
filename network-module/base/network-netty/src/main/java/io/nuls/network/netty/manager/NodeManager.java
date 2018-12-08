@@ -25,10 +25,14 @@
 
 package io.nuls.network.netty.manager;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.netty.container.GroupContainer;
+import io.nuls.network.netty.container.NodesContainer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -39,25 +43,63 @@ public class NodeManager {
 
     private NetworkParam networkParam;
 
+    private NodesContainer nodesContainer;
+    private GroupContainer groupContainer;
+
     public static NodeManager getInstance() {
         return instance;
     }
 
     private NodeManager() {
-
+        nodesContainer = new NodesContainer();
+        groupContainer = new GroupContainer();
     }
 
 
     public void loadDatas() {
 
+        Map<String, Node> allNodes = nodesContainer.getAllNodes();
+
+        //加载数据库的节点信心 TODO
+
+
+        // 合并种子节点
+        for(Map.Entry<String, Node> nodeEntry : allNodes.entrySet()) {
+            Node node = nodeEntry.getValue();
+            if(node.isSeedNode()) {
+                node.setSeedNode(false);
+            }
+        }
+        for(String seedId : networkParam.getSeedIpList()) {
+
+            if(allNodes.containsKey(seedId)) {
+                allNodes.get(seedId).setSeedNode(true);
+                continue;
+            }
+            try {
+                String[] ipPort = seedId.split(":");
+                String ip = ipPort[0];
+                int port = Integer.parseInt(ipPort[1]);
+
+                Node node = new Node(ip, port, Node.OUT);
+                allNodes.put(seedId, node);
+            } catch (Exception e) {
+                Log.warn("the seed config is warn of {}", seedId);
+            }
+        }
+
     }
 
     public Collection<Node> getAvailableNodes() {
-        return null;
+        return nodesContainer.getConnectedNodes().values();
     }
 
-    public List<Node> getCanConnectNodes() {
-        return null;
+    public int getAvailableNodesCount() {
+        return nodesContainer.getConnectedNodes().size();
+    }
+
+    public Collection<Node> getCanConnectNodes() {
+        return nodesContainer.getAllNodes().values();
     }
 
     public NodeGroup getNodeGroup(String groupName) {
@@ -81,5 +123,20 @@ public class NodeManager {
 
     public void initNetworkParam(NetworkParam networkParam) {
         this.networkParam = networkParam;
+    }
+
+    public void nodeConnectSuccess(Node node) {
+        nodesContainer.getConnectedNodes().put(node.getId(), node);
+        nodesContainer.getAllNodes().remove(node.getId());
+    }
+
+
+    public void nodeConnectFail(Node node) {
+        nodesContainer.getAllNodes().remove(node.getId());
+    }
+
+    public void nodeConnectDisconnect(Node node) {
+        nodesContainer.getConnectedNodes().remove(node.getId());
+        nodesContainer.getDisconnectNodes().put(node.getId(), node);
     }
 }

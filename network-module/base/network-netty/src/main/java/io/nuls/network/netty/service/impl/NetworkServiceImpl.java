@@ -37,6 +37,7 @@ import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public List<Node> getCanConnectNodes() {
-        return nodeManager.getCanConnectNodes();
+        return new ArrayList<>(nodeManager.getCanConnectNodes());
     }
 
     @Override

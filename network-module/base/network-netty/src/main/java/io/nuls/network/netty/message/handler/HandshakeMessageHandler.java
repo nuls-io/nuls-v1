@@ -23,41 +23,39 @@
  *
  */
 
-package io.nuls.network.netty.container;
+package io.nuls.network.netty.message.handler;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.HandshakeMessage;
+import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
-public class NodesContainer {
+    private static HandshakeMessageHandler instance = new HandshakeMessageHandler();
 
-    private Map<String, Node> allNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
+    private HandshakeMessageHandler() {
 
-
-    public Map<String, Node> getAllNodes() {
-        return allNodes;
     }
 
-    public void setAllNodes(Map<String, Node> allNodes) {
-        this.allNodes = allNodes;
+    public static HandshakeMessageHandler getInstance() {
+        return instance;
     }
 
-    public Map<String, Node> getConnectedNodes() {
-        return connectedNodes;
-    }
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
+        NetworkMessageBody body = handshakeMessage.getMsgBody();
 
-    public void setConnectedNodes(Map<String, Node> connectedNodes) {
-        this.connectedNodes = connectedNodes;
-    }
+        Log.info("receive message from node {}, message : {}", node.getId(), body);
 
-    public Map<String, Node> getDisconnectNodes() {
-        return disconnectNodes;
-    }
+        node.setBestBlockHash(body.getBestBlockHash());
+        node.setBestBlockHeight(body.getBestBlockHeight());
+        node.setStatus(Node.HANDSHAKE);
 
-    public void setDisconnectNodes(Map<String, Node> disconnectNodes) {
-        this.disconnectNodes = disconnectNodes;
+        return null;
     }
 }

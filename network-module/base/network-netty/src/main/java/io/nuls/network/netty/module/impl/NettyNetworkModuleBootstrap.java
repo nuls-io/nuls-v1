@@ -34,6 +34,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.netty.conn.NettyServer;
 import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.netty.message.NetworkMessageHandlerPool;
 import io.nuls.network.netty.message.filter.MessageFilterChain;
 import io.nuls.network.netty.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.netty.report.PlatformDepedentReporter;
@@ -72,7 +73,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.startAsSync();
 
-        nodeMaintenanceTask = new NodeMaintenanceTask(networkParam, nodeManager);
+        nodeMaintenanceTask = new NodeMaintenanceTask(networkParam);
         nodeMaintenanceTask.startAsSync();
 
         nodeDiscoverTask = new NodeDiscoverTask(networkParam, nodeManager);
@@ -86,6 +87,8 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void shutdown() {
+        NetworkMessageHandlerPool.shutdown();
+
         nettyServer.shutdown();
         nodeMaintenanceTask.shutdown();
         nodeDiscoverTask.shutdown();

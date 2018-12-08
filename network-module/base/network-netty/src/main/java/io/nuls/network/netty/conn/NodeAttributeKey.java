@@ -23,41 +23,11 @@
  *
  */
 
-package io.nuls.network.netty.container;
+package io.nuls.network.netty.conn;
 
+import io.netty.util.AttributeKey;
 import io.nuls.network.model.Node;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-public class NodesContainer {
-
-    private Map<String, Node> allNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
-
-
-    public Map<String, Node> getAllNodes() {
-        return allNodes;
-    }
-
-    public void setAllNodes(Map<String, Node> allNodes) {
-        this.allNodes = allNodes;
-    }
-
-    public Map<String, Node> getConnectedNodes() {
-        return connectedNodes;
-    }
-
-    public void setConnectedNodes(Map<String, Node> connectedNodes) {
-        this.connectedNodes = connectedNodes;
-    }
-
-    public Map<String, Node> getDisconnectNodes() {
-        return disconnectNodes;
-    }
-
-    public void setDisconnectNodes(Map<String, Node> disconnectNodes) {
-        this.disconnectNodes = disconnectNodes;
-    }
+public class NodeAttributeKey {
+    public static AttributeKey<Node> NODE_KEY = AttributeKey.valueOf("node");
 }

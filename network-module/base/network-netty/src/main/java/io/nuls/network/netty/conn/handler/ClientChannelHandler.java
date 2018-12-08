@@ -31,50 +31,86 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
+import io.nuls.network.netty.conn.NodeAttributeKey;
+import io.nuls.network.netty.message.MessageProcessor;
 
 import java.io.IOException;
 
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
-
-    private AttributeKey<Node> key = AttributeKey.valueOf("node");
-
-    private NetworkParam networkParam = NetworkParam.getInstance();
+    private MessageProcessor messageProcessor = MessageProcessor.getInstance();
 
     public ClientChannelHandler() {
-
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+
+        Log.error("----------------channelRegistered ---------");
+
+        Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
+
+        Node node = nodeAttribute.get();
+        if(node != null && node.getRegisterListener() != null) {
+            node.getRegisterListener().action();
+        }
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+
+        Log.error("----------------channelUnregistered ---------");
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
 
+        Log.error("----------------channelActive ---------");
+
+        Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
+
+        Node node = nodeAttribute.get();
+        if(node != null) {
+            node.setChannel(ctx.channel());
+        }
+        if(node != null && node.getConnectedListener() != null) {
+            node.getConnectedListener().action();
+        }
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+
+        Log.error("----------------channelInactive ---------");
+
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         socketChannel.close();
+        Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
+
+        Node node = nodeAttribute.get();
+
+        if(node != null && node.getDisconnectListener() != null) {
+            node.getDisconnectListener().action();
+        }
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
+            Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
+            Node node = nodeAttribute.get();
             ByteBuf buf = (ByteBuf) msg;
-            System.out.println(buf.readableBytes());
+
+            messageProcessor.processor(buf, node);
         } catch (Exception e) {
+            Log.error("----------------exceptionCaught   111 ---------");
             throw e;
         } finally {
            ReferenceCountUtil.release(msg);
@@ -83,26 +119,34 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+
+        Log.error("----------------exceptionCaught ---------");
+
+        Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
+
         if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
-            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             Log.error("----------------nodeId:" + node.getId());
             Log.error(cause);
 
         }
         if (cause instanceof TooLongFrameException) {
-            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             if (node != null) {
                 node.setCanConnect(false);
             }
         }
         if (cause instanceof TooLongFrameException) {
-            Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             node.setCanConnect(false);
         }
         ctx.channel().close();
+
+        Node node = nodeAttribute.get();
+
+        if(node != null && node.getDisconnectListener() != null) {
+            node.getDisconnectListener().action();
+        }
     }
 
 }

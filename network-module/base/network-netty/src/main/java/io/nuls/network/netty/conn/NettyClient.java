@@ -26,12 +26,15 @@
 package io.nuls.network.netty.conn;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
+import io.nuls.core.tools.log.Log;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.conn.handler.ClientChannelHandler;
 import io.nuls.network.netty.conn.initializer.NulsChannelInitializer;
@@ -43,7 +46,7 @@ public class NettyClient {
 
     public static EventLoopGroup worker = new NioEventLoopGroup();
 
-    Bootstrap boot;
+    private Bootstrap boot;
 
     private SocketChannel socketChannel;
 
@@ -53,15 +56,7 @@ public class NettyClient {
         this.node = node;
         boot = new Bootstrap();
 
-        AttributeKey<Node> key = null;
-        synchronized (NettyClient.class) {
-            if (AttributeKey.exists("node")) {
-                key = AttributeKey.valueOf("node");
-            } else {
-                key = AttributeKey.newInstance("node");
-            }
-        }
-        boot.attr(key, node);
+        boot.attr(NodeAttributeKey.NODE_KEY, node);
         boot.group(worker)
                 .channel(NioSocketChannel.class)
 //                .option(ChannelOption.SO_BACKLOG, 128)
@@ -73,8 +68,18 @@ public class NettyClient {
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
 
-    public void start() {
-
+    public boolean start() {
+        try {
+            ChannelFuture future = boot.connect(node.getIp(), node.getSeverPort());
+            future.await();
+            return future.isSuccess();
+        } catch (Exception e) {
+            //maybe time out or refused or something
+            if (socketChannel != null) {
+                socketChannel.close();
+            }
+            return false;
+        }
     }
 
 }

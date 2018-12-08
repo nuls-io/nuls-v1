@@ -23,41 +23,38 @@
  *
  */
 
-package io.nuls.network.netty.container;
+package io.nuls.network.netty.message.handler;
 
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesMessage;
+import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public class NodesMessageHandler implements BaseNetworkMeesageHandler {
 
-public class NodesContainer {
+    private static NodesMessageHandler instance = new NodesMessageHandler();
 
-    private Map<String, Node> allNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
-    private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
+    private NodesMessageHandler() {
 
-
-    public Map<String, Node> getAllNodes() {
-        return allNodes;
     }
 
-    public void setAllNodes(Map<String, Node> allNodes) {
-        this.allNodes = allNodes;
+    public static NodesMessageHandler getInstance() {
+        return instance;
     }
 
-    public Map<String, Node> getConnectedNodes() {
-        return connectedNodes;
-    }
+    private NodeManager nodeManager = NodeManager.getInstance();
 
-    public void setConnectedNodes(Map<String, Node> connectedNodes) {
-        this.connectedNodes = connectedNodes;
-    }
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        NodesMessage nodesMessage = (NodesMessage) message;
+        NodeMessageBody body = nodesMessage.getMsgBody();
+        for (Node newNode : body.getNodeList()) {
 
-    public Map<String, Node> getDisconnectNodes() {
-        return disconnectNodes;
-    }
-
-    public void setDisconnectNodes(Map<String, Node> disconnectNodes) {
-        this.disconnectNodes = disconnectNodes;
+            System.out.println(newNode.getId());
+        }
+        return null;
     }
 }

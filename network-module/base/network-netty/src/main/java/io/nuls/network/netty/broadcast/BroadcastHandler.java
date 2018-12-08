@@ -167,12 +167,12 @@ public class BroadcastHandler {
     }
 
     public BroadcastResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
-        if (!node.isAlive()) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
-        }
-        if (node.getChannel() == null || !node.getChannel().isActive()) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
-        }
+//        if (!node.isAlive()) {
+//            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
+//        }
+//        if (node.getChannel() == null || !node.getChannel().isActive()) {
+//            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
+//        }
         try {
             MessageHeader header = message.getHeader();
             header.setMagicNumber(networkParam.getPacketMagic());

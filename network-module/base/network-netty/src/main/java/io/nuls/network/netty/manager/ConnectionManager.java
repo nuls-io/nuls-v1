@@ -25,20 +25,35 @@
 
 package io.nuls.network.netty.manager;
 
+import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.tools.log.Log;
 import io.nuls.network.model.Node;
-
-import java.nio.channels.SocketChannel;
+import io.nuls.network.netty.conn.NettyClient;
 
 public class ConnectionManager {
 
-    public Node connection(String ip , int port) {
+    private static ConnectionManager instance = new ConnectionManager();
 
-        return null;
+    public static ConnectionManager getInstance() {
+        return instance;
     }
 
-    public Node connection(Node node) {
+    public Node connection(String ip , int port) {
 
-        return node;
+        Node node = new Node(ip, port, Node.OUT);
+        boolean success = connection(node);
+
+        return success ? node : null;
+    }
+
+    public boolean connection(Node node) {
+        try {
+            NettyClient client = new NettyClient(node);
+            return client.start();
+        } catch (Exception e) {
+            Log.error("connect to node {} error : {}", node.getId(), e.getMessage());
+            return false;
+        }
     }
 
     public boolean nodeHasConnectioned(String ip , int port, SocketChannel channel) {
