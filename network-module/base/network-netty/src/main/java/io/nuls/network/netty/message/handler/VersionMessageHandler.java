@@ -54,7 +54,7 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
         VersionMessage versionMessage = (VersionMessage) message;
         NetworkMessageBody body = versionMessage.getMsgBody();
 
-        Log.info("receive a version message : {}", body);
+//        Log.info("receive a version message : {}", body);
         if (body.getBestBlockHeight() < 0) {
             node.setStatus(Node.BAD);
             nodeManager.removeNode(node.getId());

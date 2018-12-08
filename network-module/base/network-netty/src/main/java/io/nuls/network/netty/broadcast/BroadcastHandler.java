@@ -39,6 +39,7 @@ import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
 
+import java.io.IOException;
 import java.util.*;
 
 public class BroadcastHandler {
@@ -58,20 +59,22 @@ public class BroadcastHandler {
     private NodeManager nodeManager = NodeManager.getInstance();
 
     public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn, int percent) {
-        if (nodeManager.getAvailableNodes().isEmpty()) {
+        Collection<Node> nodeList = NodeManager.getInstance().getAvailableNodes();
+        if (nodeList == null || nodeList.isEmpty()) {
+            Log.error("node list is null");
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn, percent);
+        return broadcastToList(nodeList, msg, excludeNode, asyn, percent);
     }
 
     public BroadcastResult broadcastToHalfNode(BaseMessage msg, Node excludeNode, boolean asyn) {
-
-        if (nodeManager.getAvailableNodes().isEmpty()) {
+        Collection<Node> nodes = nodeManager.getAvailableNodes();
+        if (nodes.isEmpty()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
         List<Node> nodeList = new ArrayList<>();
         int i = 0;
-        for (Node node : nodeManager.getAvailableNodes()) {
+        for (Node node : nodes) {
             i++;
             if (i % 2 == 1) {
                 nodeList.add(node);
@@ -180,8 +183,19 @@ public class BroadcastHandler {
             BaseNulsData body = message.getMsgBody();
             header.setLength(body.size());
 
-            ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            if (!asyn) {
+            if(asyn) {
+                node.getChannel().eventLoop().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            } else {
+                ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
                 future.await();
                 boolean success = future.isSuccess();
                 if (!success) {

@@ -32,6 +32,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
@@ -181,6 +182,14 @@ public class NodeManager {
 
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.markCanuseNodeByIp(ip);
+
+        //监听被动连接的断开
+        node.setDisconnectListener(new EventListener() {
+            @Override
+            public void action() {
+                nodesContainer.getConnectedNodes().remove(node.getId());
+            }
+        });
 
         sendHandshakeMessage(node);
         return true;

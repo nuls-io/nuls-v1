@@ -38,6 +38,7 @@ import io.nuls.network.netty.message.NetworkMessageHandlerPool;
 import io.nuls.network.netty.message.filter.MessageFilterChain;
 import io.nuls.network.netty.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.netty.report.PlatformDepedentReporter;
+import io.nuls.network.netty.task.GetNodeVersionTask;
 import io.nuls.network.netty.task.NodeDiscoverTask;
 import io.nuls.network.netty.task.NodeMaintenanceTask;
 import io.nuls.network.protocol.message.*;
@@ -53,9 +54,10 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     private  NetworkParam networkParam;
 
     private NettyServer nettyServer;
+    private NodeManager nodeManager;
     private NodeDiscoverTask nodeDiscoverTask;
     private NodeMaintenanceTask nodeMaintenanceTask;
-    private NodeManager nodeManager;
+    private GetNodeVersionTask getNodeVersionTask;
 
     @Override
     public void init() {
@@ -76,9 +78,12 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         nodeMaintenanceTask = new NodeMaintenanceTask(networkParam);
         nodeMaintenanceTask.startAsSync();
 
-        nodeDiscoverTask = new NodeDiscoverTask(networkParam, nodeManager);
+        nodeDiscoverTask = new NodeDiscoverTask(networkParam);
         nodeDiscoverTask.startAsSync();
 
+
+        getNodeVersionTask = new GetNodeVersionTask();
+        getNodeVersionTask.startAsSync();
 
         PlatformDepedentReporter reporter = new PlatformDepedentReporter();
         reporter.init();

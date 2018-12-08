@@ -51,7 +51,14 @@ public class ConnectionManager {
     public boolean connection(Node node) {
         try {
             NettyClient client = new NettyClient(node);
-            return client.start();
+            new Thread() {
+                @Override
+                public void run() {
+                    client.start();
+                }
+            }.start();
+            Thread.sleep(100L);
+            return true;
         } catch (Exception e) {
             Log.error("connect to node {} error : {}", node.getId(), e.getMessage());
             return false;

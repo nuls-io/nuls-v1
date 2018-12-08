@@ -60,7 +60,7 @@ public class NodeMaintenanceTask implements Runnable {
     public void startAsSync() {
         threadPool = TaskManager.createScheduledThreadPool(1,
                 new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "node-maintenance-task"));
-        threadPool.scheduleAtFixedRate(this, 2000L, 2000L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(this, 1000L, 5000L, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
@@ -78,7 +78,9 @@ public class NodeMaintenanceTask implements Runnable {
 
         for(Node node : needConnectNodes) {
             boolean success = connectionNode(node);
-            if(!success) {
+            if(success) {
+                node.setType(Node.OUT);
+            } else {
                 //fail
                 nodeManager.nodeConnectFail(node);
             }

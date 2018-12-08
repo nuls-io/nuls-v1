@@ -34,12 +34,11 @@ import io.nuls.network.netty.manager.NodeManager;
  */
 public class NodeDiscoverTask {
 
-    private final NodeManager nodeManager;
+    private final NodeManager nodeManager = NodeManager.getInstance();
     private final NetworkParam networkParam;
 
-    public NodeDiscoverTask(NetworkParam networkParam, NodeManager nodeManager) {
+    public NodeDiscoverTask(NetworkParam networkParam) {
         this.networkParam = networkParam;
-        this.nodeManager = nodeManager;
     }
 
     public void shutdown() {
