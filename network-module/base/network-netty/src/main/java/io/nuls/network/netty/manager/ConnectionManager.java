@@ -40,13 +40,13 @@ public class ConnectionManager {
         return instance;
     }
 
-    public Node connection(String ip , int port) {
-
-        Node node = new Node(ip, port, Node.OUT);
-        boolean success = connection(node);
-
-        return success ? node : null;
-    }
+//    public Node connection(String ip , int port) {
+//
+//        Node node = new Node(ip, port, Node.OUT);
+//        boolean success = connection(node);
+//
+//        return success ? node : null;
+//    }
 
     public boolean connection(Node node) {
         try {
@@ -65,7 +65,7 @@ public class ConnectionManager {
         }
     }
 
-    public boolean nodeHasConnectioned(String ip , int port, SocketChannel channel) {
-        return nodeManager.nodeConnectIn(ip, port, channel);
+    public boolean nodeConnectIn(SocketChannel channel) {
+        return nodeManager.nodeConnectIn(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), channel);
     }
 }

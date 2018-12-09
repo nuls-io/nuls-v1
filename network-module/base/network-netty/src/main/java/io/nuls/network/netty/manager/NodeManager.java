@@ -75,17 +75,17 @@ public class NodeManager {
 
 
         // 合并种子节点
-        for(Map.Entry<String, Node> nodeEntry : allNodes.entrySet()) {
+        for (Map.Entry<String, Node> nodeEntry : allNodes.entrySet()) {
             Node node = nodeEntry.getValue();
             node.setCanConnect(true);
 
-            if(node.isSeedNode()) {
+            if (node.isSeedNode()) {
                 node.setSeedNode(false);
             }
         }
-        for(String seedId : networkParam.getSeedIpList()) {
+        for (String seedId : networkParam.getSeedIpList()) {
 
-            if(allNodes.containsKey(seedId)) {
+            if (allNodes.containsKey(seedId)) {
                 allNodes.get(seedId).setSeedNode(true);
                 continue;
             }
@@ -116,8 +116,8 @@ public class NodeManager {
         List<Node> nodeList = new ArrayList<>();
 
         Collection<Node> allNodes = nodesContainer.getCanConnectNodes().values();
-        for(Node node : allNodes) {
-            if(node.isCanConnect()) {
+        for (Node node : allNodes) {
+            if (node.isCanConnect()) {
                 nodeList.add(node);
             }
         }
@@ -169,8 +169,7 @@ public class NodeManager {
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
-
-        if(!canConnectIn(ip, port)) {
+        if (!canConnectIn(ip, port)) {
             return false;
         }
 
@@ -198,17 +197,27 @@ public class NodeManager {
     public void addNeedVerifyNode(Node newNode) {
         // TODO 需要把待验证的区分，这里就先放可用里面了
         Map<String, Node> canConnectNodeMap = nodesContainer.getCanConnectNodes();
-        if(canConnectNodeMap.containsKey(newNode.getId())) {
+        if (canConnectNodeMap.containsKey(newNode.getId())) {
             return;
         }
         newNode.setCanConnect(true);
         canConnectNodeMap.put(newNode.getId(), newNode);
     }
 
+    /**
+     * 服务器被动连接规则
+     * 1. 不超过最大被动连接数
+     * 2. 如果自己已经主动连接了对方，不接受对方的被动连接
+     * 3. 相同的IP的被动连接不超过10次
+     *
+     * @param ip
+     * @param port
+     * @return
+     */
     private boolean canConnectIn(String ip, int port) {
         int size = groupContainer.getNodesCount(NetworkConstant.NETWORK_NODE_IN_GROUP);
 
-        if(size >= networkParam.getMaxInCount()) {
+        if (size >= networkParam.getMaxInCount()) {
             return false;
         }
 
@@ -216,14 +225,16 @@ public class NodeManager {
 
         int sameIpCount = 0;
 
-        for(Node node : connectedNodes.values()) {
-            if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
+        for (Node node : connectedNodes.values()) {
+            //不会存在两次被动连接都是同一个端口的，即使是同一台服务器
+            //if(ip.equals(node.getIp()) && (node.getPort().intValue() == port || node.getType() == Node.OUT)) {
+            if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 return false;
             }
-            if(ip.equals(node.getIp())) {
+            if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
-            if(sameIpCount >= NetworkConstant.SAME_IP_MAX_COUNT) {
+            if (sameIpCount >= NetworkConstant.SAME_IP_MAX_COUNT) {
                 return false;
             }
         }

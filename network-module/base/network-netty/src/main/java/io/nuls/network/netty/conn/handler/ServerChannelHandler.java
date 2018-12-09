@@ -29,6 +29,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -46,47 +47,37 @@ import java.io.IOException;
  */
 
 @ChannelHandler.Sharable
-public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
+public class ServerChannelHandler extends SimpleChannelInboundHandler {
 
     private MessageProcessor messageProcessor = MessageProcessor.getInstance();
-
-    @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelRegistered(ctx);
-    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
 
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        boolean success = ConnectionManager.getInstance().nodeHasConnectioned(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), socketChannel);
-        if(!success) {
-            socketChannel.close();
+        boolean success = ConnectionManager.getInstance().nodeConnectIn(socketChannel);
+        if (!success) {
+            ctx.close();
         }
     }
 
+    /**
+     * 继承SimpleChannelInboundHandler后，只需要重新channelRead0方法，msg会自动释放
+     * @param ctx
+     * @param msg
+     * @throws Exception
+     */
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
-    }
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        try {
-            SocketChannel channel = (SocketChannel) ctx.channel();
-            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-            Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
+        Node node = nodeAttribute.get();
+        ByteBuf buf = (ByteBuf) msg;
 
-            Node node = nodeAttribute.get();
-            ByteBuf buf = (ByteBuf) msg;
-
-            messageProcessor.processor(buf, node);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            ReferenceCountUtil.release(msg);
-        }
+        messageProcessor.processor(buf, node);
     }
 
     @Override
@@ -97,31 +88,32 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
 
         Node node = nodeAttribute.get();
-        if(node != null && node.getDisconnectListener() != null) {
+        if (node != null && node.getDisconnectListener() != null) {
             node.getDisconnectListener().action();
         }
-        channel.close();
+        //channelUnregistered之前，channel就已经close了，可以调用channel.isOpen()查看状态
+        //channel.close();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Log.error("----------------- server exceptionCaught -------------------");
-
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-
         if (!(cause instanceof IOException)) {
+            SocketChannel channel = (SocketChannel) ctx.channel();
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            //通常发生IOException是因为连接的节点断开了
             Log.error("----------------nodeId:" + nodeId);
             Log.error(cause);
         }
 
-        Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
-
-        Node node = nodeAttribute.get();
-        if(node != null && node.getDisconnectListener() != null) {
-            node.getDisconnectListener().action();
-        }
-        channel.close();
+        //触发异常后，只需要关闭连接，就会执行channelUnregistered
+//        Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
+//
+//        Node node = nodeAttribute.get();
+//        if (node != null && node.getDisconnectListener() != null) {
+//            node.getDisconnectListener().action();
+//        }
+        ctx.close();
     }
 
 }
