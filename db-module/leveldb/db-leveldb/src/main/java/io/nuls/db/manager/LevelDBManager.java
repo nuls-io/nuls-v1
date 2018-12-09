@@ -65,6 +65,8 @@ public class LevelDBManager {
 
     private static String dataPath;
 
+    private static Integer cacheSize;
+
     public static int getMax() {
         return max;
     }
@@ -143,6 +145,14 @@ public class LevelDBManager {
 
     public static File loadDataPath() throws Exception {
         Properties properties = ConfigLoader.loadProperties("db_config.properties");
+        String cacheSize = properties.getProperty("leveldb.cacheSize");
+        try {
+            if(StringUtils.isNotBlank(cacheSize)) {
+                LevelDBManager.cacheSize = Integer.valueOf(cacheSize);
+            }
+        } catch (Exception e) {
+            // skip it
+        }
         String path = properties.getProperty("leveldb.datapath", "./data");
         String maxStr = properties.getProperty("leveldb.area.max", "50");
         try {
@@ -356,7 +366,9 @@ public class LevelDBManager {
         if (cacheSize != null) {
             options.cacheSize(cacheSize);
         } else {
-            options.cacheSize(50 << 20);
+            if(LevelDBManager.cacheSize != null) {
+                options.cacheSize(LevelDBManager.cacheSize.intValue() << 20);
+            }
         }
         File file = new File(dbPath);
         DBFactory factory = Iq80DBFactory.factory;
@@ -379,7 +391,9 @@ public class LevelDBManager {
             putModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), cacheSize);
             options.cacheSize(cacheSize);
         } else {
-            options.cacheSize(50 << 20);
+            if(LevelDBManager.cacheSize != null) {
+                options.cacheSize(LevelDBManager.cacheSize.intValue() << 20);
+            }
         }
         if (comparator != null) {
             putModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), comparator);
