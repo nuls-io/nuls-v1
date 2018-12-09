@@ -101,13 +101,13 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception{
         if (!(cause instanceof IOException) && !(cause instanceof TooLongFrameException)) {
             Attribute<Node> nodeAttribute = ctx.channel().attr(NodeAttributeKey.NODE_KEY);
             Node node = nodeAttribute.get();
             Log.error("----------------nodeId:" + node.getId());
             Log.error(cause);
-
         }
+        ctx.close();
     }
 }
