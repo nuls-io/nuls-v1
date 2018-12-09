@@ -22,4 +22,5 @@ public interface DBErrorCode extends KernelErrorCode {
     ErrorCode DB_AREA_CREATE_PATH_ERROR = ErrorCode.init("20013");
     ErrorCode DB_AREA_DESTROY_ERROR = ErrorCode.init("20014");
     ErrorCode DB_BATCH_CLOSE = ErrorCode.init("20015");
+    ErrorCode DB_AREA_FAILED_BATCH_CLOSE = ErrorCode.init("20016");
 }

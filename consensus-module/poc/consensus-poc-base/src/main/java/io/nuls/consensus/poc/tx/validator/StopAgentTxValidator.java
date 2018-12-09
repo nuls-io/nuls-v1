@@ -37,6 +37,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
@@ -77,7 +78,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
 
-        if (!SignatureUtil.containsAddress(data,agentPo.getAgentAddress())) {
+        if (!SignatureUtil.containsAddress(data, agentPo.getAgentAddress())) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
@@ -106,10 +107,10 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         Na fromTotal = Na.ZERO;
         Map<String, Na> verifyToMap = new HashMap<>();
         for (Coin coin : data.getCoinData().getFrom()) {
-            if (coin.getLockTime() != -1L){
-                return ValidateResult.getFailedResult(this.getClass().getName(),TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
+            if (coin.getLockTime() != -1L) {
+                return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-                NulsDigestData txHash = new NulsDigestData();
+            NulsDigestData txHash = new NulsDigestData();
             txHash.parse(coin.getOwner(), 0);
             DepositPo deposit = depositMap.remove(txHash);
             if (deposit == null) {
@@ -158,6 +159,8 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
             }
         }
         if (ownLockTime < (data.getTime() + PocConsensusConstant.STOP_AGENT_LOCK_TIME)) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LOCK_TIME_NOT_REACHED);
+        } else if (data.getBlockHeight() <= 0 && ownLockTime < (TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME - 300000L)) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LOCK_TIME_NOT_REACHED);
         }
         if (!verifyToMap.isEmpty()) {

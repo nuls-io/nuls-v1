@@ -160,6 +160,7 @@ public interface ProtocolConstant extends NulsConstant {
     short PROTOCOL_GET_TRANSACTION = 20;
     //协议升级要求最低覆盖率
     int MIN_PROTOCOL_UPGRADE_RATE = 60;
+    // pierre test comment out
     //协议升级要求最低延迟块数
     int MIN_PROTOCOL_UPGRADE_DELAY = 0;
     // pierre test comment out

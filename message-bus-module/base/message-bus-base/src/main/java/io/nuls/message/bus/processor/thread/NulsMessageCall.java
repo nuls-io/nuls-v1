@@ -26,16 +26,14 @@
 package io.nuls.message.bus.processor.thread;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
-import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author: Charlie
  */
-public class NulsMessageCall<T extends NulsDigestData> implements Runnable {
+public class NulsMessageCall<T extends BaseMessage> implements Runnable {
 
     private final ProcessData<T> data;
     private final NulsMessageHandler<BaseMessage> handler;
@@ -52,18 +50,16 @@ public class NulsMessageCall<T extends NulsDigestData> implements Runnable {
         }
         try {
             long start = System.currentTimeMillis();
-            BaseMessage message = MessageCacher.get(data.getData());
+            BaseMessage message = data.getData();
             if (null == message) {
-                MessageCacher.remove(data.getData());
                 return;
             }
-            handler.onMessage(message, MessageCacher.getNode(data.getData()));
+            handler.onMessage(message,data.getNode());
             if (Log.isDebugEnabled()) {
                 Log.debug(data.getData().getClass() + ",use:" + (System.currentTimeMillis() - start));
             }
-            MessageCacher.remove(data.getData());
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         }
         return;
     }

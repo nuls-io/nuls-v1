@@ -40,6 +40,7 @@ import io.nuls.contract.entity.txdata.DeleteContractData;
 import io.nuls.contract.rpc.form.transaction.CallContractTx;
 import io.nuls.contract.rpc.form.transaction.CreateContractTx;
 import io.nuls.contract.rpc.form.transaction.DeleteContractTx;
+import io.nuls.contract.rpc.model.ContractTransactionCreatedReturnInfo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.crypto.Hex;
@@ -63,6 +64,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -170,7 +172,7 @@ public class ContractSdkResource {
             return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
         }
 
-        return this.buildReturnInfo(tx);
+        return this.buildReturnInfo(tx, AddressTool.getStringAddressByBytes(contractAddressBytes));
     }
 
     @POST
@@ -272,7 +274,7 @@ public class ContractSdkResource {
             return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
         }
 
-        return this.buildReturnInfo(tx);
+        return this.buildReturnInfo(tx, contractAddress);
     }
 
 
@@ -340,14 +342,14 @@ public class ContractSdkResource {
             return Result.getFailed(TransactionErrorCode.DATA_SIZE_ERROR).toRpcClientResult();
         }
 
-        return this.buildReturnInfo(tx);
+        return this.buildReturnInfo(tx, contractAddress);
     }
 
-    private RpcClientResult buildReturnInfo(Transaction tx) {
+    private RpcClientResult buildReturnInfo(Transaction tx, String contractAddress) {
         try {
             TransactionCreatedReturnInfo returnInfo = LedgerRpcUtil.makeReturnInfo(tx);
-            Map<String, TransactionCreatedReturnInfo> data = new HashMap<>();
-            data.put("value", returnInfo);
+            Map<String, ContractTransactionCreatedReturnInfo> data = new LinkedHashMap<>();
+            data.put("value", new ContractTransactionCreatedReturnInfo(returnInfo, contractAddress));
             return Result.getSuccess().setData(data).toRpcClientResult();
         } catch (IOException e) {
             Log.error(e);

@@ -55,6 +55,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -739,6 +740,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, byte[] remark, Na price) {
         try {
+            if (NulsContext.WALLET_STATUS == NulsConstant.SYNCHING) {
+                return Result.getFailed(KernelErrorCode.WALLET_STATUS_SYNCHING);
+            } else if (NulsContext.WALLET_STATUS == NulsConstant.ROLLBACK) {
+                return Result.getFailed(KernelErrorCode.WALLET_STATUS_ROLLBACK);
+            }
+
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -1785,7 +1792,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Result<MultiSigAccount> result = accountService.getMultiSigAccount(fromAddr);
             MultiSigAccount multiSigAccount = result.getData();
             //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-            if(!multiSigAccount.getPubKeyList().contains(account.getPubKey())){
+            if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
             Script redeemScript = getRedeemScript(multiSigAccount);
@@ -2055,6 +2062,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(txByte));
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            //验证签名地址账户是否属于多签账户
+            List<byte[]> pubkeys = SignatureUtil.getPublicKeyList(transactionSignature.getScripts().get(0));
+            if (pubkeys == null || pubkeys.size() == 0 || !AddressTool.validSignAddress(pubkeys, account.getPubKey())) {
+                return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
             return txMultiProcess(tx, transactionSignature, account, password);
         } catch (NulsException e) {
             Log.error(e);

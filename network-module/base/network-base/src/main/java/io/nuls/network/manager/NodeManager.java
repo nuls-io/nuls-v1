@@ -118,12 +118,29 @@ public class NodeManager implements Runnable {
         if (externalIp != null) {
             networkParam.getLocalIps().add(externalIp);
         }
+        /**
+         * 下个版本放开此段代码
+         List<Node> nodeList = getSeedNodes();
+         nodeList.addAll(getNetworkStorageService().getLocalNodeList());
+         for (Node node : nodeList) {
+         addNode(node);
+         }
+         */
 
+        //todo  下个版本删除一下代码
+        //首先连接种子节点，然后再连接其他节点
+        connectSeedNodes();
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //todo 以上代码下个版本删除
         List<Node> nodeList = getNetworkStorageService().getLocalNodeList();
-        nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
             addNode(node);
         }
+
         running = true;
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "NetworkNodeManager", this);
         nodeDiscoverHandler.start();
@@ -208,14 +225,15 @@ public class NodeManager implements Runnable {
      * 添加主动连接节点，并创建连接
      */
     public boolean addNode(Node node) {
-        if(node.getIp().equals("222.183.234.88") ||node.getIp().equals("222.183.238.45") ||node.getIp().equals("85.26.34.202")) {
-            System.out.println(1);
-        }
+
         //判断是否是本地地址
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
         }
         if (node.getStatus() != Node.WAIT) {
+            return false;
+        }
+        if (!IpUtil.isboolIp(node.getIp())) {
             return false;
         }
         lock.lock();
@@ -227,14 +245,13 @@ public class NodeManager implements Runnable {
                 if (node.getIp().equals(n.getIp()) && n.getType() == Node.OUT) {
                     return false;
                 }
-                if (node.isCanConnect()) {
+                if (n.isCanConnect()) {
                     count++;
                 }
             }
-            if (count >= 50) {
+            if (count >= 20) {
                 return false;
             }
-
             node.setType(Node.OUT);
             node.setTestConnect(false);
             disConnectNodes.put(node.getId(), node);
@@ -305,7 +322,6 @@ public class NodeManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-//            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             getNetworkStorageService().deleteNode(nodeId);
         }
     }
@@ -340,11 +356,11 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if(node.isCanConnect()) {
-            if(!disConnectNodes.containsKey(node.getId())) {
-                disConnectNodes.put(node.getId(),node);
+        if (node.isCanConnect()) {
+            if (!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(), node);
             }
-        }else {
+        } else {
             disConnectNodes.remove(node.getId());
             getNetworkStorageService().deleteNode(node.getId());
         }
@@ -439,6 +455,16 @@ public class NodeManager implements Runnable {
         }
     }
 
+    private boolean checkFullHandShake(int type) {
+        if (type == Node.IN) {
+            NodeGroup inGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+            return inGroup.size() < networkParam.getMaxInCount();
+        } else {
+            NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+            return outGroup.size() < networkParam.getMaxOutCount();
+        }
+    }
+
     /**
      * 添加节点到节点组
      */
@@ -485,6 +511,15 @@ public class NodeManager implements Runnable {
         return seedNodes;
     }
 
+    public void connectSeedNodes() {
+        List<Node> nodeList = getSeedNodes();
+        Collections.shuffle(nodeList);
+
+        for (int i = 0; i < nodeList.size(); i++) {
+            addNode(nodeList.get(i));
+        }
+    }
+
     /**
      * 是否是种子节点
      */
@@ -509,9 +544,48 @@ public class NodeManager implements Runnable {
         for (Node n : nodes) {
             if (seedIpList.contains(n.getIp())) {
                 count++;
-                if (count > 1) {
+                if (count > 2) {
                     removeNode(n);
                 }
+            }
+        }
+    }
+
+    /**
+     * 如果连接的种子节点小于2个，尝试连接种子节点
+     *
+     * @return
+     */
+    private void checkConnectSeedNode() {
+        int count = 0;
+        for (Node node : handShakeNodes.values()) {
+            if (isSeedNode(node.getIp())) {
+                count++;
+            }
+        }
+        if (count < 2) {
+            List<Node> seedList = getSeedNodes();
+            Iterator<Node> iterator = disConnectNodes.values().iterator();
+            boolean hasSeed = false;
+
+            for (Node seedNode : seedList) {
+                hasSeed = false;
+                for (Node node : getConnectedNodes().values()) {
+                    if (seedNode.getIp().equals(node.getIp())) {
+                        hasSeed = true;
+                        break;
+                    }
+                }
+                if (hasSeed) {
+                    continue;
+                }
+                while (iterator.hasNext()) {
+                    Node node = iterator.next();
+                    if (seedNode.getIp().equals(node.getIp())) {
+                        disConnectNodes.remove(node.getId());
+                    }
+                }
+                addNode(seedNode);
             }
         }
     }
@@ -536,47 +610,50 @@ public class NodeManager implements Runnable {
                 e.printStackTrace();
             }
 
-           /* System.out.println("--------disConnectNodes:" + disConnectNodes.size());
-            for (Node node : disConnectNodes.values()) {
-                System.out.println(node.toString());
-            }
+//           System.out.println("--------disConnectNodes:" + disConnectNodes.size());
+//            for (Node node : disConnectNodes.values()) {
+//                System.out.println(node.toString());
+//            }
 
-            System.out.println("--------connectedNodes:" + connectedNodes.size());
-            for (Node node : connectedNodes.values()) {
-                System.out.println(node.toString());
-            }
+//            System.out.println("--------connectedNodes:" + connectedNodes.size());
+//            for (Node node : connectedNodes.values()) {
+//                System.out.println(node.toString());
+//            }
+//
+//            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
+//            for (Node node : handShakeNodes.values()) {
+//                System.out.println(node.toString());
+//            }
+            //todo 以下代码下个版本去掉
+//            checkConnectSeedNode();
 
-            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
-            for (Node node : handShakeNodes.values()) {
-                System.out.println(node.toString());
-            }*/
-
-            if (handShakeNodes.size() > 9) {
+            if (handShakeNodes.size() >= 10) {
                 removeSeedNode();
             } else if (handShakeNodes.size() <= 2) {
                 //如果已连接成功数太少，立刻尝试连接种子节点
                 for (Node node : getSeedNodes()) {
                     addNode(node);
                 }
-            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
+            }
+            //如果握手成功的节点小于配置主动连接的最大数，需要从未连接的节点里补充，直到达到最大主动连接配置为止
+            if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
+                int count = 0;
+                List<Node> nodeList = new ArrayList<>(disConnectNodes.values());
+                Collections.shuffle(nodeList);
                 for (Node node : disConnectNodes.values()) {
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
                         connectionManager.connectionNode(node);
+                        count++;
+                    }
+                    if(count == 10){
+                        break;
                     }
                 }
+            } else if (handShakeNodes.size() >= networkParam.getMaxOutCount() && connectedNodes.size() != 0) {
+                for (Node node : connectedNodes.values()) {
+                    removeNode(node);
+                }
             }
-
-//            //定期尝试重新连接，检测网络节点
-//            long now = TimeService.currentTimeMillis();
-//            for (Node node : disConnectNodes.values()) {
-//                if (node.getStatus() == Node.WAIT) {
-//                    if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
-//                        connectionManager.connectionNode(node);
-//                    } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
-//                        connectionManager.connectionNode(node);
-//                    }
-//                }
-//            }
         }
     }
 

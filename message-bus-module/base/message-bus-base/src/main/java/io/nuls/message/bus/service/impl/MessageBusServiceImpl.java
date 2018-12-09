@@ -26,6 +26,7 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
@@ -33,7 +34,6 @@ import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.manager.HandlerManager;
-import io.nuls.message.bus.manager.MessageCacher;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.MessageBusService;
@@ -70,8 +70,7 @@ public class MessageBusServiceImpl implements MessageBusService {
     @Override
     public void receiveMessage(BaseMessage message, Node node) {
         try {
-            MessageCacher.put(message, node);
-            this.processorManager.offer(new ProcessData(message.getHash(), message.getClass()));
+            this.processorManager.offer(new ProcessData(message, node));
         } catch (Exception e) {
             Log.error(e);
         }

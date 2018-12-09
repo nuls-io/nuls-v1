@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class NulsContext {
 
+    public static volatile Integer WALLET_STATUS = 1;
+
     /**
      * 当前钱包最新协议版本(用于系统升级，默认为1，启动时会根据当前钱包的协议配置做修改)
      * System protocol version.
@@ -68,7 +70,6 @@ public class NulsContext {
      * and the current address begins with "Ns".8964.
      */
     public static short DEFAULT_CHAIN_ID = 8964;
-    // pierre test comment out
 
     /**
      * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中

@@ -72,6 +72,27 @@ public class Node extends BaseNulsData {
 
     private boolean testConnect;
 
+    /**
+     * 1: inNode ,  2: outNode
+     */
+    public final static int IN = 1;
+    public final static int OUT = 2;
+    private int type;
+
+    /**
+     * 0: wait , 1: connecting, 2: handshake 3: close
+     */
+    public final static int WAIT = 0;
+    public final static int CONNECT = 1;
+    public final static int HANDSHAKE = 2;
+    public final static int BAD = 3;
+    private volatile int status;
+
+    public final static int UNCHECK = 0;
+    public final static int FAILED = 1;
+    public final static int SUCCESS = 2;
+    private volatile int connectStatus;
+
     private Channel channel;
 
     @Override
@@ -98,23 +119,6 @@ public class Node extends BaseNulsData {
         ip = buffer.readString();
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
-
-    /**
-     * 1: inNode ,  2: outNode
-     */
-    public final static int IN = 1;
-    public final static int OUT = 2;
-    private int type;
-
-    /**
-     * 0: wait , 1: connecting, 2: handshake 3: close
-     */
-    public final static int WAIT = 0;
-    public final static int CONNECT = 1;
-    public final static int HANDSHAKE = 2;
-    public final static int BAD = 3;
-    private volatile int status;
-
 
     public Node() {
         this.status = WAIT;
@@ -337,5 +341,13 @@ public class Node extends BaseNulsData {
 
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    public int getConnectStatus() {
+        return connectStatus;
+    }
+
+    public void setConnectStatus(int connectStatus) {
+        this.connectStatus = connectStatus;
     }
 }

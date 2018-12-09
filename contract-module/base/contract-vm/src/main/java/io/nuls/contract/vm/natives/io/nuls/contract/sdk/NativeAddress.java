@@ -27,7 +27,6 @@ package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
-import io.nuls.contract.vm.exception.RevertException;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.program.ProgramCall;
 import io.nuls.contract.vm.program.ProgramResult;
@@ -243,8 +242,6 @@ public class NativeAddress {
             return programResult.getResult();
         } else if (programResult.isError()) {
             throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
-        } else if (programResult.isRevert()) {
-            throw new RevertException(programResult.getErrorMessage(), programResult.getStackTrace());
         } else {
             throw new RuntimeException("error contract status");
         }

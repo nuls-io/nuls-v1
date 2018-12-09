@@ -57,7 +57,7 @@ public class SendNodeInfoThread implements Runnable {
         while (true) {
             try {
                 nodeManager.broadNodeSever();
-                Thread.sleep(10 * DateUtil.MINUTE_TIME);
+                Thread.sleep(60 * DateUtil.MINUTE_TIME);
             } catch (Throwable e) {
                 Log.error(e);
             }

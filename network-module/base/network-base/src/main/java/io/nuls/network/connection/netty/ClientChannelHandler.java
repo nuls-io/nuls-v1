@@ -33,6 +33,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
@@ -80,6 +81,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } else {
             //其他节点则正常保持连接
             node.setCanConnect(true);
+
             boolean result = nodeManager.processConnectedNode(node, channel);
             if (!result) {
                 channel.close();
@@ -93,12 +95,13 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null) {
+            node.setStatus(Node.WAIT);
             nodeManager.removeNode(node);
         } else {
             SocketChannel socketChannel = (SocketChannel) ctx.channel();
             String remoteIP = socketChannel.remoteAddress().getHostString();
             int port = socketChannel.remoteAddress().getPort();
-            Log.info("-----------------client channelInactive  node is null -----------------" + remoteIP + ":" + port);
+//            Log.info("-----------------client channelInactive  node is null -----------------" + remoteIP + ":" + port);
         }
     }
 
@@ -107,25 +110,20 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
+            ByteBuf buf = (ByteBuf) msg;
 
-            if (node != null) {
-                if (node.isAlive()) {
-                    ByteBuf buf = (ByteBuf) msg;
-                    try {
-                        connectionManager.receiveMessage(buf, node);
-                    } finally {
-                        buf.release();
-                    }
-                    //                NetworkThreadPool.doRead(buf, node);
-                }
+            if (node != null && node.isAlive()) {
+                connectionManager.receiveMessage(buf, node);
             } else {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
                 int port = socketChannel.remoteAddress().getPort();
-                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.error("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
             }
         } catch (Exception e) {
             throw e;
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 
@@ -145,7 +143,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 node.setCanConnect(false);
             }
         }
-        if(cause instanceof TooLongFrameException) {
+        if (cause instanceof TooLongFrameException) {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             node.setCanConnect(false);

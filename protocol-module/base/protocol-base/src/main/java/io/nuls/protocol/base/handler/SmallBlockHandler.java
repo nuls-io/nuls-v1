@@ -49,6 +49,7 @@ import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,12 +68,10 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
     private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
 
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
-
-        if (!downloadService.isDownloadSuccess().isSuccess()) {
-            return;
-        }
 
         SmallBlock smallBlock = event.getMsgBody();
         if (null == smallBlock) {
@@ -83,15 +82,21 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         BlockHeader header = smallBlock.getHeader();
         //阻止恶意节点提前出块
         if (header.getTime() > (TimeService.currentTimeMillis() + ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000)) {
+
+//            Log.warn("Time is wrong!");
+//            Log.info("---------------" + sdf.format(header.getTime()));
+//            Log.info("---------------" + TimeService.currentTimeMillis());
             return;
         }
 
         if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
+//            Log.warn("block header 重复");
             return;
         }
 
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
         if (null != theBlockHeader) {
+//            Log.warn("这个区块已存在");
             return;
         }
 

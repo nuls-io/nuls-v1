@@ -5,14 +5,14 @@
     <parent>
         <artifactId>db-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.3-beta3</version>
+        <version>1.1.5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.db-module</groupId>
     <artifactId>db-leveldb</artifactId>
-    <version>1.1.3-beta3</version>
+    <version>1.1.5</version>
 
     <name>db-leveldb</name>
 
@@ -20,14 +20,21 @@
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.1.3-beta3</version>
+            <version>1.1.5</version>
         </dependency>
         <!-- level DB -->
+        <!--<dependency>-->
+            <!--<groupId>org.iq80.leveldb</groupId>-->
+            <!--<artifactId>leveldb</artifactId>-->
+            <!--<version>0.10</version>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>org.iq80.leveldb</groupId>
+            <groupId>io.github.pcmind</groupId>
             <artifactId>leveldb</artifactId>
-            <version>0.10</version>
+            <classifier>uber</classifier>
+            <version>0.11</version>
         </dependency>
+
         <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-core</artifactId>

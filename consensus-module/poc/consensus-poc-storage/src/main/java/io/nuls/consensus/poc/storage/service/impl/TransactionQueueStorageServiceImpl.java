@@ -31,9 +31,9 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionManager;
-import io.nuls.kernel.utils.queue.entity.PersistentQueue;
 
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author: Niels Wang
@@ -42,7 +42,7 @@ import java.io.IOException;
 @Component
 public class TransactionQueueStorageServiceImpl implements TransactionQueueStorageService {
 
-    private PersistentQueue queue = new PersistentQueue("tx-cache-queue", 10000000L);
+    private LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue(10000000);
 
     public TransactionQueueStorageServiceImpl() throws Exception {
     }

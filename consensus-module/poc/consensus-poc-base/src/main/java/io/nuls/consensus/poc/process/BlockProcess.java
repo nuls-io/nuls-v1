@@ -514,12 +514,13 @@ public class BlockProcess {
         NulsDigestData preHash = blockHeader.getPreHash();
 
         // check the preHash is in the waitVerifyChainList
-        for (ChainContainer chainContainer : chainManager.getChains()) {
 
-            Chain forkChain = chainContainer.getChain();
+        Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
+        while (iterator.hasNext()) {
+            Chain forkChain = iterator.next().getChain();
             List<BlockHeader> headerList = forkChain.getAllBlockHeaderList();
-
-            for (int i = headerList.size() - 1; i >= 0; i--) {
+            int size = headerList.size();
+            for (int i = size - 1; i >= 0; i--) {
                 BlockHeader header = headerList.get(i);
 
                 if (header.getHash().equals(blockHeader.getHash())) {
@@ -535,8 +536,8 @@ public class BlockProcess {
 
                     // Check whether it is forked or connected. If it is a connection, add it.
                     // 检查是分叉还是连接，如果是连接，则加上即可
-                    if (i == headerList.size() - 1) {
-                        chainContainer.getChain().addBlock(block);
+                    if (i == size - 1) {
+                        forkChain.addBlock(block);
                         return true;
                     }
 
@@ -546,7 +547,7 @@ public class BlockProcess {
 
                     Chain newForkChain = new Chain();
 
-                    newForkChain.initData(forkChain.getStartBlockHeader(), headerList.subList(0, i + 1), blockList.subList(0, i + 1));
+                    newForkChain.initData(forkChain.getStartBlockHeader(), new ArrayList<>(headerList.subList(0, i + 1)), new ArrayList<>(blockList.subList(0, i + 1)));
                     newForkChain.addBlock(block);
 
 

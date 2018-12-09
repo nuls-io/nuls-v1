@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -98,6 +99,7 @@ public class OrphanBlockProcess implements Runnable {
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return;
         }
+
         Block block = blockContainer.getBlock();
 
         // 只处理本地误差配置的块个数以内的孤块
@@ -153,7 +155,7 @@ public class OrphanBlockProcess implements Runnable {
      */
     private boolean checkHasExist(NulsDigestData blockHash) {
 
-        for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator() ; it.hasNext() ; ) {
+        for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator(); it.hasNext(); ) {
             ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
@@ -162,7 +164,7 @@ public class OrphanBlockProcess implements Runnable {
             }
         }
 
-        for (Iterator<ChainContainer> it = chainManager.getChains().iterator() ; it.hasNext() ; ) {
+        for (Iterator<ChainContainer> it = chainManager.getChains().iterator(); it.hasNext(); ) {
             ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getAllBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {

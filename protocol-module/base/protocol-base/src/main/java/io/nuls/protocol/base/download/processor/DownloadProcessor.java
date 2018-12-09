@@ -118,7 +118,7 @@ public class DownloadProcessor extends Thread {
         FutureTask<Boolean> threadManagerFuture = new FutureTask<>(downloadThreadManager);
 
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-thread-manager",
-                new Thread(threadManagerFuture));
+                threadManagerFuture);
 
         try {
             Boolean downResult = threadManagerFuture.get();
