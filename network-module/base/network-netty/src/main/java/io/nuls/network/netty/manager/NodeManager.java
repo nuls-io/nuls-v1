@@ -166,6 +166,10 @@ public class NodeManager {
     public void nodeConnectDisconnect(Node node) {
         nodesContainer.getConnectedNodes().remove(node.getId());
         nodesContainer.getDisconnectNodes().put(node.getId(), node);
+
+        if (node.getChannel() != null) {
+            node.setChannel(null);
+        }
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
