@@ -102,6 +102,8 @@ public class Node extends BaseNulsData {
     private EventListener connectedListener;
     private EventListener disconnectListener;
 
+    private String remoteVersion;
+
     @Override
     public int size() {
         int s = 0;
@@ -388,5 +390,13 @@ public class Node extends BaseNulsData {
 
     public void setDisconnectListener(EventListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public String getRemoteVersion() {
+        return remoteVersion;
+    }
+
+    public void setRemoteVersion(String remoteVersion) {
+        this.remoteVersion = remoteVersion;
     }
 }
