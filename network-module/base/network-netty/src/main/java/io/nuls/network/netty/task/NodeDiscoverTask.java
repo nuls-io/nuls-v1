@@ -32,18 +32,13 @@ import io.nuls.network.netty.manager.NodeManager;
  * @author: ln
  * @date: 2018/12/8
  */
-public class NodeDiscoverTask {
+public class NodeDiscoverTask implements Runnable {
 
     private final NodeManager nodeManager = NodeManager.getInstance();
-    private final NetworkParam networkParam;
+    private final NetworkParam networkParam = NetworkParam.getInstance();
 
-    public NodeDiscoverTask(NetworkParam networkParam) {
-        this.networkParam = networkParam;
-    }
+    @Override
+    public void run() {
 
-    public void shutdown() {
-    }
-
-    public void startAsSync() {
     }
 }

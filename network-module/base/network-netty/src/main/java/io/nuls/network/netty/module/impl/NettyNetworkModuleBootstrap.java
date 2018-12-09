@@ -28,6 +28,8 @@ package io.nuls.network.netty.module.impl;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -46,6 +48,8 @@ import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.nuls.network.constant.NetworkConstant.*;
 
@@ -55,9 +59,8 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
     private NettyServer nettyServer;
     private NodeManager nodeManager;
-    private NodeDiscoverTask nodeDiscoverTask;
-    private NodeMaintenanceTask nodeMaintenanceTask;
-    private GetNodeVersionTask getNodeVersionTask;
+
+    private ScheduledThreadPoolExecutor executorService;
 
     @Override
     public void init() {
@@ -75,15 +78,13 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.startAsSync();
 
-        nodeMaintenanceTask = new NodeMaintenanceTask(networkParam);
-        nodeMaintenanceTask.startAsSync();
 
-        nodeDiscoverTask = new NodeDiscoverTask(networkParam);
-        nodeDiscoverTask.startAsSync();
+        executorService = TaskManager.createScheduledThreadPool(3,
+                new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "network-task-thread-pool"));
 
-
-        getNodeVersionTask = new GetNodeVersionTask();
-        getNodeVersionTask.startAsSync();
+        executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
 
         PlatformDepedentReporter reporter = new PlatformDepedentReporter();
         reporter.init();
@@ -94,9 +95,8 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     public void shutdown() {
         NetworkMessageHandlerPool.shutdown();
 
+        executorService.shutdown();
         nettyServer.shutdown();
-        nodeMaintenanceTask.shutdown();
-        nodeDiscoverTask.shutdown();
     }
 
     @Override

@@ -25,18 +25,13 @@
 package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.thread.manager.NulsThreadFactory;
-import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
-import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.*;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 节点维护任务
@@ -45,27 +40,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class NodeMaintenanceTask implements Runnable {
 
-
+    private final NetworkParam networkParam = NetworkParam.getInstance();
     private final NodeManager nodeManager = NodeManager.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
-
-    private final NetworkParam networkParam;
-
-    private ScheduledThreadPoolExecutor threadPool;
-
-    public NodeMaintenanceTask(NetworkParam networkParam) {
-        this.networkParam = networkParam;
-    }
-
-    public void startAsSync() {
-        threadPool = TaskManager.createScheduledThreadPool(1,
-                new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "node-maintenance-task"));
-        threadPool.scheduleAtFixedRate(this, 1000L, 5000L, TimeUnit.MILLISECONDS);
-    }
-
-    public void shutdown() {
-        threadPool.shutdown();
-    }
 
     @Override
     public void run() {
@@ -92,7 +69,7 @@ public class NodeMaintenanceTask implements Runnable {
         node.setRegisterListener(new EventListener() {
             @Override
             public void action() {
-                Log.info("==== node {} connect register!", node.getId());
+                Log.debug("new node {} try connecting!", node.getId());
             }
         });
 
@@ -108,15 +85,13 @@ public class NodeMaintenanceTask implements Runnable {
         node.setDisconnectListener(new EventListener() {
             @Override
             public void action() {
-                Log.info("----- node {} disconnect !", node.getId());
+                Log.info("node {} disconnect !", node.getId());
 
                 nodeManager.nodeConnectDisconnect(node);
             }
         });
 
         boolean success = connectionManager.connection(node);
-
-        Log.info("connect to node {} ··· , result {} ", node.getId(), success);
         return success;
     }
 
