@@ -26,6 +26,8 @@
 package io.nuls.network.netty.conn;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -68,11 +70,13 @@ public class NettyServer implements Runnable {
         serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
-//                .childOption(ChannelOption.SO_BACKLOG, 128)
+//                .childOption(ChannelOption.SO_BACKLOG, 2048)
                 .childOption(ChannelOption.TCP_NODELAY, true)            //Send messages immediately
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.SO_SNDBUF, 128 * 1024)
                 .childOption(ChannelOption.SO_RCVBUF, 128 * 1024)
+                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childHandler(new NulsChannelInitializer<>(new ServerChannelHandler()));
     }
 

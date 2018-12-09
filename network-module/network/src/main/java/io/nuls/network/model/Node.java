@@ -34,6 +34,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.network.listener.EventListener;
 
 import java.io.IOException;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class Node extends BaseNulsData {
 
     private Long lastFailTime;
 
-    private Long bestBlockHeight;
+    private long bestBlockHeight;
 
     private NulsDigestData bestBlockHash;
 
@@ -71,6 +72,8 @@ public class Node extends BaseNulsData {
     private boolean canConnect;
 
     private boolean testConnect;
+
+    private boolean isSeedNode;
 
     /**
      * 1: inNode ,  2: outNode
@@ -94,6 +97,10 @@ public class Node extends BaseNulsData {
     private volatile int connectStatus;
 
     private Channel channel;
+
+    private EventListener registerListener;
+    private EventListener connectedListener;
+    private EventListener disconnectListener;
 
     @Override
     public int size() {
@@ -349,5 +356,37 @@ public class Node extends BaseNulsData {
 
     public void setConnectStatus(int connectStatus) {
         this.connectStatus = connectStatus;
+    }
+
+    public boolean isSeedNode() {
+        return isSeedNode;
+    }
+
+    public void setSeedNode(boolean seedNode) {
+        isSeedNode = seedNode;
+    }
+
+    public EventListener getRegisterListener() {
+        return registerListener;
+    }
+
+    public void setRegisterListener(EventListener registerListener) {
+        this.registerListener = registerListener;
+    }
+
+    public EventListener getConnectedListener() {
+        return connectedListener;
+    }
+
+    public void setConnectedListener(EventListener connectedListener) {
+        this.connectedListener = connectedListener;
+    }
+
+    public EventListener getDisconnectListener() {
+        return disconnectListener;
+    }
+
+    public void setDisconnectListener(EventListener disconnectListener) {
+        this.disconnectListener = disconnectListener;
     }
 }

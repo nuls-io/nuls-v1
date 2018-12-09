@@ -23,49 +23,39 @@
  *
  */
 
-package io.nuls.network.netty.manager;
+package io.nuls.network.netty.message.handler;
 
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.netty.conn.NettyClient;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.HandshakeMessage;
+import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.protocol.message.base.BaseMessage;
 
-public class ConnectionManager {
+public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
-    private static ConnectionManager instance = new ConnectionManager();
+    private static HandshakeMessageHandler instance = new HandshakeMessageHandler();
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private HandshakeMessageHandler() {
 
-    public static ConnectionManager getInstance() {
+    }
+
+    public static HandshakeMessageHandler getInstance() {
         return instance;
     }
 
-    public Node connection(String ip , int port) {
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
+        NetworkMessageBody body = handshakeMessage.getMsgBody();
 
-        Node node = new Node(ip, port, Node.OUT);
-        boolean success = connection(node);
+        Log.info("receive message from node {}, message : {}", node.getId(), body);
 
-        return success ? node : null;
-    }
+        node.setBestBlockHash(body.getBestBlockHash());
+        node.setBestBlockHeight(body.getBestBlockHeight());
+        node.setStatus(Node.HANDSHAKE);
 
-    public boolean connection(Node node) {
-        try {
-            NettyClient client = new NettyClient(node);
-            new Thread() {
-                @Override
-                public void run() {
-                    client.start();
-                }
-            }.start();
-            Thread.sleep(100L);
-            return true;
-        } catch (Exception e) {
-            Log.error("connect to node {} error : {}", node.getId(), e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean nodeHasConnectioned(String ip , int port, SocketChannel channel) {
-        return nodeManager.nodeConnectIn(ip, port, channel);
+        return null;
     }
 }

@@ -155,6 +155,7 @@ public class Bootstrap {
                     ips.add(node);
                 }
                 for (NulsDigestData key : map.keySet()) {
+                    if(key == null) continue;
                     List<Node> nodeList = map.get(key);
                     long height = nodeList.get(0).getBestBlockHeight();
                     StringBuilder ids = new StringBuilder();

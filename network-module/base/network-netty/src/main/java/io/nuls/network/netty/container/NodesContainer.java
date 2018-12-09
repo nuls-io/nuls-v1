@@ -27,14 +27,65 @@ package io.nuls.network.netty.container;
 
 import io.nuls.network.model.Node;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NodesContainer {
 
-    private Map<String, Node> allNodes = new ConcurrentHashMap<>();
+    private Map<String, Node> canConnectNodes = new ConcurrentHashMap<>();
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
     private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
+    private Map<String, Node> failNodes = new ConcurrentHashMap<>();
 
+    public boolean markCanuseNodeByIp(String ip) {
+        if(ip == null) {
+            return false;
+        }
+        Iterator<Node> it = canConnectNodes.values().iterator();
+        while(it.hasNext()) {
+            Node node = it.next();
+            if(ip.equals(node.getIp())) {
+                node.setCanConnect(false);
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public Node getNode(String nodeId) {
+        return connectedNodes.get(nodeId);
+    }
+
+    public Map<String, Node> getCanConnectNodes() {
+        return canConnectNodes;
+    }
+
+    public void setCanConnectNodes(Map<String, Node> canConnectNodes) {
+        this.canConnectNodes = canConnectNodes;
+    }
+
+    public Map<String, Node> getConnectedNodes() {
+        return connectedNodes;
+    }
+
+    public void setConnectedNodes(Map<String, Node> connectedNodes) {
+        this.connectedNodes = connectedNodes;
+    }
+
+    public Map<String, Node> getDisconnectNodes() {
+        return disconnectNodes;
+    }
+
+    public void setDisconnectNodes(Map<String, Node> disconnectNodes) {
+        this.disconnectNodes = disconnectNodes;
+    }
+
+    public Map<String, Node> getFailNodes() {
+        return failNodes;
+    }
+
+    public void setFailNodes(Map<String, Node> failNodes) {
+        this.failNodes = failNodes;
+    }
 }

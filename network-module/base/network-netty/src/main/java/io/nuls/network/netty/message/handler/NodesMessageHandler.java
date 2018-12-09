@@ -22,28 +22,38 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.netty.task;
 
-import io.nuls.network.constant.NetworkParam;
+package io.nuls.network.netty.message.handler;
+
+import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesMessage;
+import io.nuls.protocol.message.base.BaseMessage;
 
-/**
- * 节点发现任务
- * @author: ln
- * @date: 2018/12/8
- */
-public class NodeDiscoverTask {
+public class NodesMessageHandler implements BaseNetworkMeesageHandler {
 
-    private final NodeManager nodeManager = NodeManager.getInstance();
-    private final NetworkParam networkParam;
+    private static NodesMessageHandler instance = new NodesMessageHandler();
 
-    public NodeDiscoverTask(NetworkParam networkParam) {
-        this.networkParam = networkParam;
+    private NodeManager nodeManager = NodeManager.getInstance();
+
+    private NodesMessageHandler() {
+
     }
 
-    public void shutdown() {
+    public static NodesMessageHandler getInstance() {
+        return instance;
     }
 
-    public void startAsSync() {
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        NodesMessage nodesMessage = (NodesMessage) message;
+        NodeMessageBody body = nodesMessage.getMsgBody();
+        for (Node newNode : body.getNodeList()) {
+            nodeManager.addNeedVerifyNode(newNode);
+        }
+        return null;
     }
 }

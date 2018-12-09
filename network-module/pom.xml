@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>network</module>
-        <module>base/network-base</module>
+        <module>base/network-netty</module>
         <module>base/network-protocol</module>
         <module>base/network-storage</module>
         <module>base/network-rpc</module>

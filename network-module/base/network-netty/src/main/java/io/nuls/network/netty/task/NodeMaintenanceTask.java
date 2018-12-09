@@ -24,28 +24,126 @@
  */
 package io.nuls.network.netty.task;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.listener.EventListener;
+import io.nuls.network.model.Node;
+import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.protocol.constant.ProtocolConstant;
+
+import java.util.*;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 节点维护任务
  * @author: ln
  * @date: 2018/12/8
  */
-public class NodeMaintenanceTask {
+public class NodeMaintenanceTask implements Runnable {
 
 
-    private final NodeManager nodeManager;
+    private final NodeManager nodeManager = NodeManager.getInstance();
+    private final ConnectionManager connectionManager = ConnectionManager.getInstance();
+
     private final NetworkParam networkParam;
 
-    public NodeMaintenanceTask(NetworkParam networkParam, NodeManager nodeManager) {
-        this.networkParam = networkParam;
-        this.nodeManager = nodeManager;
-    }
+    private ScheduledThreadPoolExecutor threadPool;
 
-    public void shutdown() {
+    public NodeMaintenanceTask(NetworkParam networkParam) {
+        this.networkParam = networkParam;
     }
 
     public void startAsSync() {
+        threadPool = TaskManager.createScheduledThreadPool(1,
+                new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "node-maintenance-task"));
+        threadPool.scheduleAtFixedRate(this, 1000L, 5000L, TimeUnit.MILLISECONDS);
+    }
+
+    public void shutdown() {
+        threadPool.shutdown();
+    }
+
+    @Override
+    public void run() {
+
+        List<Node> needConnectNodes = getNeedConnectNodes();
+
+        if(needConnectNodes == null) {
+            return;
+        }
+
+        for(Node node : needConnectNodes) {
+            boolean success = connectionNode(node);
+            if(success) {
+                node.setType(Node.OUT);
+            } else {
+                //fail
+                nodeManager.nodeConnectFail(node);
+            }
+        }
+    }
+
+    private boolean connectionNode(Node node) {
+
+        node.setRegisterListener(new EventListener() {
+            @Override
+            public void action() {
+                Log.info("==== node {} connect register!", node.getId());
+            }
+        });
+
+        node.setConnectedListener(new EventListener() {
+            @Override
+            public void action() {
+                Log.info("node {} connect success !", node.getId());
+
+                nodeManager.nodeConnectSuccess(node);
+            }
+        });
+
+        node.setDisconnectListener(new EventListener() {
+            @Override
+            public void action() {
+                Log.info("----- node {} disconnect !", node.getId());
+
+                nodeManager.nodeConnectDisconnect(node);
+            }
+        });
+
+        boolean success = connectionManager.connection(node);
+
+        Log.info("connect to node {} ··· , result {} ", node.getId(), success);
+        return success;
+    }
+
+    private List<Node> getNeedConnectNodes() {
+
+        Collection<Node> avaliableNodes = nodeManager.getAvailableNodes();
+
+        if(avaliableNodes.size() >= networkParam.getMaxOutCount()) {
+            return null;
+        }
+
+        Collection<Node> allNodes = nodeManager.getCanConnectNodes();
+        if(allNodes.size() <= avaliableNodes.size()) {
+            return null;
+        }
+
+        List<Node> nodeList = new ArrayList<>(allNodes);
+
+        nodeList.removeAll(avaliableNodes);
+
+        int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
+        if(nodeList.size() < maxCount) {
+            return nodeList;
+        }
+
+        Collections.shuffle(nodeList);
+
+        return nodeList.subList(0, maxCount);
     }
 }

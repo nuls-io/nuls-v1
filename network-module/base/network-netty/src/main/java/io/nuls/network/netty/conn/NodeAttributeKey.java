@@ -22,28 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.netty.task;
 
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.netty.manager.NodeManager;
+package io.nuls.network.netty.conn;
 
-/**
- * 节点发现任务
- * @author: ln
- * @date: 2018/12/8
- */
-public class NodeDiscoverTask {
+import io.netty.util.AttributeKey;
+import io.nuls.network.model.Node;
 
-    private final NodeManager nodeManager = NodeManager.getInstance();
-    private final NetworkParam networkParam;
-
-    public NodeDiscoverTask(NetworkParam networkParam) {
-        this.networkParam = networkParam;
-    }
-
-    public void shutdown() {
-    }
-
-    public void startAsSync() {
-    }
+public class NodeAttributeKey {
+    public static AttributeKey<Node> NODE_KEY = AttributeKey.valueOf("node");
 }

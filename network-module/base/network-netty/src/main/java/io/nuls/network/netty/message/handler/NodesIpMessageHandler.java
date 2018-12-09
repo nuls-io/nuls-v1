@@ -22,28 +22,39 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.netty.task;
+
+package io.nuls.network.netty.message.handler;
 
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesIpMessage;
+import io.nuls.protocol.message.base.BaseMessage;
 
-/**
- * 节点发现任务
- * @author: ln
- * @date: 2018/12/8
- */
-public class NodeDiscoverTask {
+public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
-    private final NodeManager nodeManager = NodeManager.getInstance();
-    private final NetworkParam networkParam;
+    private static NodesIpMessageHandler instance = new NodesIpMessageHandler();
 
-    public NodeDiscoverTask(NetworkParam networkParam) {
-        this.networkParam = networkParam;
+    private NodesIpMessageHandler() {
+
     }
 
-    public void shutdown() {
+    public static NodesIpMessageHandler getInstance() {
+        return instance;
     }
 
-    public void startAsSync() {
+    private NetworkParam networkParam = NetworkParam.getInstance();
+
+    @Override
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
+        NodeMessageBody body = handshakeMessage.getMsgBody();
+
+//        for(String ip : body.getIpList()) {
+//            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
+//        }
+        return null;
     }
 }
