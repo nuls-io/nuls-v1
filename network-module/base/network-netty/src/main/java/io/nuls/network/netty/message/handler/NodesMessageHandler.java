@@ -25,6 +25,7 @@
 
 package io.nuls.network.netty.message.handler;
 
+import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.manager.NodeManager;
@@ -52,6 +53,9 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
         NodesMessage nodesMessage = (NodesMessage) message;
         NodeMessageBody body = nodesMessage.getMsgBody();
         for (Node newNode : body.getNodeList()) {
+            if(!IpUtil.isboolIp(newNode.getIp())) {
+                continue;
+            }
             nodeManager.addNeedVerifyNode(newNode);
         }
         return null;

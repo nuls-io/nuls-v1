@@ -37,8 +37,9 @@ public class NodesContainer {
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
     private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
     private Map<String, Node> failNodes = new ConcurrentHashMap<>();
+    private Map<String, Node> uncheckNodes = new ConcurrentHashMap<>();
 
-    public boolean markCanuseNodeByIp(String ip) {
+    public boolean markCanuseNodeByIp(String ip, int type) {
         if(ip == null) {
             return false;
         }
@@ -46,11 +47,33 @@ public class NodesContainer {
         while(it.hasNext()) {
             Node node = it.next();
             if(ip.equals(node.getIp())) {
-//                node.setCanConnect(false);
+                node.setStatus(type);
                 return true;
             }
         }
         return false;
+    }
+
+    public boolean nodeExist(String nodeId) {
+        boolean exist = uncheckNodes.containsKey(nodeId);
+
+        if (!exist) {
+            exist = canConnectNodes.containsKey(nodeId);
+        }
+
+        if (!exist) {
+            exist = connectedNodes.containsKey(nodeId);
+        }
+
+        if (!exist) {
+            exist = disconnectNodes.containsKey(nodeId);
+        }
+
+        if (!exist) {
+            exist = failNodes.containsKey(nodeId);
+        }
+
+        return exist;
     }
 
     public Node getNode(String nodeId) {
@@ -87,5 +110,13 @@ public class NodesContainer {
 
     public void setFailNodes(Map<String, Node> failNodes) {
         this.failNodes = failNodes;
+    }
+
+    public Map<String, Node> getUncheckNodes() {
+        return uncheckNodes;
+    }
+
+    public void setUncheckNodes(Map<String, Node> uncheckNodes) {
+        this.uncheckNodes = uncheckNodes;
     }
 }

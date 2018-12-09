@@ -27,13 +27,10 @@ package io.nuls.network.netty.conn;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.AdaptiveRecvByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.nuls.core.tools.log.Log;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.conn.handler.ClientChannelHandler;
 import io.nuls.network.netty.conn.initializer.NulsChannelInitializer;
@@ -46,8 +43,6 @@ public class NettyClient {
     public static EventLoopGroup worker = new NioEventLoopGroup();
 
     private Bootstrap boot;
-
-    private SocketChannel socketChannel;
 
     private Node node;
 
@@ -72,13 +67,12 @@ public class NettyClient {
     public boolean start() {
         try {
             ChannelFuture future = boot.connect(node.getIp(), node.getPort());
-            socketChannel = (SocketChannel) future.channel();
             future.channel().closeFuture().awaitUninterruptibly();
             return future.isSuccess();
         } catch (Exception e) {
-            //maybe time out or refused or something
-            if (socketChannel != null) {
-                socketChannel.close();
+            Log.error("{}", e);
+            if(node.getChannel() != null) {
+                node.getChannel().close();
             }
             return false;
         }

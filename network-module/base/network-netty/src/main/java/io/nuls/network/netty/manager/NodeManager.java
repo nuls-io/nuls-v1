@@ -30,10 +30,8 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.model.NodeGroup;
@@ -43,7 +41,6 @@ import io.nuls.network.netty.container.GroupContainer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.storage.po.NodePo;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.ArrayList;
@@ -56,6 +53,7 @@ public class NodeManager {
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private static NodeManager instance = new NodeManager();
+
     private NetworkParam networkParam;
 
     private NodesContainer nodesContainer;
@@ -75,25 +73,30 @@ public class NodeManager {
 
     public void loadDatas() {
 
-        Map<String, Node> allNodes = nodesContainer.getCanConnectNodes();
-
         //本地已经存储的节点信息
-        List<Node> localNodeList = getNetworkStorageService().getAllNodes();
-
+        List<Node> allNodeList = getNetworkStorageService().getAllNodes();
 
         // 合并种子节点
-        for (Map.Entry<String, Node> nodeEntry : allNodes.entrySet()) {
-            Node node = nodeEntry.getValue();
-//            node.setCanConnect(true);
-
+        for (Node node : allNodeList) {
             if (node.isSeedNode()) {
                 node.setSeedNode(false);
             }
         }
+
         for (String seedId : networkParam.getSeedIpList()) {
 
-            if (allNodes.containsKey(seedId)) {
-                allNodes.get(seedId).setSeedNode(true);
+            boolean exist = false;
+            for (Node node : allNodeList) {
+                if (node.getId().equals(seedId)) {
+                    node.setSeedNode(true);
+                    node.setStatus(NodeStatusEnum.CONNECTABLE);
+
+                    exist = true;
+                    break;
+                }
+            }
+
+            if (exist) {
                 continue;
             }
             try {
@@ -102,13 +105,46 @@ public class NodeManager {
                 int port = Integer.parseInt(ipPort[1]);
 
                 Node node = new Node(ip, port, Node.OUT);
-//                node.setCanConnect(true);
+                node.setSeedNode(true);
+                node.setStatus(NodeStatusEnum.CONNECTABLE);
 
-                allNodes.put(seedId, node);
+                allNodeList.add(node);
             } catch (Exception e) {
                 Log.warn("the seed config is warn of {}", seedId);
             }
         }
+
+        Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
+        Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
+        Map<String, Node> failNodes = nodesContainer.getFailNodes();
+
+        for (Node node : allNodeList) {
+            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+            switch (node.getStatus()) {
+                case NodeStatusEnum.CONNECTABLE: {
+                    canConnectNodes.put(node.getId(), node);
+                    break;
+                }
+                case NodeStatusEnum.UNAVAILABLE: {
+                    failNodes.put(node.getId(), node);
+                    break;
+                }
+                default:
+                    uncheckNodes.put(node.getId(), node);
+            }
+        }
+    }
+
+    public Collection<Node> getCanConnectNodes() {
+        List<Node> nodeList = new ArrayList<>();
+
+        Collection<Node> allNodes = nodesContainer.getCanConnectNodes().values();
+        for (Node node : allNodes) {
+            if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
+                nodeList.add(node);
+            }
+        }
+        return nodeList;
     }
 
     public Collection<Node> getAvailableNodes() {
@@ -117,18 +153,6 @@ public class NodeManager {
 
     public int getAvailableNodesCount() {
         return nodesContainer.getConnectedNodes().size();
-    }
-
-    public Collection<Node> getCanConnectNodes() {
-        List<Node> nodeList = new ArrayList<>();
-
-        Collection<Node> allNodes = nodesContainer.getCanConnectNodes().values();
-        for (Node node : allNodes) {
-//            if (node.isCanConnect()) {
-//                nodeList.add(node);
-//            }
-        }
-        return nodeList;
     }
 
     public NodeGroup getNodeGroup(String groupName) {
@@ -158,14 +182,9 @@ public class NodeManager {
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.getCanConnectNodes().remove(node.getId());
 
-        //连接成功后，清除连接失败次数
-        node.setStatus(NodeStatusEnum.CONNECTABLE);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
-        node.setFailCount(0);
-        node.setLastFailTime(0L);
-        //连接成功后，存储节点信息
-        getNetworkStorageService().saveNode(node);
-        sendHandshakeMessage(node);
+
+        sendHandshakeMessage(node, NetworkConstant.HANDSHAKE_CLIENT_TYPE);
     }
 
     /**
@@ -175,28 +194,44 @@ public class NodeManager {
      */
     public void nodeConnectFail(Node node) {
         nodesContainer.getCanConnectNodes().remove(node.getId());
-//        node.setCanConnect(false);
+        node.setStatus(NodeStatusEnum.UNAVAILABLE);
+        node.setConnectStatus(NodeConnectStatusEnum.FAIL);
         nodesContainer.getFailNodes().put(node.getId(), node);
     }
 
     public void nodeConnectDisconnect(Node node) {
-        nodesContainer.getConnectedNodes().remove(node.getId());
-        nodesContainer.getDisconnectNodes().put(node.getId(), node);
 
         if (node.getChannel() != null) {
             node.setChannel(null);
         }
-        //连接断开后,判断是否是为连接成功，还是连接成功后断开
-        // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
-        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
-            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-            node.setStatus(NodeStatusEnum.UNAVAILABLE);
-            node.setFailCount(node.getFailCount() + 1);
-            node.setLastFailTime(TimeService.currentTimeMillis());
-            getNetworkStorageService().saveNode(node);
+
+        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
+            node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+
+            node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
+
+            nodesContainer.getConnectedNodes().remove(node.getId());
         } else {
-            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+            node.setConnectStatus(NodeConnectStatusEnum.FAIL);
+            node.setStatus(NodeStatusEnum.UNAVAILABLE);
+
+            nodesContainer.getCanConnectNodes().remove(node.getId());
         }
+
+        nodesContainer.getDisconnectNodes().put(node.getId(), node);
+
+
+//        //连接断开后,判断是否是为连接成功，还是连接成功后断开
+//        // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+//        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
+//            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+//            node.setStatus(NodeStatusEnum.UNAVAILABLE);
+//            node.setFailCount(node.getFailCount() + 1);
+//            node.setLastFailTime(TimeService.currentTimeMillis());
+//            getNetworkStorageService().saveNode(node);
+//        } else {
+//            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+//        }
 
     }
 
@@ -212,28 +247,33 @@ public class NodeManager {
         attribute.set(node);
 
         nodesContainer.getConnectedNodes().put(node.getId(), node);
-        nodesContainer.markCanuseNodeByIp(ip);
+        nodesContainer.markCanuseNodeByIp(ip, NodeStatusEnum.AVAILABLE);
 
         //监听被动连接的断开
-        node.setDisconnectListener(new EventListener() {
-            @Override
-            public void action() {
-                nodesContainer.getConnectedNodes().remove(node.getId());
-            }
+        node.setDisconnectListener(() -> {
+            nodesContainer.getConnectedNodes().remove(node.getId());
+            nodesContainer.markCanuseNodeByIp(ip, NodeStatusEnum.CONNECTABLE);
         });
 
-        sendHandshakeMessage(node);
+        sendHandshakeMessage(node, NetworkConstant.HANDSHAKE_SEVER_TYPE);
         return true;
     }
 
-    public void addNeedVerifyNode(Node newNode) {
-        // TODO 需要把待验证的区分，这里就先放可用里面了
-        Map<String, Node> canConnectNodeMap = nodesContainer.getCanConnectNodes();
-        if (canConnectNodeMap.containsKey(newNode.getId())) {
-            return;
+    public boolean addNeedVerifyNode(Node newNode) {
+        boolean nodeExist = nodesContainer.nodeExist(newNode.getId());
+        if (!nodeExist) {
+            newNode.setStatus(NodeStatusEnum.UNCHECK);
+            nodesContainer.getUncheckNodes().put(newNode.getId(), newNode);
         }
-//        newNode.setCanConnect(true);
-        canConnectNodeMap.put(newNode.getId(), newNode);
+        return !nodeExist;
+    }
+
+    public NodesContainer getNodesContainer() {
+        return nodesContainer;
+    }
+
+    public void setNodesContainer(NodesContainer nodesContainer) {
+        this.nodesContainer = nodesContainer;
     }
 
     /**
@@ -244,7 +284,7 @@ public class NodeManager {
      *
      * @param ip
      * @param port
-     * @return
+     * @return boolean
      */
     private boolean canConnectIn(String ip, int port) {
         int size = groupContainer.getNodesCount(NetworkConstant.NETWORK_NODE_IN_GROUP);
@@ -274,8 +314,8 @@ public class NodeManager {
         return true;
     }
 
-    private void sendHandshakeMessage(Node node) {
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
+    private void sendHandshakeMessage(Node node, int type ) {
+        NetworkMessageBody body = new NetworkMessageBody(type, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                 node.getIp());
         broadcastHandler.broadcastToNode(new HandshakeMessage(body), node, true);

@@ -40,23 +40,20 @@ public class ConnectionManager {
         return instance;
     }
 
-//    public Node connection(String ip , int port) {
-//
-//        Node node = new Node(ip, port, Node.OUT);
-//        boolean success = connection(node);
-//
-//        return success ? node : null;
-//    }
+    public Node connection(String ip , int port) {
+
+        Node node = new Node(ip, port, Node.OUT);
+        boolean success = connection(node);
+
+        return success ? node : null;
+    }
 
     public boolean connection(Node node) {
         try {
             NettyClient client = new NettyClient(node);
-            new Thread() {
-                @Override
-                public void run() {
-                    client.start();
-                }
-            }.start();
+
+            new Thread(() -> client.start()).start();
+
             Thread.sleep(100L);
             return true;
         } catch (Exception e) {

@@ -29,7 +29,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
-import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -56,6 +55,9 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
         node.setBestBlockHash(body.getBestBlockHash());
         node.setBestBlockHeight(body.getBestBlockHeight());
+
+        node.setExternalIp(body.getNodeIp());
+        node.setRemoteVersion(body.getVersion());
         node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
 
         return null;

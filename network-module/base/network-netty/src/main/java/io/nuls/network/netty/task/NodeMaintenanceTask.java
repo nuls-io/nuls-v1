@@ -26,7 +26,6 @@ package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.netty.manager.ConnectionManager;
@@ -67,28 +66,18 @@ public class NodeMaintenanceTask implements Runnable {
 
     private boolean connectionNode(Node node) {
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
-        node.setRegisterListener(new EventListener() {
-            @Override
-            public void action() {
-                Log.debug("new node {} try connecting!", node.getId());
-            }
+
+        node.setRegisterListener(() -> Log.debug("new node {} try connecting!", node.getId()));
+
+        node.setConnectedListener(() -> {
+            Log.info("node {} connect success !", node.getId());
+
+            nodeManager.nodeConnectSuccess(node);
         });
 
-        node.setConnectedListener(new EventListener() {
-            @Override
-            public void action() {
-                Log.info("node {} connect success !", node.getId());
-
-                nodeManager.nodeConnectSuccess(node);
-            }
-        });
-
-        node.setDisconnectListener(new EventListener() {
-            @Override
-            public void action() {
-                Log.info("node {} disconnect !", node.getId());
-                nodeManager.nodeConnectDisconnect(node);
-            }
+        node.setDisconnectListener(() -> {
+            Log.info("node {} disconnect !", node.getId());
+            nodeManager.nodeConnectDisconnect(node);
         });
 
         boolean success = connectionManager.connection(node);
