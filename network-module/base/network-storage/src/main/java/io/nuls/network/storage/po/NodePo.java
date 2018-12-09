@@ -25,6 +25,8 @@
 
 package io.nuls.network.storage.po;
 
+import io.nuls.network.model.Node;
+
 public class NodePo {
 
     private String id;
@@ -38,6 +40,24 @@ public class NodePo {
     private Long lastFailTime;
 
     private Integer failCount;
+
+    private Integer connectStatus;
+
+
+    public NodePo() {
+
+    }
+
+    public NodePo(Node node) {
+        this.id = node.getId();
+        this.ip = node.getIp();
+        this.port = node.getPort();
+        this.lastTime = node.getLastTime();
+        this.lastFailTime = node.getLastFailTime();
+        this.failCount = node.getFailCount();
+        this.connectStatus = node.getConnectStatus();
+    }
+
 
     public String getId() {
         return id;
@@ -85,5 +105,13 @@ public class NodePo {
 
     public void setLastTime(Long lastTime) {
         this.lastTime = lastTime;
+    }
+
+    public Integer getConnectStatus() {
+        return connectStatus;
+    }
+
+    public void setConnectStatus(Integer connectStatus) {
+        this.connectStatus = connectStatus;
     }
 }

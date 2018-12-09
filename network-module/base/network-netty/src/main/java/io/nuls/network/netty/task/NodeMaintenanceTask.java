@@ -86,7 +86,6 @@ public class NodeMaintenanceTask implements Runnable {
             @Override
             public void action() {
                 Log.info("node {} disconnect !", node.getId());
-
                 nodeManager.nodeConnectDisconnect(node);
             }
         });

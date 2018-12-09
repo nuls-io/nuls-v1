@@ -57,6 +57,8 @@ public class Node extends BaseNulsData {
 
     private Long lastTime;
 
+    private int failCount;
+
     private Long lastFailTime;
 
     private long bestBlockHeight;
@@ -388,5 +390,13 @@ public class Node extends BaseNulsData {
 
     public void setDisconnectListener(EventListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public int getFailCount() {
+        return failCount;
+    }
+
+    public void setFailCount(int failCount) {
+        this.failCount = failCount;
     }
 }

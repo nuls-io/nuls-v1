@@ -30,6 +30,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.listener.EventListener;
@@ -40,6 +41,8 @@ import io.nuls.network.netty.container.GroupContainer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.storage.po.NodePo;
+import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,11 +54,12 @@ public class NodeManager {
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private static NodeManager instance = new NodeManager();
-
     private NetworkParam networkParam;
 
     private NodesContainer nodesContainer;
     private GroupContainer groupContainer;
+
+    private NetworkStorageService networkStorageService;
 
     public static NodeManager getInstance() {
         return instance;
@@ -71,7 +75,8 @@ public class NodeManager {
 
         Map<String, Node> allNodes = nodesContainer.getCanConnectNodes();
 
-        //加载数据库的节点信心 TODO
+        //本地已经存储的节点信息
+        List<Node> localNodeList = getNetworkStorageService().getAllNodes();
 
 
         // 合并种子节点
@@ -151,12 +156,20 @@ public class NodeManager {
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.getCanConnectNodes().remove(node.getId());
 
+        //连接成功后，清除连接失败次数
         node.setConnectStatus(Node.CONNECT);
-
+        node.setFailCount(0);
+        node.setLastFailTime(0L);
+        //连接成功后，存储节点信息
+        getNetworkStorageService().saveNode(node);
         sendHandshakeMessage(node);
     }
 
-
+    /**
+     * 不会走到这个函数里
+     *
+     * @param node
+     */
     public void nodeConnectFail(Node node) {
         nodesContainer.getCanConnectNodes().remove(node.getId());
         node.setCanConnect(false);
@@ -170,6 +183,11 @@ public class NodeManager {
         if (node.getChannel() != null) {
             node.setChannel(null);
         }
+        //连接断开后，失败次数+1，记录当前失败时间，供下次尝试连接使用
+        node.setConnectStatus(Node.FAILED);
+        node.setFailCount(node.getFailCount() + 1);
+        node.setLastFailTime(TimeService.currentTimeMillis());
+        getNetworkStorageService().saveNode(node);
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
@@ -251,5 +269,13 @@ public class NodeManager {
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                 node.getIp());
         broadcastHandler.broadcastToNode(new HandshakeMessage(body), node, true);
+    }
+
+
+    private NetworkStorageService getNetworkStorageService() {
+        if (null == this.networkStorageService) {
+            this.networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
+        }
+        return this.networkStorageService;
     }
 }

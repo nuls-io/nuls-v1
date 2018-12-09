@@ -30,11 +30,17 @@ import io.nuls.network.model.Node;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 提供节点信息的本地存储服务
+ * 这里应该只存储主动连接的节点
+ */
 public interface NetworkStorageService {
 
-    List<Node> getLocalNodeList();
+    Node getNode(String nodeId);
 
-    List<Node> getLocalNodeList(int size, Set<String> ipSet);
+    List<Node> getAllNodes();
+
+    List<Node> getNodeList(int size, Set<String> ipSet);
 
     void saveNode(Node node);
 

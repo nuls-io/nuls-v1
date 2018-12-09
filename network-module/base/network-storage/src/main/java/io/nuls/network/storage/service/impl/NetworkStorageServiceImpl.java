@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
+import static io.nuls.core.tools.str.StringUtils.parseLong;
 
 @Component
 public class NetworkStorageServiceImpl implements NetworkStorageService, InitializingBean {
@@ -52,7 +53,16 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     private DBService dbService;
 
     @Override
-    public List<Node> getLocalNodeList() {
+    public Node getNode(String nodeId) {
+        NodePo nodePo = getDbService().getModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(nodeId), NodePo.class);
+        if(nodePo == null) {
+            return null;
+        }
+        return NetworkTransferTool.toNode(nodePo);
+    }
+
+    @Override
+    public List<Node> getAllNodes() {
         List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
             return new ArrayList<>();
@@ -65,7 +75,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     }
 
     @Override
-    public List<Node> getLocalNodeList(int size, Set<String> ipSet) {
+    public List<Node> getNodeList(int size, Set<String> ipSet) {
         List<Node> nodeList = new ArrayList<>();
         List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
