@@ -147,11 +147,11 @@ public class Node extends BaseNulsData {
     }
 
     public boolean isHandShake() {
-        return this.status == NodeConnectStatusEnum.AVAILABLE;
+        return this.connectStatus == NodeConnectStatusEnum.AVAILABLE;
     }
 
     public boolean isAlive() {
-        return this.status == NodeConnectStatusEnum.CONNECTED;
+        return this.connectStatus == NodeConnectStatusEnum.CONNECTED || this.status == NodeConnectStatusEnum.AVAILABLE;
     }
 
     @Override
@@ -326,5 +326,13 @@ public class Node extends BaseNulsData {
 
     public void setTimeOffset(Long timeOffset) {
         this.timeOffset = timeOffset;
+    }
+
+    public String getRemoteVersion() {
+        return remoteVersion;
+    }
+
+    public void setRemoteVersion(String remoteVersion) {
+        this.remoteVersion = remoteVersion;
     }
 }
