@@ -34,16 +34,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroupContainer {
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
+    public GroupContainer() {
+        nodeGroups.put(NetworkConstant.NETWORK_NODE_IN_GROUP, new NodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP));
+        nodeGroups.put(NetworkConstant.NETWORK_NODE_OUT_GROUP, new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP));
+    }
 
     public int getNodesCount() {
         int total = 0;
 
         NodeGroup inGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if(inGroup != null) {
+        if (inGroup != null) {
             total += inGroup.size();
         }
         NodeGroup outGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        if(outGroup != null) {
+        if (outGroup != null) {
             total += outGroup.size();
         }
 
@@ -57,7 +61,7 @@ public class GroupContainer {
 
     public int getNodesCount(String groupName) {
         NodeGroup group = nodeGroups.get(groupName);
-        if(group != null) {
+        if (group != null) {
             return group.size();
         }
         return 0;
