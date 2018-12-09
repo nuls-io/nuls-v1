@@ -24,27 +24,16 @@
  */
 package io.nuls.network.netty.task;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.thread.manager.NulsThreadFactory;
-import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
-import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.protocol.constant.ProtocolConstant;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 维护节点高度的定时任务
@@ -58,19 +47,7 @@ public class GetNodeVersionTask implements Runnable {
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
-    private ScheduledThreadPoolExecutor threadPool;
-
     public GetNodeVersionTask() {
-    }
-
-    public void startAsSync() {
-        threadPool = TaskManager.createScheduledThreadPool(1,
-                new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "node-version-task"));
-        threadPool.scheduleAtFixedRate(this, 2000L, 3000L, TimeUnit.MILLISECONDS);
-    }
-
-    public void shutdown() {
-        threadPool.shutdown();
     }
 
     @Override
