@@ -31,7 +31,6 @@ import io.nuls.client.rpc.resources.dto.UpgradeProcessDTO;
 import io.nuls.client.rpc.resources.dto.VersionDto;
 import io.nuls.client.rpc.resources.thread.UpgradeThread;
 import io.nuls.client.version.SyncVersionRunner;
-import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -44,8 +43,9 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.module.manager.ModuleManager;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
@@ -190,7 +190,7 @@ public class ClientResource {
                 try {
                     Thread.sleep(1000L);
                     RpcServerManager.getInstance().shutdown();
-                    ConnectionManager.getInstance().shutdown();
+                    ModuleManager.getInstance().stopModule(NetworkConstant.NETWORK_MODULE_ID);
                 } catch (Exception e) {
                     Log.error(e);
                 }

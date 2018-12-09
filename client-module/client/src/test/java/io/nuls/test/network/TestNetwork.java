@@ -28,7 +28,7 @@ package io.nuls.test.network;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
-import io.nuls.network.module.impl.NettyNetworkModuleBootstrap;
+import io.nuls.network.netty.module.impl.NettyNetworkModuleBootstrap;
 import io.nuls.protocol.base.module.BaseProtocolsModuleBootstrap;
 import org.junit.Before;
 import org.junit.Test;

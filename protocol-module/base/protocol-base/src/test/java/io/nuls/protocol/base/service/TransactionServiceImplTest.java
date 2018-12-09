@@ -34,12 +34,11 @@ import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
-
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.module.impl.UtxoLedgerModuleBootstrap;
-import io.nuls.network.module.impl.NettyNetworkModuleBootstrap;
+import io.nuls.network.netty.module.impl.NettyNetworkModuleBootstrap;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
@@ -47,7 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 

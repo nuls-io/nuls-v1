@@ -240,7 +240,7 @@
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
-            <artifactId>network-base</artifactId>
+            <artifactId>network-netty</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>

@@ -43,10 +43,12 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.module.manager.ModuleManager;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
+import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.service.NetworkService;
 
 import java.io.File;
@@ -131,7 +133,7 @@ public class Bootstrap {
             }
             if (NulsContext.mastUpGrade) {
                 //如果强制升级标志开启，停止网络连接
-                ConnectionManager.getInstance().shutdown();
+                ModuleManager.getInstance().stopModule(NetworkConstant.NETWORK_MODULE_ID);
                 Log.error(">>>>>> The new protocol version has taken effect, the network connection has been disconnected，please upgrade immediately **********");
             }
             try {
