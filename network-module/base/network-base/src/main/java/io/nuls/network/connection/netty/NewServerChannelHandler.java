@@ -26,10 +26,7 @@
 package io.nuls.network.connection.netty;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
@@ -53,7 +50,7 @@ import java.util.Map;
  */
 
 @ChannelHandler.Sharable
-public class NewServerChannelHandler extends ChannelInboundHandlerAdapter {
+public class NewServerChannelHandler extends SimpleChannelInboundHandler {
 
     private NewNodeManager nodeManager = NewNodeManager.getInstance();
 
@@ -64,6 +61,7 @@ public class NewServerChannelHandler extends ChannelInboundHandlerAdapter {
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     private static long severChannelRegister = 0;
+
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -76,18 +74,14 @@ public class NewServerChannelHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-
-
-//        String channelId = ctx.channel().id().asLongText();
-//        NioChannelMap.add(channelId, channel);
         Node node = new Node(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), Node.IN);
         node.setStatus(Node.CONNECT);
         boolean success = nodeManager.processConnectedNode(node, channel);
         if (!success) {
-            ctx.channel().close();
+            ctx.close();
             return;
         }
-        //握手成功时，告知对方其自身的外网ip地址
+        //连接成功时，告知对方其自身的外网ip地址
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                 socketChannel.remoteAddress().getHostString());
@@ -126,32 +120,24 @@ public class NewServerChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        try {
-            Node node = nodeManager.getNode(nodeId);
-            if (node != null && node.isAlive()) {
-                ByteBuf buf = (ByteBuf) msg;
-                connectionManager.receiveMessage(buf, node);
-            } else {
-                Log.error("-----------------server channelRead  node is null -----------------" + nodeId);
-            }
-        } catch (Exception e) {
-//            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
-            e.printStackTrace();
-            throw e;
-        } finally {
-            ReferenceCountUtil.release(msg);
+
+        Node node = nodeManager.getNode(nodeId);
+        if (node != null && node.isAlive()) {
+            ByteBuf buf = (ByteBuf) msg;
+            connectionManager.receiveMessage(buf, node);
+        } else {
+            Log.error("-----------------server channelRead  node is null -----------------" + nodeId);
         }
     }
 
     @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         Node node = nodeManager.getNode(nodeId);
         if (node != null) {
@@ -161,16 +147,10 @@ public class NewServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        Log.info("----------------- server exceptionCaught -------------------");
         if (!(cause instanceof IOException)) {
-            SocketChannel channel = (SocketChannel) ctx.channel();
-            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-            Log.error("----------------nodeId:" + nodeId);
             Log.error(cause);
-//            nodeManager.deleteNodeFromDB(nodeId);
-//            return;
         }
-        ctx.channel().close();
+        ctx.close();
     }
 
 }

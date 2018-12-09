@@ -99,7 +99,6 @@ public class ConnectionManager {
                 }
             }
         }, false);
-        ;
         heartBeatThread = new HeartBeatThread(messageHandlerFactory.getHandler(VersionMessage.class.getName()));
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "heart-beat", this.heartBeatThread);
     }

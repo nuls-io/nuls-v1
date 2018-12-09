@@ -86,8 +86,7 @@ public class NettyServer implements Runnable {
             throw e;
         } finally {
             // Shut down all event loops to terminate all threads.
-            boss.shutdownGracefully();
-            worker.shutdownGracefully();
+            shutdown();
         }
     }
 
