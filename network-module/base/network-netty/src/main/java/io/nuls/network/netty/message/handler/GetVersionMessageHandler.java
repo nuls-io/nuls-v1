@@ -59,7 +59,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
         NetworkMessageBody body = getVersionMessage.getMsgBody();
 
         if (body.getBestBlockHeight() < 0) {
-            node.setStatus(Node.BAD);
+//            node.setStatus(Node.BAD);
             nodeManager.removeNode(node.getId());
             return null;
         }

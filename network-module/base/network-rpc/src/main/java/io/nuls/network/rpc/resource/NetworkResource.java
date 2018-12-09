@@ -33,7 +33,9 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.rpc.model.NetworkInfoDto;
 import io.nuls.network.rpc.model.NodeDto;
 import io.nuls.network.service.NetworkService;
@@ -73,7 +75,7 @@ public class NetworkResource {
         NodeGroup outGroup = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         int count = 0;
         for (Node node : inGroup.getNodes().values()) {
-            if (node.getStatus() == Node.HANDSHAKE) {
+            if (node.getStatus() == NodeConnectStatusEnum.AVAILABLE) {
                 count += 1;
             }
         }
@@ -81,7 +83,7 @@ public class NetworkResource {
 
         count = 0;
         for (Node node : outGroup.getNodes().values()) {
-            if (node.getStatus() == Node.HANDSHAKE) {
+            if (node.getStatus() == NodeConnectStatusEnum.AVAILABLE) {
                 count += 1;
             }
         }

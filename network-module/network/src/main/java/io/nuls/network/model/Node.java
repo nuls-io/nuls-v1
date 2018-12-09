@@ -51,8 +51,6 @@ public class Node extends BaseNulsData {
 
     private Integer port;
 
-    private Integer severPort = 0;
-
     private long magicNumber;
 
     private Long lastTime;
@@ -65,17 +63,11 @@ public class Node extends BaseNulsData {
 
     private NulsDigestData bestBlockHash;
 
-    private Set<String> groupSet;
-
-    private long timeOffset;
-
     private String externalIp;
 
-    private boolean canConnect;
-
-    private boolean testConnect;
-
     private boolean isSeedNode;
+
+    private Long timeOffset;
 
     /**
      * 1: inNode ,  2: outNode
@@ -85,18 +77,17 @@ public class Node extends BaseNulsData {
     private int type;
 
     /**
-     * 0: wait , 1: connecting, 2: handshake 3: close
+     * 0: uncheck , 1: connectable, 2: unavailable
      */
-    public final static int WAIT = 0;
-    public final static int CONNECT = 1;
-    public final static int HANDSHAKE = 2;
-    public final static int BAD = 3;
-    private volatile int status;
 
-    public final static int UNCHECK = 0;
-    public final static int FAILED = 1;
-    public final static int SUCCESS = 2;
-    private volatile int connectStatus;
+    private int status;
+
+    /**
+     * unconnect,connecting,connected,disconnect, fail,available
+     */
+
+
+    private int connectStatus;
 
     private Channel channel;
 
@@ -125,31 +116,24 @@ public class Node extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = buffer.readUint32();
-        severPort = buffer.readUint16();
-        port = severPort;
+        port = buffer.readUint16();
         ip = buffer.readString();
-        this.groupSet = ConcurrentHashMap.newKeySet();
     }
 
     public Node() {
-        this.status = WAIT;
-        this.canConnect = false;
-        groupSet = ConcurrentHashMap.newKeySet();
+        this.status = NodeStatusEnum.UNCHECK;
+        this.connectStatus = NodeConnectStatusEnum.UNCONNECT;
     }
 
     public Node(String ip, int port, int type) {
         this();
         this.ip = ip;
         this.port = port;
-        if (type == Node.OUT) {
-            this.severPort = port;
-        }
         this.type = type;
     }
 
     public Node(String ip, int port, int severPort, int type) {
         this(ip, port, type);
-        this.severPort = severPort;
     }
 
     public Node(String id, String ip, int port, int serverPort, int type) {
@@ -160,31 +144,14 @@ public class Node extends BaseNulsData {
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
         this.channel = null;
-        this.status = Node.WAIT;
     }
 
     public boolean isHandShake() {
-        return this.status == Node.HANDSHAKE;
+        return this.status == NodeConnectStatusEnum.AVAILABLE;
     }
 
     public boolean isAlive() {
-        return this.status == Node.CONNECT || status == Node.HANDSHAKE;
-    }
-
-    public void addToGroup(NodeGroup nodeGroup) {
-        if (nodeGroup != null) {
-            this.groupSet.add(nodeGroup.getName());
-        }
-    }
-
-    public void removeFromGroup(NodeGroup nodeGroup) {
-        if (nodeGroup != null) {
-            this.groupSet.remove(nodeGroup.getName());
-        }
-    }
-
-    public void addGroup(String groupName) {
-        this.groupSet.add(groupName);
+        return this.status == NodeConnectStatusEnum.CONNECTED;
     }
 
     @Override
@@ -194,7 +161,6 @@ public class Node extends BaseNulsData {
         sb.append("id:" + getId() + ",");
         sb.append("type:" + type + ",");
         sb.append("status:" + status + ",");
-        sb.append("canConnect:" + canConnect + ",");
         return sb.toString();
     }
 
@@ -255,14 +221,6 @@ public class Node extends BaseNulsData {
         this.magicNumber = magicNumber;
     }
 
-    public int getGroupCount(String groupName) {
-        return this.groupSet.size();
-    }
-
-    public Set<String> getGroupSet() {
-        return this.groupSet;
-    }
-
     public Long getLastFailTime() {
         if (lastFailTime == null) {
             lastFailTime = 0L;
@@ -278,32 +236,8 @@ public class Node extends BaseNulsData {
         return ip + ":" + port;
     }
 
-    public String getPoId() {
-        if (severPort == null || severPort == 0) {
-            severPort = port;
-        }
-        id = ip + ":" + severPort;
-        return id;
-    }
-
     public void setId(String id) {
         this.id = id;
-    }
-
-    public Integer getSeverPort() {
-        return severPort;
-    }
-
-    public void setSeverPort(Integer severPort) {
-        this.severPort = severPort;
-    }
-
-    public boolean isCanConnect() {
-        return canConnect;
-    }
-
-    public void setCanConnect(boolean canConnect) {
-        this.canConnect = canConnect;
     }
 
     public long getBestBlockHeight() {
@@ -322,28 +256,12 @@ public class Node extends BaseNulsData {
         this.bestBlockHash = bestBlockHash;
     }
 
-    public long getTimeOffset() {
-        return timeOffset;
-    }
-
-    public void setTimeOffset(long timeOffset) {
-        this.timeOffset = timeOffset;
-    }
-
     public String getExternalIp() {
         return externalIp;
     }
 
     public void setExternalIp(String externalIp) {
         this.externalIp = externalIp;
-    }
-
-    public boolean isTestConnect() {
-        return testConnect;
-    }
-
-    public void setTestConnect(boolean testConnect) {
-        this.testConnect = testConnect;
     }
 
     public Channel getChannel() {
@@ -392,5 +310,21 @@ public class Node extends BaseNulsData {
 
     public void setDisconnectListener(EventListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public int getFailCount() {
+        return failCount;
+    }
+
+    public void setFailCount(int failCount) {
+        this.failCount = failCount;
+    }
+
+    public Long getTimeOffset() {
+        return timeOffset;
+    }
+
+    public void setTimeOffset(Long timeOffset) {
+        this.timeOffset = timeOffset;
     }
 }

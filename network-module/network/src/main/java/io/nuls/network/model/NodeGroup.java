@@ -52,7 +52,6 @@ public class NodeGroup {
             return;
         }
         this.nodeMap.put(p.getId(), p);
-        p.addToGroup(this);
     }
 
     public void removeNode(Node node) {

@@ -25,7 +25,6 @@
 
 package io.nuls.network.netty.message.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -56,7 +55,7 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
 
 //        Log.info("receive a version message : {}", body);
         if (body.getBestBlockHeight() < 0) {
-            node.setStatus(Node.BAD);
+//            node.setStatus(Node.BAD);
             nodeManager.removeNode(node.getId());
             return null;
         }

@@ -28,6 +28,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
 
@@ -65,7 +66,7 @@ public class NodeMaintenanceTask implements Runnable {
     }
 
     private boolean connectionNode(Node node) {
-
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
         node.setRegisterListener(new EventListener() {
             @Override
             public void action() {

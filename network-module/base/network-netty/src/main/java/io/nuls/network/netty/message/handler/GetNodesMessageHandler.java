@@ -74,13 +74,13 @@ public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
             if (ipSet.contains(node.getIp())) {
                 continue;
             }
-            if (node.getSeverPort() == null || node.getSeverPort() == 0) {
-                continue;
-            }
+//            if (node.getSeverPort() == null || node.getSeverPort() == 0) {
+//                continue;
+//            }
             Node newNode = new Node();
             newNode.setIp(node.getIp());
-            newNode.setPort(node.getSeverPort());
-            newNode.setSeverPort(node.getSeverPort());
+            newNode.setPort(node.getPort());
+//            newNode.setSeverPort(node.getSeverPort());
             ipSet.add(node.getIp());
             nodeList.add(newNode);
             if (nodeList.size() == length) {

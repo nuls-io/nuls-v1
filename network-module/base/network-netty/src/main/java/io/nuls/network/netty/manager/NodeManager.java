@@ -35,7 +35,9 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.container.GroupContainer;
 import io.nuls.network.netty.container.NodesContainer;
@@ -82,7 +84,7 @@ public class NodeManager {
         // 合并种子节点
         for (Map.Entry<String, Node> nodeEntry : allNodes.entrySet()) {
             Node node = nodeEntry.getValue();
-            node.setCanConnect(true);
+//            node.setCanConnect(true);
 
             if (node.isSeedNode()) {
                 node.setSeedNode(false);
@@ -100,7 +102,7 @@ public class NodeManager {
                 int port = Integer.parseInt(ipPort[1]);
 
                 Node node = new Node(ip, port, Node.OUT);
-                node.setCanConnect(true);
+//                node.setCanConnect(true);
 
                 allNodes.put(seedId, node);
             } catch (Exception e) {
@@ -122,9 +124,9 @@ public class NodeManager {
 
         Collection<Node> allNodes = nodesContainer.getCanConnectNodes().values();
         for (Node node : allNodes) {
-            if (node.isCanConnect()) {
-                nodeList.add(node);
-            }
+//            if (node.isCanConnect()) {
+//                nodeList.add(node);
+//            }
         }
         return nodeList;
     }
@@ -157,7 +159,8 @@ public class NodeManager {
         nodesContainer.getCanConnectNodes().remove(node.getId());
 
         //连接成功后，清除连接失败次数
-        node.setConnectStatus(Node.CONNECT);
+        node.setStatus(NodeStatusEnum.CONNECTABLE);
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setFailCount(0);
         node.setLastFailTime(0L);
         //连接成功后，存储节点信息
@@ -172,7 +175,7 @@ public class NodeManager {
      */
     public void nodeConnectFail(Node node) {
         nodesContainer.getCanConnectNodes().remove(node.getId());
-        node.setCanConnect(false);
+//        node.setCanConnect(false);
         nodesContainer.getFailNodes().put(node.getId(), node);
     }
 
@@ -183,11 +186,18 @@ public class NodeManager {
         if (node.getChannel() != null) {
             node.setChannel(null);
         }
-        //连接断开后，失败次数+1，记录当前失败时间，供下次尝试连接使用
-        node.setConnectStatus(Node.FAILED);
-        node.setFailCount(node.getFailCount() + 1);
-        node.setLastFailTime(TimeService.currentTimeMillis());
-        getNetworkStorageService().saveNode(node);
+        //连接断开后,判断是否是为连接成功，还是连接成功后断开
+        // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
+            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+            node.setStatus(NodeStatusEnum.UNAVAILABLE);
+            node.setFailCount(node.getFailCount() + 1);
+            node.setLastFailTime(TimeService.currentTimeMillis());
+            getNetworkStorageService().saveNode(node);
+        } else {
+            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+        }
+
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
@@ -196,7 +206,7 @@ public class NodeManager {
         }
 
         Node node = new Node(ip, port, Node.IN);
-        node.setConnectStatus(Node.CONNECT);
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setChannel(channel);
         Attribute<Node> attribute = channel.attr(AttributeKey.newInstance("node-" + node.getId()));
         attribute.set(node);
@@ -222,7 +232,7 @@ public class NodeManager {
         if (canConnectNodeMap.containsKey(newNode.getId())) {
             return;
         }
-        newNode.setCanConnect(true);
+//        newNode.setCanConnect(true);
         canConnectNodeMap.put(newNode.getId(), newNode);
     }
 

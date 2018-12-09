@@ -46,7 +46,7 @@ public class NodesContainer {
         while(it.hasNext()) {
             Node node = it.next();
             if(ip.equals(node.getIp())) {
-                node.setCanConnect(false);
+//                node.setCanConnect(false);
                 return true;
             }
         }

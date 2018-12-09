@@ -71,7 +71,7 @@ public class NettyClient {
 
     public boolean start() {
         try {
-            ChannelFuture future = boot.connect(node.getIp(), node.getSeverPort());
+            ChannelFuture future = boot.connect(node.getIp(), node.getPort());
             socketChannel = (SocketChannel) future.channel();
             future.channel().closeFuture().awaitUninterruptibly();
             return future.isSuccess();
