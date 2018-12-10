@@ -243,8 +243,7 @@ public class NodeManager {
         Node node = new Node(ip, port, Node.IN);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setChannel(channel);
-        Attribute<Node> attribute = channel.attr(AttributeKey.newInstance("node-" + node.getId()));
-        attribute.set(node);
+        cacheNode(node, channel);
 
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.markCanuseNodeByIp(ip, NodeStatusEnum.AVAILABLE);
@@ -312,6 +311,20 @@ public class NodeManager {
         }
 
         return true;
+    }
+
+    private void cacheNode(Node node, SocketChannel channel) {
+
+        String name = "node-" + node.getId();
+        boolean exists = AttributeKey.exists(name);
+        AttributeKey attributeKey;
+        if(exists) {
+            attributeKey = AttributeKey.valueOf(name);
+        } else {
+            attributeKey = AttributeKey.newInstance(name);
+        }
+        Attribute<Node> attribute = channel.attr(attributeKey);
+        attribute.set(node);
     }
 
     private void sendHandshakeMessage(Node node, int type ) {

@@ -27,12 +27,9 @@ package io.nuls.network.netty.conn.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
-import io.netty.util.ReferenceCountUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.conn.NodeAttributeKey;
@@ -84,6 +81,11 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler {
         if (node != null && node.getConnectedListener() != null) {
             node.getConnectedListener().action();
         }
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
     }
 
     @Override

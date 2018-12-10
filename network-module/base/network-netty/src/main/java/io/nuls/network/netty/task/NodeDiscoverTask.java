@@ -40,6 +40,8 @@ import io.nuls.network.protocol.message.P2PNodeMessage;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 节点发现任务
@@ -84,10 +86,10 @@ public class NodeDiscoverTask implements Runnable {
         }
 
         if (failNodes.size() > 0) {
-            probeNodes(uncheckNodes, canConnectNodes);
+            probeNodes(failNodes, canConnectNodes);
         }
 
-        if (failNodes.size() > 0) {
+        if (disconnectNodes.size() > 0) {
             probeNodes(disconnectNodes, canConnectNodes);
         }
     }
@@ -95,6 +97,9 @@ public class NodeDiscoverTask implements Runnable {
     private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes) {
 
         for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
+
+            CompletableFuture future = new CompletableFuture<>();
+
             Node node = nodeEntry.getValue();
 
             node.setConnectedListener(() -> {
@@ -103,18 +108,27 @@ public class NodeDiscoverTask implements Runnable {
             });
 
             node.setDisconnectListener(() -> {
+                node.setChannel(null);
+
                 if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
                     node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
                     canConnectNodes.put(node.getId(), node);
+
+                    verifyNodes.remove(node.getId());
+                } else if (nodeManager.getAvailableNodesCount() > 0) {
+                    verifyNodes.remove(node.getId());
                 }
-                node.setChannel(null);
-                verifyNodes.remove(node.getId());
+                future.complete(new Object());
             });
 
             boolean result = connectionManager.connection(node);
             if (!result) {
                 verifyNodes.remove(node.getId());
+            }
+            try {
+                future.get(1, TimeUnit.SECONDS);
+            } catch (Exception e) {
             }
         }
     }
