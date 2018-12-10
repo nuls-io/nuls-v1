@@ -71,7 +71,7 @@ public class NettyClient {
             return future.isSuccess();
         } catch (Exception e) {
             Log.error("{}", e);
-            if(node.getChannel() != null) {
+            if (node.getChannel() != null) {
                 node.getChannel().close();
             }
             return false;

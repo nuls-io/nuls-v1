@@ -265,7 +265,7 @@ public class ChainContainer implements Cloneable {
                 //最低覆盖率不能小于60%
                 Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
                 return Result.getFailed();
-            } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < ProtocolConstant.MIN_PROTOCOL_UPGRADE_DELAY) {
+            } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < ConsensusConfig.getMinProtocolUpgradeDelay()) {
                 //延迟块数不能小于1000
                 Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
                 return Result.getFailed();

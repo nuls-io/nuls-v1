@@ -62,7 +62,7 @@ public class AddressTool {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+        Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
         return address.getAddressBytes();
     }
 
@@ -99,7 +99,7 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+        if (NulsContext.getInstance().getDefaultChainId() != chainId) {
             return false;
         }
         if (NulsContext.MAIN_NET_VERSION <= 1 && NulsContext.DEFAULT_ADDRESS_TYPE != type) {
@@ -130,7 +130,7 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+        if (NulsContext.getInstance().getDefaultChainId() != chainId) {
             return false;
         }
         if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {
@@ -156,7 +156,7 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+        if (NulsContext.getInstance().getDefaultChainId() != chainId) {
             return false;
         }
         if (NulsContext.CONTRACT_ADDRESS_TYPE != type) {
@@ -238,7 +238,7 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+        if (NulsContext.getInstance().getDefaultChainId() != chainId) {
             return false;
         }
         if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {

@@ -56,12 +56,9 @@ import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.ScriptBuilder;
-import io.nuls.kernel.script.ScriptUtil;
-import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
-import io.nuls.kernel.validate.ValidateResult;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -613,7 +610,7 @@ public class AccountServiceImpl implements AccountService {
         locker.lock();
         try {
             Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
-            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+            Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
             MultiSigAccount account = new MultiSigAccount();
             account.setAddress(address);
             account.setM(m);
@@ -707,7 +704,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Boolean> saveMultiSigAccount(String addressStr, List<String> pubkeys, int m) {
         Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+        Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
         if (!AddressTool.getStringAddressByBytes(address.getAddressBytes()).equals(addressStr)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }

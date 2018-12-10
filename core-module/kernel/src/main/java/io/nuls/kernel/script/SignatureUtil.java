@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class SignatureUtil {
@@ -346,13 +344,13 @@ public class SignatureUtil {
      * @param redeemScript 赎回脚本
      */
     public static List<byte[]> getPublicKeyList(Script redeemScript) {
-        if(redeemScript == null) {
-            return  null;
+        if (redeemScript == null) {
+            return null;
         }
         List<byte[]> publicKeyList = new ArrayList<>();
         List<ScriptChunk> chunks = redeemScript.getChunks();
-        int publicKeyCount = Script.decodeFromOpN(chunks.get(chunks.size()-2).opcode);
-        for(int i = 1;i<=publicKeyCount;i++){
+        int publicKeyCount = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
+        for (int i = 1; i <= publicKeyCount; i++) {
             publicKeyList.add(chunks.get(i).data);
         }
         return publicKeyList;
@@ -365,7 +363,7 @@ public class SignatureUtil {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
             byte[] redeemByte = chunks.get(chunks.size() - 1).data;
             Script redeemScript = new Script(redeemByte);
-            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+            Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
             return address.toString();
         } else {
             return AddressTool.getStringAddressByBytes(AddressTool.getAddress(chunks.get(1).data));

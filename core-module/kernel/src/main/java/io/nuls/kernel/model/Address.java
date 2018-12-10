@@ -51,7 +51,7 @@ public class Address {
     /**
      * chain id
      */
-    private short chainId = NulsContext.DEFAULT_CHAIN_ID;
+    private short chainId = NulsContext.getInstance().getDefaultChainId();
 
     /**
      * address type
