@@ -76,6 +76,18 @@ public class NodesContainer {
         return exist;
     }
 
+    public int getConnectedCount(int type) {
+        int size = 0;
+
+        for (Node node : connectedNodes.values()) {
+            if (node.getType() == type) {
+                size++;
+            }
+        }
+
+        return size;
+    }
+
     public Node getNode(String nodeId) {
         return connectedNodes.get(nodeId);
     }
@@ -119,4 +131,5 @@ public class NodesContainer {
     public void setUncheckNodes(Map<String, Node> uncheckNodes) {
         this.uncheckNodes = uncheckNodes;
     }
+
 }

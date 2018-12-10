@@ -54,13 +54,8 @@ public class NodeMaintenanceTask implements Runnable {
         }
 
         for(Node node : needConnectNodes) {
-            boolean success = connectionNode(node);
-            if(success) {
-                node.setType(Node.OUT);
-            } else {
-                //fail
-                nodeManager.nodeConnectFail(node);
-            }
+            node.setType(Node.OUT);
+            connectionNode(node);
         }
     }
 
@@ -69,19 +64,11 @@ public class NodeMaintenanceTask implements Runnable {
 
         node.setRegisterListener(() -> Log.debug("new node {} try connecting!", node.getId()));
 
-        node.setConnectedListener(() -> {
-            Log.info("node {} connect success !", node.getId());
+        node.setConnectedListener(() -> nodeManager.nodeConnectSuccess(node));
 
-            nodeManager.nodeConnectSuccess(node);
-        });
+        node.setDisconnectListener(() -> nodeManager.nodeConnectDisconnect(node));
 
-        node.setDisconnectListener(() -> {
-            Log.info("node {} disconnect !", node.getId());
-            nodeManager.nodeConnectDisconnect(node);
-        });
-
-        boolean success = connectionManager.connection(node);
-        return success;
+        return connectionManager.connection(node);
     }
 
     private List<Node> getNeedConnectNodes() {

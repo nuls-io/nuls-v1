@@ -30,6 +30,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
@@ -43,10 +44,7 @@ import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NodeManager {
 
@@ -168,10 +166,17 @@ public class NodeManager {
     }
 
     public void removeNode(String nodeId) {
-        return;
+        Node node = getNode(nodeId);
+        if (node.getChannel() != null) {
+            node.getChannel().close();
+        }
     }
 
     public void reset() {
+        Set<String> nodeIds = nodesContainer.getConnectedNodes().keySet();
+        for (String id : nodeIds) {
+            removeNode(id);
+        }
     }
 
     public void initNetworkParam(NetworkParam networkParam) {
@@ -184,19 +189,22 @@ public class NodeManager {
 
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
 
+        Log.info("node {} connect success !", node.getId());
+
         sendHandshakeMessage(node, NetworkConstant.HANDSHAKE_CLIENT_TYPE);
     }
 
     /**
-     * 不会走到这个函数里
-     *
+     * 节点连接失败
      * @param node
      */
     public void nodeConnectFail(Node node) {
-        nodesContainer.getCanConnectNodes().remove(node.getId());
+
         node.setStatus(NodeStatusEnum.UNAVAILABLE);
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
-        nodesContainer.getFailNodes().put(node.getId(), node);
+
+        node.setFailCount(node.getFailCount() + 1);
+        node.setLastProbeTime(TimeService.currentTimeMillis());
     }
 
     public void nodeConnectDisconnect(Node node) {
@@ -205,34 +213,23 @@ public class NodeManager {
             node.setChannel(null);
         }
 
+        //连接断开后,判断是否是为连接成功，还是连接成功后断开
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
             node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-
+            node.setFailCount(0);
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
 
+            nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
+
+            Log.info("node {} disconnect !", node.getId());
         } else {
-            node.setConnectStatus(NodeConnectStatusEnum.FAIL);
-            node.setStatus(NodeStatusEnum.UNAVAILABLE);
+            // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+            nodeConnectFail(node);
 
             nodesContainer.getCanConnectNodes().remove(node.getId());
+            nodesContainer.getFailNodes().put(node.getId(), node);
         }
-
-        nodesContainer.getDisconnectNodes().put(node.getId(), node);
-
-
-//        //连接断开后,判断是否是为连接成功，还是连接成功后断开
-//        // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
-//        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
-//            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-//            node.setStatus(NodeStatusEnum.UNAVAILABLE);
-//            node.setFailCount(node.getFailCount() + 1);
-//            node.setLastFailTime(TimeService.currentTimeMillis());
-//            getNetworkStorageService().saveNode(node);
-//        } else {
-//            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-//        }
-
     }
 
     public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
@@ -286,8 +283,9 @@ public class NodeManager {
      * @return boolean
      */
     private boolean canConnectIn(String ip, int port) {
-        int size = groupContainer.getNodesCount(NetworkConstant.NETWORK_NODE_IN_GROUP);
+//        int size = groupContainer.getNodesCount(NetworkConstant.NETWORK_NODE_IN_GROUP);
 
+        int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= networkParam.getMaxInCount()) {
             return false;
         }
