@@ -232,7 +232,7 @@ public class Node extends BaseNulsData {
     }
 
     public Long getLastProbeTime() {
-        return lastProbeTime;
+        return lastProbeTime == null ? 0L : lastProbeTime;
     }
 
     public void setLastProbeTime(Long lastProbeTime) {
