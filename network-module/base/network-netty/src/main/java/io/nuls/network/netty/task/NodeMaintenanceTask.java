@@ -46,7 +46,14 @@ public class NodeMaintenanceTask implements Runnable {
 
     @Override
     public void run() {
+        try {
+            process();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
 
+    private void process() {
         List<Node> needConnectNodes = getNeedConnectNodes();
 
         if(needConnectNodes == null) {

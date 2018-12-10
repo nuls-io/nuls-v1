@@ -26,11 +26,15 @@ public class ShareMineNodeTask implements Runnable {
     @Override
     public void run() {
         while(!hasShare) {
-            shareMyServer();
-
             try {
+                shareMyServer();
                 Thread.sleep(1000L);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 Log.error(e);
             }
         }

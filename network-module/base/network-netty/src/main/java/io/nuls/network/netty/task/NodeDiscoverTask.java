@@ -59,7 +59,11 @@ public class NodeDiscoverTask implements Runnable {
 
     @Override
     public void run() {
-        processNodes();
+        try {
+            processNodes();
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 
     private void processNodes() {
@@ -94,7 +98,7 @@ public class NodeDiscoverTask implements Runnable {
             }
             int status = doProbe(node);
 
-            if (status == PROBE_STATUS_IGNORE) {
+            if (status == PROBE_STATUS_IGNORE/* && !node.isSeedNode()*/) {
                 continue;
             }
 
@@ -184,13 +188,11 @@ public class NodeDiscoverTask implements Runnable {
             return future.get();
         } catch (Exception e) {
             Log.error(e);
+            return PROBE_STATUS_IGNORE;
         }
-        return PROBE_STATUS_FAIL;
     }
 
     private void doShare(Node node) {
-
-        Log.info("================ 转发节点信息 {} " , node);
         P2PNodeBody p2PNodeBody = new P2PNodeBody(node.getIp(), node.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
         broadcastHandler.broadcastToAllNode(message, null, true, 100);
