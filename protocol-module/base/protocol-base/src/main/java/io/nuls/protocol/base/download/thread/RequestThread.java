@@ -47,7 +47,7 @@ public class RequestThread implements Runnable {
     private MessageBusService service = NulsContext.getServiceBean(MessageBusService.class);
 
     private static final int count = 10;
-    private boolean running;
+    private boolean running = true;
 
     public RequestThread(List<Node> nodeList, long startHeight, long endHeight) {
         this.nodeList = nodeList;

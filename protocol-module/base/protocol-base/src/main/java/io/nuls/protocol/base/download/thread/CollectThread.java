@@ -70,7 +70,7 @@ public class CollectThread implements Runnable {
         lock.lock();
         while (true) {
             try {
-                if (startHeight > endHeight||this.requestThread.isStoped()) {
+                if (startHeight > endHeight || this.requestThread.isStoped()) {
                     break;
                 }
                 pushBlock();
@@ -78,11 +78,7 @@ public class CollectThread implements Runnable {
                 Log.error(e);
             }
         }
-        try {
-            this.init();
-        } finally {
-            lock.unlock();
-        }
+        lock.unlock();
     }
 
     private void init() {
