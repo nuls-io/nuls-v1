@@ -56,7 +56,7 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
             if(!IpUtil.isboolIp(newNode.getIp())) {
                 continue;
             }
-            nodeManager.addNeedVerifyNode(newNode);
+            nodeManager.addNeedCheckNode(newNode);
         }
         return null;
     }

@@ -58,8 +58,8 @@ public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
         }
 
         Node newNode = new Node(nodeBody.getNodeIp(), nodeBody.getSeverPort(), Node.OUT);
-        nodeManager.addNeedVerifyNode(newNode);
-        
+        nodeManager.addNeedCheckNode(newNode);
+
         return null;
     }
 }

@@ -45,12 +45,16 @@ import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class NodeManager {
 
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private static NodeManager instance = new NodeManager();
+
+    private Lock locker = new ReentrantLock();
 
     private NetworkParam networkParam;
 
@@ -255,13 +259,13 @@ public class NodeManager {
         return true;
     }
 
-    public boolean addNeedVerifyNode(Node newNode) {
-        boolean nodeExist = nodesContainer.nodeExist(newNode.getId());
-        if (!nodeExist) {
-            newNode.setStatus(NodeStatusEnum.UNCHECK);
-            nodesContainer.getUncheckNodes().put(newNode.getId(), newNode);
+    public boolean addNeedCheckNode(Node newNode) {
+        locker.lock();
+        try {
+            return nodesContainer.addNeedCheckNode(newNode);
+        } finally {
+            locker.unlock();
         }
-        return !nodeExist;
     }
 
     public NodesContainer getNodesContainer() {
@@ -283,7 +287,6 @@ public class NodeManager {
      * @return boolean
      */
     private boolean canConnectIn(String ip, int port) {
-//        int size = groupContainer.getNodesCount(NetworkConstant.NETWORK_NODE_IN_GROUP);
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= networkParam.getMaxInCount()) {

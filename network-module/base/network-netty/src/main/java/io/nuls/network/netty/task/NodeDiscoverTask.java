@@ -25,16 +25,19 @@
 package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.model.NodeStatusEnum;
+import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.protocol.message.P2PNodeBody;
+import io.nuls.network.protocol.message.P2PNodeMessage;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 节点发现任务
@@ -43,7 +46,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class NodeDiscoverTask implements Runnable {
 
+    // 节点探测结果 -- 成功，能连接
+    private final static int PROBE_STATUS_SUCCESS = 1;
+    // 节点探测结果 -- 失败，不能连接，节点不可用
+    private final static int PROBE_STATUS_FAIL = 2;
+    // 节点探测结果 -- 忽略，当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略
+    private final static int PROBE_STATUS_IGNORE = 3;
+
     private final NodeManager nodeManager = NodeManager.getInstance();
+    private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     @Override
@@ -76,46 +87,112 @@ public class NodeDiscoverTask implements Runnable {
     private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes) {
 
         for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
-
-            CompletableFuture future = new CompletableFuture<>();
-
             Node node = nodeEntry.getValue();
+            boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
+            if (!needProbeNow) {
+                continue;
+            }
+            int status = doProbe(node);
 
-            node.setConnectedListener(() -> {
-                node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
-                node.getChannel().close();
-            });
+            if (status == PROBE_STATUS_IGNORE) {
+                continue;
+            }
 
-            node.setDisconnectListener(() -> {
+            verifyNodes.remove(node.getId());
+            if (status == PROBE_STATUS_SUCCESS) {
+                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+                node.setStatus(NodeStatusEnum.CONNECTABLE);
+                node.setFailCount(0);
+                canConnectNodes.put(node.getId(), node);
 
-                future.complete(new Object());
-
-                node.setChannel(null);
-
-                if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
-                    node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                    node.setStatus(NodeStatusEnum.CONNECTABLE);
-                    canConnectNodes.put(node.getId(), node);
-
-                    verifyNodes.remove(node.getId());
-                } else if (nodeManager.getAvailableNodesCount() > 0) {
-
-                    nodeManager.nodeConnectFail(node);
-
-                    verifyNodes.remove(node.getId());
+                if (node.getLastProbeTime() == 0L) {
+                    // 当lastProbeTime为0时，代表第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                    doShare(node);
                 }
-            });
-
-            boolean result = connectionManager.connection(node);
-            if (!result) {
-                verifyNodes.remove(node.getId());
+            } else if (status == PROBE_STATUS_FAIL) {
+                nodeManager.nodeConnectFail(node);
+                nodeManager.getNodesContainer().getFailNodes().put(node.getId(), node);
             }
-            try {
-                future.get(1, TimeUnit.SECONDS);
-            } catch (Exception e) {
-//                Log.error(e);
-            }
+            node.setLastProbeTime(TimeService.currentTimeMillis());
         }
     }
 
+    private boolean checkNeedProbeNow(Node node, Map<String, Node> verifyNodes) {
+        // 探测间隔时间，根据失败的次数来决定，探测失败次数为failCount，探测间隔为probeInterval，定义分别如下：
+        // failCount : 0-10 ，probeInterval = 60s
+        // failCount : 11-20 ，probeInterval = 300s
+        // failCount : 21-30 ，probeInterval = 600s
+        // failCount : 31-50 ，probeInterval = 1800s
+        // failCount : 51-100 ，probeInterval = 3600s
+        // 当一个节点失败次数大于100时，将从节点列表中移除，除非再次收到该节点的分享，否则永远丢弃该节点
+
+        long probeInterval;
+        int failCount = node.getFailCount();
+
+        if (failCount <= 10) {
+            probeInterval = 60 * 1000L;
+        } else if (failCount <= 20) {
+            probeInterval = 300 * 1000L;
+        } else if (failCount <= 30) {
+            probeInterval = 600 * 1000L;
+        } else if (failCount <= 50) {
+            probeInterval = 1800 * 1000L;
+        } else if (failCount <= 100) {
+            probeInterval = 3600 * 1000L;
+        } else {
+            verifyNodes.remove(node.getId());
+            return false;
+        }
+
+        return TimeService.currentTimeMillis() - node.getLastProbeTime() > probeInterval;
+    }
+
+    /*
+     * 执行探测
+     * @param int 探测结果 ： PROBE_STATUS_SUCCESS,成功  PROBE_STATUS_FAIL,失败  PROBE_STATUS_IGNORE,跳过（当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略）
+     */
+    private int doProbe(Node node) {
+
+        if(node == null) {
+            return PROBE_STATUS_FAIL;
+        }
+
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+
+        node.setConnectedListener(() -> {
+            node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
+            node.getChannel().close();
+        });
+
+        node.setDisconnectListener(() -> {
+            node.setChannel(null);
+
+            if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
+                future.complete(PROBE_STATUS_SUCCESS);
+            } else if (nodeManager.getAvailableNodesCount() == 0) {
+                future.complete(PROBE_STATUS_IGNORE);
+            } else {
+                future.complete(PROBE_STATUS_FAIL);
+            }
+        });
+
+        boolean result = connectionManager.connection(node);
+        if (!result) {
+            return PROBE_STATUS_FAIL;
+        }
+        try {
+            return future.get();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return PROBE_STATUS_FAIL;
+    }
+
+    private void doShare(Node node) {
+
+        Log.info("================ 转发节点信息 {} " , node);
+        P2PNodeBody p2PNodeBody = new P2PNodeBody(node.getIp(), node.getPort());
+        P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
+        broadcastHandler.broadcastToAllNode(message, null, true, 100);
+    }
 }
