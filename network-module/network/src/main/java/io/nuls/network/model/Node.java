@@ -57,7 +57,7 @@ public class Node extends BaseNulsData {
 
     private int failCount;
 
-    private Long lastFailTime;
+    private Long lastProbeTime;
 
     private long bestBlockHeight;
 
@@ -141,11 +141,6 @@ public class Node extends BaseNulsData {
         this.id = id;
     }
 
-    public void destroy() {
-        this.lastFailTime = TimeService.currentTimeMillis();
-        this.channel = null;
-    }
-
     public boolean isHandShake() {
         return this.connectStatus == NodeConnectStatusEnum.AVAILABLE;
     }
@@ -222,18 +217,26 @@ public class Node extends BaseNulsData {
     }
 
     public Long getLastFailTime() {
-        if (lastFailTime == null) {
-            lastFailTime = 0L;
+        if (lastProbeTime == null) {
+            lastProbeTime = 0L;
         }
-        return lastFailTime;
+        return lastProbeTime;
     }
 
     public void setLastFailTime(Long lastFailTime) {
-        this.lastFailTime = lastFailTime;
+        this.lastProbeTime = lastFailTime;
     }
 
     public String getId() {
         return ip + ":" + port;
+    }
+
+    public Long getLastProbeTime() {
+        return lastProbeTime;
+    }
+
+    public void setLastProbeTime(Long lastProbeTime) {
+        this.lastProbeTime = lastProbeTime;
     }
 
     public void setId(String id) {
