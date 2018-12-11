@@ -82,7 +82,7 @@ public class DownloadProcessor extends Thread {
         //检查网络不再有变化，一般触发同步的节点数量有限，为确保数据的准确性和安全性，尽量等待连上更多的节点之后开始同步
         //There is no change in the inspection network. Usually, the number of nodes that trigger synchronization is limited.
         // To ensure the accuracy and security of data, try to wait for more nodes to start synchronization.
-//        waitNetworkNotChange();
+        waitNetworkNotChange();
         downloadStatus = DownloadStatus.READY;
         try {
             doSynchronize();
