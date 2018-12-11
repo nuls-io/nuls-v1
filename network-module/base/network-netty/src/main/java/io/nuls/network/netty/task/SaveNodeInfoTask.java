@@ -26,20 +26,9 @@ package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.Node;
-import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.netty.manager.NodeManager;
-import io.nuls.network.protocol.message.GetVersionMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Collection;
 
 /**
  * 维护节点高度的定时任务
@@ -63,7 +52,16 @@ public class SaveNodeInfoTask implements Runnable {
      */
     @Override
     public void run() {
-        getNetworkStorageService().saveNodes(nodesContainer.getDisconnectNodes(),nodesContainer.getCanConnectNodes(),nodesContainer.getFailNodes(),nodesContainer.getUncheckNodes(),nodesContainer.getConnectedNodes());
+        try {
+            doCommit();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doCommit() {
+        NetworkStorageService networkStorageService = getNetworkStorageService();
+        networkStorageService.saveNodes(nodesContainer.getDisconnectNodes(),nodesContainer.getCanConnectNodes(),nodesContainer.getFailNodes(),nodesContainer.getUncheckNodes(),nodesContainer.getConnectedNodes());
     }
 
     private NetworkStorageService getNetworkStorageService() {

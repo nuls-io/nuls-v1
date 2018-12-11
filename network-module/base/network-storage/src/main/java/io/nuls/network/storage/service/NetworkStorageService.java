@@ -25,7 +25,6 @@
 
 package io.nuls.network.storage.service;
 
-import com.sun.org.apache.xalan.internal.xsltc.dom.NodeCounter;
 import io.nuls.network.model.Node;
 import io.nuls.network.storage.po.NodeContainerPo;
 
