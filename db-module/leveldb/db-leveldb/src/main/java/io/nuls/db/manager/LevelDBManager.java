@@ -921,21 +921,22 @@ public class LevelDBManager {
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
-        final Filter bloomFilter = new BloomFilter(10);
-        final Statistics stats = new Statistics();
+//        final Filter bloomFilter = new BloomFilter(10);
+//        final Statistics stats = new Statistics();
         //final RateLimiter rateLimiter = new RateLimiter(10000000, 10000, 10);
 
-        options.setCreateIfMissing(createIfMissing).setAllowMmapReads(true).setCreateMissingColumnFamilies(true)
-                .setStatistics(stats).setMaxWriteBufferNumber(3).setMaxBackgroundCompactions(10);
+        options.setCreateIfMissing(createIfMissing);
+//        .setAllowMmapReads(true).setCreateMissingColumnFamilies(true)
+//                .setStatistics(stats).setMaxWriteBufferNumber(3).setMaxBackgroundCompactions(10);
 
-        final BlockBasedTableConfig tableOptions = new BlockBasedTableConfig();
-        tableOptions.setBlockCacheSize(64 * SizeUnit.KB).setFilter(bloomFilter)
-                .setCacheNumShardBits(6).setBlockSizeDeviation(5).setBlockRestartInterval(10)
-                .setCacheIndexAndFilterBlocks(true).setHashIndexAllowCollision(false)
-                .setBlockCacheCompressedSize(64 * SizeUnit.KB)
-                .setBlockCacheCompressedNumShardBits(10);
+//        final BlockBasedTableConfig tableOptions = new BlockBasedTableConfig();
+//        tableOptions.setBlockCacheSize(64 * SizeUnit.KB).setFilter(bloomFilter)
+//                .setCacheNumShardBits(6).setBlockSizeDeviation(5).setBlockRestartInterval(10)
+//                .setCacheIndexAndFilterBlocks(true).setHashIndexAllowCollision(false)
+//                .setBlockCacheCompressedSize(64 * SizeUnit.KB)
+//                .setBlockCacheCompressedNumShardBits(10);
 
-        options.setTableFormatConfig(tableOptions);
+//        options.setTableFormatConfig(tableOptions);
         return options;
     }
 }

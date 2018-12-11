@@ -31,8 +31,8 @@ import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
 import io.nuls.client.version.WalletVersionManager;
-import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
@@ -45,11 +45,11 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.module.manager.ModuleManager;
 import io.nuls.kernel.module.service.ModuleService;
-import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
-import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.download.thread.CollectThread;
+import io.nuls.protocol.base.download.thread.RequestThread;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -144,6 +144,7 @@ public class Bootstrap {
             if (i > 10) {
                 i = 0;
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
+                Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
                 Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().size() + " - " + TxMemoryPool.getInstance().getOrphanPoolSize() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
@@ -157,7 +158,7 @@ public class Bootstrap {
                     ips.add(node);
                 }
                 for (NulsDigestData key : map.keySet()) {
-                    if(key == null) continue;
+                    if (key == null) continue;
                     List<Node> nodeList = map.get(key);
                     long height = nodeList.get(0).getBestBlockHeight();
                     StringBuilder ids = new StringBuilder();

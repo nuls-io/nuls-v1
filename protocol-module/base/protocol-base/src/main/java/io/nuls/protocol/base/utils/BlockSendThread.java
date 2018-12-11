@@ -110,8 +110,8 @@
 //        if (chainEndBlock.getHeader().getHeight() < chainStartBlock.getHeader().getHeight()) {
 //            return;
 //        }
-//        long end = param.getStart() + param.getSize() - 1;
-//        if (chainStartBlock.getHeader().getHeight() > param.getStart() || chainEndBlock.getHeader().getHeight() < end) {
+//        long end = param.getStartHeight() + param.getSize() - 1;
+//        if (chainStartBlock.getHeader().getHeight() > param.getStartHeight() || chainEndBlock.getHeader().getHeight() < end) {
 //            sendNotFound(param.getStartHash(), fromNode);
 //            return;
 //        }

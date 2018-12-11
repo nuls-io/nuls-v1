@@ -193,7 +193,7 @@ public class NodeManager {
 
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
 
-        Log.info("node {} connect success !", node.getId());
+//        Log.info("node {} connect success !", node.getId());
 
         sendHandshakeMessage(node, NetworkConstant.HANDSHAKE_CLIENT_TYPE);
     }
@@ -226,7 +226,7 @@ public class NodeManager {
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
 
-            Log.info("node {} disconnect !", node.getId());
+//            Log.info("node {} disconnect !", node.getId());
         } else {
             // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
             nodeConnectFail(node);

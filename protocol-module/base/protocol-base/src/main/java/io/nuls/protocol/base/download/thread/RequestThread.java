@@ -67,7 +67,7 @@ public class RequestThread implements Runnable {
                 if (this.nodeList == null || this.nodeList.isEmpty()) {
                     break;
                 }
-                if (startHeight - NulsContext.getInstance().getBestHeight() < 1000) {
+                if (startHeight - NulsContext.getInstance().getBestHeight() < 5000) {
                     downloadRound();
                     continue;
                 } else {
@@ -78,7 +78,7 @@ public class RequestThread implements Runnable {
                         }
                     }
                 }
-                Thread.sleep(1000);
+                Thread.sleep(10L);
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -103,6 +103,10 @@ public class RequestThread implements Runnable {
             if ((startHeight + size) > endHeight) {
                 size = (int) (endHeight - startHeight + 1);
             }
+            if (size <= 0) {
+                break;
+            }
+//            Log.info("request:{}-{} ,from {}.", startHeight, size, node.getId());
             boolean result = request(node, startHeight, size);
             if (result) {
                 startHeight += size;
@@ -127,5 +131,9 @@ public class RequestThread implements Runnable {
 
     public boolean isStoped() {
         return !this.running;
+    }
+
+    public long getStartHeight() {
+        return startHeight;
     }
 }
