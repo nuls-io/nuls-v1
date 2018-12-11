@@ -60,7 +60,7 @@ public class RequestThread implements Runnable {
     public void run() {
         this.running = true;
         this.success = false;
-        while (true) {
+        while (running) {
             try {
                 if (startHeight > endHeight) {
                     this.init();
@@ -70,7 +70,7 @@ public class RequestThread implements Runnable {
                 if (this.nodeList == null || this.nodeList.isEmpty()) {
                     break;
                 }
-                if (startHeight - NulsContext.getInstance().getBestHeight() < 5000) {
+                if (startHeight - NulsContext.getInstance().getBestHeight() < 1000) {
                     downloadRound();
                     continue;
                 } else {
@@ -142,5 +142,9 @@ public class RequestThread implements Runnable {
 
     public long getStartHeight() {
         return startHeight;
+    }
+
+    public void stop() {
+        this.running = false;
     }
 }

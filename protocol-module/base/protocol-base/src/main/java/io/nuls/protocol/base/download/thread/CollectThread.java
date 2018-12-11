@@ -31,8 +31,8 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.Result;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,61 +43,75 @@ import java.util.concurrent.locks.ReentrantLock;
 public class CollectThread implements Runnable {
 
     private static final CollectThread INSTANCE = new CollectThread();
-
+    private CompletableFuture<Boolean> future;
     private long endHeight;
     private long startHeight;
     private Map<Long, Block> map = new ConcurrentHashMap<>();
     private RequestThread requestThread;
     private Lock lock = new ReentrantLock();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private boolean running = true;
 
-
-    public static final CollectThread getInstance() {
-        return INSTANCE;
+    public void setConfiguration(long startHeight, long endHeight, RequestThread requestThread, CompletableFuture<Boolean> future) {
+        if (this.isRunning()) {
+            this.running = false;
+            this.requestThread.stop();
+        }
+        this.lock.lock();
+        try {
+            this.setStartHeight(startHeight);
+            this.setEndHeight(endHeight);
+            this.setRequestThread(requestThread);
+            this.future = future;
+            this.map.clear();
+            this.running = true;
+        } finally {
+            this.lock.unlock();
+        }
     }
 
-    public static final CollectThread initInstance(long startHeight, long endHeight, RequestThread requestThread) {
-        INSTANCE.setStartHeight(startHeight);
-        INSTANCE.setEndHeight(endHeight);
-        INSTANCE.setRequestThread(requestThread);
-        return INSTANCE;
+
+    private boolean isRunning() {
+        return running;
     }
 
     private CollectThread() {
     }
 
+    public static CollectThread getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void run() {
         lock.lock();
-        boolean result = false;
-        while (true) {
+        boolean complete = false;
+        while (running) {
             try {
-                if (startHeight > endHeight || (!this.requestThread.isSuccess() && this.requestThread.isStoped())) {
+                if (startHeight > endHeight) {
+                    complete = true;
                     break;
                 }
-                result = pushBlock();
-                if (!result) {
-                    Thread.sleep(10L);
+                if ((!this.requestThread.isSuccess() && this.requestThread.isStoped())) {
+                    complete = false;
+                    break;
                 }
+                pushBlock();
             } catch (Exception e) {
                 Log.error(e);
             }
         }
+        running = false;
+        future.complete(complete);
         lock.unlock();
-    }
-
-    private void init() {
-        this.endHeight = 0;
-        this.startHeight = 0;
-        this.map.clear();
-        this.requestThread = null;
     }
 
     private boolean pushBlock() throws InterruptedException {
 
-        Block block = map.get(startHeight);
+        Block block = map.remove(startHeight);
         if (null == block) {
-            if (startHeight - NulsContext.getInstance().getBestHeight() > 2000) {
+            if (startHeight - NulsContext.getInstance().getBestHeight() > 1000) {
+                Thread.sleep(10L);
                 return false;
             }
             block = waitBlock(startHeight);
@@ -107,7 +121,6 @@ public class CollectThread implements Runnable {
         }
         Result result = consensusService.addBlock(block);
         if (result.isSuccess()) {
-            map.remove(block.getHeader().getHeight());
             startHeight++;
             return true;
         }
@@ -127,7 +140,7 @@ public class CollectThread implements Runnable {
                 }
                 totalWait = 0;
             }
-            block = map.get(startHeight);
+            block = map.remove(startHeight);
         }
 //        Log.info("Height:" + height + ",累计等待时间ms：：：：：" + totalWait);
         return block;

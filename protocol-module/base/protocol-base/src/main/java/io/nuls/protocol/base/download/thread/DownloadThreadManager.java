@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.download.thread;
 
+import io.netty.util.concurrent.CompleteFuture;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
@@ -46,10 +47,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -87,10 +85,12 @@ public class DownloadThreadManager implements Callable<Boolean> {
         long netBestHeight = newestInfos.getNetBestHeight();
         long localBestHeight = blockService.getBestBlock().getData().getHeader().getHeight();
         RequestThread requestThread = new RequestThread(nodes, localBestHeight + 1, netBestHeight);
-        CollectThread collectThread = CollectThread.initInstance(localBestHeight + 1, netBestHeight, requestThread);
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        CollectThread collectThread = CollectThread.getInstance();
+        collectThread.setConfiguration(localBestHeight + 1, netBestHeight, requestThread, future);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-collect", collectThread);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-request", requestThread);
-        return true;
+        return future.get();
     }
 
 
