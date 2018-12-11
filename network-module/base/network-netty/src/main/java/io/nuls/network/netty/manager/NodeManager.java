@@ -75,6 +75,7 @@ public class NodeManager {
     }
 
     public void loadDatas() {
+
         //本地已经存储的节点信息
         NodeContainerPo containerPo = getNetworkStorageService().loadNodeContainer();
         if (containerPo != null) {
@@ -86,6 +87,9 @@ public class NodeManager {
         for (Node node : seedList) {
             node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
             nodesContainer.getCanConnectNodes().put(node.getId(), node);
+            nodesContainer.getUncheckNodes().remove(node.getId());
+            nodesContainer.getDisconnectNodes().remove(node.getId());
+            nodesContainer.getFailNodes().remove(node.getId());
         }
     }
 
