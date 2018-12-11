@@ -26,7 +26,9 @@
 package io.nuls.network.storage.service.impl;
 
 
+import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.context.NulsContext;
@@ -36,7 +38,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.storage.constant.NetworkStorageConstant;
 import io.nuls.network.storage.po.NetworkTransferTool;
 import io.nuls.network.storage.po.NodeContainerPo;
@@ -44,10 +45,8 @@ import io.nuls.network.storage.po.NodePo;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
@@ -138,10 +137,11 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         try {
-            fos = new FileOutputStream(NulsContext.getDataPath() + "/" + NetworkConstant.NODE_FILE_NAME);
+            fos = new FileOutputStream(getStoreageFile());
             oos = new ObjectOutputStream(fos);
             oos.writeObject(containerPo);
         } catch (FileNotFoundException e) {
+            Log.error(e);
         } catch (IOException e) {
             Log.error(e);
         } finally {
@@ -167,12 +167,12 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         FileInputStream fis = null;
         ObjectInputStream ois = null;
         try {
-            fis = new FileInputStream(NulsContext.getDataPath() + "/" + NetworkConstant.NODE_FILE_NAME);
+            fis = new FileInputStream(getStoreageFile());
             ois = new ObjectInputStream(fis);
             NodeContainerPo containerPo = (NodeContainerPo) ois.readObject();
             return containerPo;
         } catch (FileNotFoundException e) {
-
+            Log.error(e);
         } catch (IOException e) {
             Log.error(e);
         } catch (ClassNotFoundException e) {
@@ -240,6 +240,43 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        getDbService().createArea(NetworkStorageConstant.DB_NAME_NETWORK_NODE);
+//        getDbService().createArea(NetworkStorageConstant.DB_NAME_NETWORK_NODE);
+    }
+
+    private File getStoreageFile() throws IOException {
+        Properties properties = ConfigLoader.loadProperties("db_config.properties");
+        String path = properties.getProperty("leveldb.datapath", "./data");
+
+        File dir = new File(genAbsolutePath(path));
+        File file = new File(dir, NetworkConstant.NODE_FILE_NAME);
+
+        return file;
+    }
+
+    private static String genAbsolutePath(String path) {
+        String[] paths = path.split("/|\\\\");
+        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+        String classPath = resource.getPath();
+        File file = new File(classPath);
+        String resultPath = null;
+        boolean isFileName = false;
+        for (String p : paths) {
+            if (StringUtils.isBlank(p)) {
+                continue;
+            }
+            if (!isFileName) {
+                if ("..".equals(p)) {
+                    file = file.getParentFile();
+                } else if (".".equals(p)) {
+                    continue;
+                } else {
+                    isFileName = true;
+                    resultPath = file.getPath() + File.separator + p;
+                }
+            } else {
+                resultPath += File.separator + p;
+            }
+        }
+        return resultPath;
     }
 }
