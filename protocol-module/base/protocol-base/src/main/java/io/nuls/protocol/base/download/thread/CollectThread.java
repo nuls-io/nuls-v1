@@ -50,7 +50,7 @@ public class CollectThread implements Runnable {
     private RequestThread requestThread;
     private Lock lock = new ReentrantLock();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
-    private boolean running = true;
+    private boolean running = false;
 
     public void setConfiguration(long startHeight, long endHeight, RequestThread requestThread, CompletableFuture<Boolean> future) {
         if (this.isRunning()) {
@@ -64,7 +64,6 @@ public class CollectThread implements Runnable {
             this.setRequestThread(requestThread);
             this.future = future;
             this.map.clear();
-            this.running = true;
         } finally {
             this.lock.unlock();
         }
@@ -86,6 +85,7 @@ public class CollectThread implements Runnable {
     public void run() {
         lock.lock();
         boolean complete = false;
+        running = true;
         while (running) {
             try {
                 if (startHeight > endHeight) {
