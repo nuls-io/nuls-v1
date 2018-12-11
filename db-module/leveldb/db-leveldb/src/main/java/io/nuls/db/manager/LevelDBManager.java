@@ -26,13 +26,15 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
-import org.rocksdb.*;
-import org.rocksdb.util.SizeUnit;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
+import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +42,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -51,7 +52,7 @@ public class LevelDBManager {
 
     private static int max;
 
-    private static final ConcurrentHashMap<String, RocksDB> AREAS = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, DB> AREAS = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Comparator<byte[]>> AREAS_COMPARATOR = new ConcurrentHashMap<>();
 
     private static final Map<Class, RuntimeSchema> SCHEMA_MAP = new ConcurrentHashMap<>();
@@ -78,14 +79,13 @@ public class LevelDBManager {
                 isInit = true;
                 File dir = loadDataPath();
                 dataPath = dir.getPath();
-                NulsContext.setDataPath(dataPath);
                 Log.info("LevelDBManager dataPath is " + dataPath);
 
                 initSchema();
                 initBaseDB(dataPath);
 
                 File[] areaFiles = dir.listFiles();
-                RocksDB db;
+                DB db = null;
                 String dbPath = null;
                 for (File areaFile : areaFiles) {
                     if (BASE_AREA_NAME.equals(areaFile.getName())) {
@@ -133,9 +133,9 @@ public class LevelDBManager {
             }
             String filePath = baseAreaPath + File.separator + BASE_DB_NAME;
             try {
-                RocksDB db = openDB(filePath, true, null, null);
+                DB db = openDB(filePath, true, null, null);
                 AREAS.put(BASE_AREA_NAME, db);
-            } catch (RocksDBException e) {
+            } catch (IOException e) {
                 Log.error(e);
             }
         }
@@ -151,7 +151,7 @@ public class LevelDBManager {
             //skip it
             max = 50;
         }
-        File dir;
+        File dir = null;
         String pathSeparator = System.getProperty("path.separator");
         String unixPathSeparator = ":";
         String rootPath;
@@ -245,7 +245,7 @@ public class LevelDBManager {
                     dir.mkdir();
                 }
                 String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
-                RocksDB db = openDB(filePath, true, cacheSize, comparator);
+                DB db = openDB(filePath, true, cacheSize, comparator);
                 AREAS.put(areaName, db);
                 result = Result.getSuccess();
             } catch (Exception e) {
@@ -258,7 +258,7 @@ public class LevelDBManager {
         }
     }
 
-    public static RocksDB getArea(String areaName) {
+    public static DB getArea(String areaName) {
         return AREAS.get(areaName);
     }
 
@@ -271,7 +271,7 @@ public class LevelDBManager {
         }
         Result result;
         try {
-            RocksDB db = AREAS.remove(areaName);
+            DB db = AREAS.remove(areaName);
             db.close();
             File dir = new File(dataPath + File.separator + areaName);
             if (!dir.exists()) {
@@ -290,10 +290,11 @@ public class LevelDBManager {
         return result;
     }
 
-    private static void destroyDB(String dbPath) throws RocksDBException {
+    private static void destroyDB(String dbPath) throws IOException {
         File file = new File(dbPath);
         Options options = new Options();
-        RocksDB.destroyDB(dbPath, options);
+        DBFactory factory = Iq80DBFactory.factory;
+        factory.destroy(file, options);
     }
 
     /**
@@ -301,8 +302,8 @@ public class LevelDBManager {
      * 关闭所有数据区域
      */
     public static void close() {
-        Set<Map.Entry<String, RocksDB>> entries = AREAS.entrySet();
-        for (Map.Entry<String, RocksDB> entry : entries) {
+        Set<Map.Entry<String, DB>> entries = AREAS.entrySet();
+        for (Map.Entry<String, DB> entry : entries) {
             try {
                 AREAS.remove(entry.getKey());
                 AREAS_COMPARATOR.remove(entry.getKey());
@@ -318,9 +319,13 @@ public class LevelDBManager {
      * 关闭指定数据区域
      */
     public static void closeArea(String area) {
-        AREAS_COMPARATOR.remove(area);
-        RocksDB db = AREAS.remove(area);
-        db.close();
+        try {
+            AREAS_COMPARATOR.remove(area);
+            DB db = AREAS.remove(area);
+            db.close();
+        } catch (IOException e) {
+            Log.warn("close leveldb area error:" + area, e);
+        }
     }
 
 
@@ -329,14 +334,31 @@ public class LevelDBManager {
      * @return
      * @throws IOException
      */
-    private static RocksDB initOpenDB(String dbPath) throws RocksDBException {
+    private static DB initOpenDB(String dbPath) throws IOException {
         File checkFile = new File(dbPath + File.separator + "CURRENT");
         if (!checkFile.exists()) {
             return null;
         }
+        Options options = new Options().createIfMissing(false);
 
-        Options options = getCommonOptions(false);
-        return RocksDB.open(options, dbPath);
+        /*
+         * Area的自定义比较器，启动数据库时获取并装载它
+         * Area的自定义cacheSize，启动数据库时获取并装载它，否则，启动已存在的Area时会丢失之前的cacheSize设置。
+         * Area of custom comparator, you start the database access and loaded it
+         * the custom cacheSize of the Area will be retrieved and loaded on the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
+         */
+        String areaName = getAreaNameFromDbPath(dbPath);
+        Comparator comparator = getModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), Comparator.class);
+        if (comparator != null) {
+            AREAS_COMPARATOR.put(areaName, comparator);
+        }
+        Long cacheSize = getModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), Long.class);
+        if (cacheSize != null) {
+            options.cacheSize(cacheSize);
+        }
+        File file = new File(dbPath);
+        DBFactory factory = Iq80DBFactory.factory;
+        return factory.open(file, options);
     }
 
     /**
@@ -347,9 +369,20 @@ public class LevelDBManager {
      * If the area custom comparator, save area define the comparator, the next time you start the database access and loaded it
      * If the area custom cacheSize, save the area's custom cacheSize, get and load it the next time you start the database, or you'll lose the cacheSize setting before starting the existing area.
      */
-    private static RocksDB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator<byte[]> comparator) throws RocksDBException {
-        Options options = getCommonOptions(createIfMissing);
-        return RocksDB.open(options, dbPath);
+    private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator<byte[]> comparator) throws IOException {
+        File file = new File(dbPath);
+        String areaName = getAreaNameFromDbPath(dbPath);
+        Options options = new Options().createIfMissing(createIfMissing);
+        if (cacheSize != null) {
+            putModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), cacheSize);
+            options.cacheSize(cacheSize);
+        }
+        if (comparator != null) {
+            putModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), comparator);
+            AREAS_COMPARATOR.put(areaName, comparator);
+        }
+        DBFactory factory = Iq80DBFactory.factory;
+        return factory.open(file, options);
     }
 
     private static String getAreaNameFromDbPath(String dbPath) {
@@ -396,7 +429,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             db.put(key, value);
             return Result.getSuccess();
         } catch (Exception e) {
@@ -417,7 +450,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             db.put(bytes(key), bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
@@ -438,7 +471,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             db.put(key, bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
@@ -478,13 +511,7 @@ public class LevelDBManager {
         }
         RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
         ModelWrapper modelWrapper = new ModelWrapper(value);
-        LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
-        final byte[] bytes;
-        try {
-            bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, buffer);
-        } finally {
-            buffer.clear();
-        }
+        byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
         return bytes;
     }
 
@@ -500,7 +527,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             db.delete(bytes(key));
             return Result.getSuccess();
         } catch (Exception e) {
@@ -517,7 +544,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             db.delete(key);
             return Result.getSuccess();
         } catch (Exception e) {
@@ -538,7 +565,7 @@ public class LevelDBManager {
             return null;
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             return db.get(bytes(key));
         } catch (Exception e) {
             return null;
@@ -553,7 +580,7 @@ public class LevelDBManager {
             return null;
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             return db.get(key);
         } catch (Exception e) {
             return null;
@@ -588,7 +615,7 @@ public class LevelDBManager {
             return null;
         }
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             byte[] bytes = db.get(key);
             if (bytes == null) {
                 return null;
@@ -606,36 +633,18 @@ public class LevelDBManager {
         }
     }
 
-    private static <T> T getModel(byte[] value, Class<T> clazz) {
-        if (value == null) {
-            return null;
-        }
-        try {
-            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
-            ModelWrapper model = new ModelWrapper();
-            ProtostuffIOUtil.mergeFrom(value, model, schema);
-            if (clazz != null && model.getT() != null) {
-                return clazz.cast(model.getT());
-            }
-            return (T) model.getT();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static Set<byte[]> keySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        Set<byte[]> keySet;
+        DBIterator iterator = null;
+        Set<byte[]> keySet = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             keySet = new HashSet<>();
-            iterator = db.newIterator();
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                keySet.add(iterator.key());
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                keySet.add(iterator.peekNext().getKey());
             }
             return keySet;
         } catch (Exception e) {
@@ -644,7 +653,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
     }
@@ -653,14 +666,15 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        List<byte[]> keyList;
+        DBIterator iterator = null;
+        List<byte[]> keyList = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             keyList = new ArrayList<>();
-            iterator = db.newIterator();
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                keyList.add(iterator.key());
+            iterator = db.iterator();
+            String key;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                keyList.add(iterator.peekNext().getKey());
             }
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
             if (comparator != null) {
@@ -673,7 +687,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
     }
@@ -682,16 +700,18 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        Set<Entry<byte[], byte[]>> entrySet;
+        DBIterator iterator = null;
+        Set<Entry<byte[], byte[]>> entrySet = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             entrySet = new HashSet<>();
-            iterator = db.newIterator();
+            iterator = db.iterator();
             byte[] key, bytes;
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                key = iterator.key();
-                bytes = iterator.value();
+            Map.Entry<byte[], byte[]> entry;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                entry = iterator.peekNext();
+                key = entry.getKey();
+                bytes = entry.getValue();
                 entrySet.add(new Entry<byte[], byte[]>(key, bytes));
             }
         } catch (Exception e) {
@@ -700,7 +720,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
         return entrySet;
@@ -710,18 +734,19 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        List<Entry<byte[], byte[]>> entryList;
+        DBIterator iterator = null;
+        List<Entry<byte[], byte[]>> entryList = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             entryList = new ArrayList<>();
-            iterator = db.newIterator();
+            iterator = db.iterator();
             byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                key = iterator.key();
-                bytes = iterator.value();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                entry = iterator.peekNext();
+                key = entry.getKey();
+                bytes = entry.getValue();
                 entryList.add(new Entry<byte[], byte[]>(key, bytes, comparator));
             }
             // 如果自定义了比较器，则执行排序
@@ -739,7 +764,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
         return entryList;
@@ -749,18 +778,21 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        List<Entry<byte[], T>> entryList;
+        DBIterator iterator = null;
+        List<Entry<byte[], T>> entryList = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             entryList = new ArrayList<>();
-            iterator = db.newIterator();
-            byte[] key;
+            iterator = db.iterator();
+            byte[] key, bytes;
+            Map.Entry<byte[], byte[]> entry;
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
-            T t;
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                key = iterator.key();
-                t = getModel(iterator.value(), clazz);
+            T t = null;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                t = null;
+                entry = iterator.peekNext();
+                key = entry.getKey();
+                t = getModel(area, entry.getKey(), clazz);
                 entryList.add(new Entry<byte[], T>(key, t, comparator));
             }
             // 如果自定义了比较器，则执行排序
@@ -778,7 +810,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
         return entryList;
@@ -810,15 +846,19 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        List<T> list;
+        DBIterator iterator = null;
+        List<T> list = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             list = new ArrayList<>();
-            iterator = db.newIterator();
-            T t;
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                t = getModel(iterator.value(), clazz);
+            iterator = db.iterator();
+            byte[] key, bytes;
+            Map.Entry<byte[], byte[]> entry;
+            T t = null;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                t = null;
+                entry = iterator.peekNext();
+                t = getModel(area, entry.getKey(), clazz);
                 list.add(t);
             }
         } catch (Exception e) {
@@ -827,7 +867,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
         return list;
@@ -837,14 +881,14 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
-        RocksIterator iterator = null;
-        List<byte[]> list;
+        DBIterator iterator = null;
+        List<byte[]> list = null;
         try {
-            RocksDB db = AREAS.get(area);
+            DB db = AREAS.get(area);
             list = new ArrayList<>();
-            iterator = db.newIterator();
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                list.add(iterator.value());
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                list.add(iterator.peekNext().getValue());
             }
         } catch (Exception e) {
             Log.error(e);
@@ -852,7 +896,11 @@ public class LevelDBManager {
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
             if (iterator != null) {
-                iterator.close();
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
             }
         }
         return list;
@@ -891,11 +939,11 @@ public class LevelDBManager {
             return Result.getFailed();
         }
 
-        /*RocksIterator iterator = null;
+        /*DBIterator iterator = null;
         try {
-            RocksDB db = AREAS.get(area);
-            iterator = db.newIterator();
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+            DB db = AREAS.get(area);
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                db.delete(iterator.peekNext().getKey());
             }
             return Result.getSuccess();
@@ -912,37 +960,5 @@ public class LevelDBManager {
                 }
             }
         }*/
-    }
-
-
-    /**
-     * 获得公共的数据库连接属性.
-     *
-     * @param createIfMissing 是否默认表
-     * @return 数据库连接属性
-     */
-    private static synchronized Options getCommonOptions(final boolean createIfMissing) {
-        Options options = new Options();
-//        final Filter bloomFilter = new BloomFilter(10);
-//        final Statistics stats = new Statistics();
-        //final RateLimiter rateLimiter = new RateLimiter(10000000, 10000, 10);
-
-        options.setCreateIfMissing(createIfMissing);
-//        .setAllowMmapReads(true).setCreateMissingColumnFamilies(true)
-//                .setStatistics(stats).setMaxWriteBufferNumber(3).setMaxBackgroundCompactions(10);
-
-//        final BlockBasedTableConfig tableOptions = new BlockBasedTableConfig();
-//        tableOptions.setBlockCacheSize(64 * SizeUnit.KB).setFilter(bloomFilter)
-//                .setCacheNumShardBits(6).setBlockSizeDeviation(5).setBlockRestartInterval(10)
-//                .setCacheIndexAndFilterBlocks(true).setHashIndexAllowCollision(false)
-//                .setBlockCacheCompressedSize(64 * SizeUnit.KB)
-//                .setBlockCacheCompressedNumShardBits(10);
-
-//        options.setTableFormatConfig(tableOptions);
-        return options;
-    }
-
-    public static String getDataPath() {
-        return dataPath;
     }
 }
