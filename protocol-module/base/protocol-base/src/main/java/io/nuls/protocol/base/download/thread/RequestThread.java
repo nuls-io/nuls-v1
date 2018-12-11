@@ -98,7 +98,7 @@ public class RequestThread implements Runnable {
     private void downloadRound() {
         for (int i = nodeList.size() - 1; i >= 0; i--) {
             Node node = nodeList.get(i);
-            if (!node.isHandShake()) {
+            if (!node.isHandShake() || node.getTimeOffset() > 100L) {
                 nodeList.remove(i);
                 continue;
             }
