@@ -33,6 +33,7 @@ import io.nuls.client.storage.LanguageService;
 import io.nuls.client.version.WalletVersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
@@ -48,8 +49,10 @@ import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
-import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.download.thread.CollectThread;
+import io.nuls.protocol.base.download.thread.RequestThread;
+import io.nuls.protocol.service.DownloadService;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -118,12 +121,13 @@ public class Bootstrap {
         // if isDaemon flag is true, don't launch the WebView
         boolean isDaemon = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_DAEMON, false);
         if (!isDaemon) {
-//            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
         }
 
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
         NulsContext context = NulsContext.getInstance();
+        DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         while (true) {
             if (context.getStop() > 0) {
                 if (context.getStop() == 2) {
@@ -144,6 +148,9 @@ public class Bootstrap {
             if (i > 10) {
                 i = 0;
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
+                if (!downloadService.isDownloadSuccess().isSuccess()) {
+                    Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());
+                }
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
                 Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().size() + " - " + TxMemoryPool.getInstance().getOrphanPoolSize() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
@@ -157,7 +164,7 @@ public class Bootstrap {
                     ips.add(node);
                 }
                 for (NulsDigestData key : map.keySet()) {
-                    if(key == null) continue;
+                    if (key == null) continue;
                     List<Node> nodeList = map.get(key);
                     long height = nodeList.get(0).getBestBlockHeight();
                     StringBuilder ids = new StringBuilder();

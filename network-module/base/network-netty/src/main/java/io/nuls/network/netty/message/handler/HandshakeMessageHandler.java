@@ -51,7 +51,7 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
         NetworkMessageBody body = handshakeMessage.getMsgBody();
 
-        Log.info("receive message from node {}, message : {}", node.getId(), body);
+//        Log.info("receive message from node {}, message : {}", node.getId(), body);
 
         node.setBestBlockHash(body.getBestBlockHash());
         node.setBestBlockHeight(body.getBestBlockHeight());

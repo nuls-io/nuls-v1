@@ -33,6 +33,7 @@ import io.nuls.kernel.model.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,7 +46,7 @@ public class CollectThread implements Runnable {
 
     private long endHeight;
     private long startHeight;
-    private Map<Long, Block> map = new HashMap<>();
+    private Map<Long, Block> map = new ConcurrentHashMap<>();
     private RequestThread requestThread;
     private Lock lock = new ReentrantLock();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
@@ -68,12 +69,16 @@ public class CollectThread implements Runnable {
     @Override
     public void run() {
         lock.lock();
+        boolean result = false;
         while (true) {
             try {
-                if (startHeight > endHeight || this.requestThread.isStoped()) {
+                if (startHeight > endHeight || (!this.requestThread.isSuccess() && this.requestThread.isStoped())) {
                     break;
                 }
-                pushBlock();
+                result = pushBlock();
+                if (!result) {
+                    Thread.sleep(10L);
+                }
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -88,19 +93,25 @@ public class CollectThread implements Runnable {
         this.requestThread = null;
     }
 
-    private void pushBlock() throws InterruptedException {
+    private boolean pushBlock() throws InterruptedException {
+
         Block block = map.get(startHeight);
         if (null == block) {
+            if (startHeight - NulsContext.getInstance().getBestHeight() > 2000) {
+                return false;
+            }
             block = waitBlock(startHeight);
         }
         if (null == block) {
-            return;
+            return false;
         }
         Result result = consensusService.addBlock(block);
         if (result.isSuccess()) {
             map.remove(block.getHeader().getHeight());
             startHeight++;
+            return true;
         }
+        return false;
     }
 
     private Block waitBlock(long height) throws InterruptedException {
@@ -118,6 +129,7 @@ public class CollectThread implements Runnable {
             }
             block = map.get(startHeight);
         }
+//        Log.info("Height:" + height + ",累计等待时间ms：：：：：" + totalWait);
         return block;
     }
 
@@ -136,6 +148,7 @@ public class CollectThread implements Runnable {
         if (height < startHeight || height > endHeight) {
             return false;
         }
+//        Log.info("added block:" + height);
         map.put(height, block);
         return true;
     }
@@ -150,5 +163,13 @@ public class CollectThread implements Runnable {
 
     protected void setRequestThread(RequestThread requestThread) {
         this.requestThread = requestThread;
+    }
+
+    public long getStartHeight() {
+        return startHeight;
+    }
+
+    public long getRequestStartHeight() {
+        return requestThread.getStartHeight();
     }
 }

@@ -91,9 +91,9 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "share-mine-node", new ShareMineNodeTask());
 
-        PlatformDepedentReporter reporter = new PlatformDepedentReporter();
-        reporter.init();
-        reporter.start();
+//        PlatformDepedentReporter reporter = new PlatformDepedentReporter();
+//        reporter.init();
+//        reporter.start();
     }
 
     @Override
