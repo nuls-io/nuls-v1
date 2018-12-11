@@ -26,6 +26,7 @@ package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
@@ -73,6 +74,7 @@ public class GetNodeVersionTask implements Runnable {
 
         for(Node node : connectedNodes) {
             if (node.getType() == Node.OUT) {
+                node.setLastTime(TimeService.currentTimeMillis());
                 broadcastHandler.broadcastToNode(getVersionMessage, node, true);
             }
         }
