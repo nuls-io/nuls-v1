@@ -137,13 +137,12 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         NodeContainerPo containerPo = createNodeContainerPo(disConnectNodes, canConnectNodes, failNodes, uncheckNodes, connectedNodes);
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
-
         try {
             fos = new FileOutputStream(NulsContext.getDataPath() + "/" + NetworkConstant.NODE_FILE_NAME);
             oos = new ObjectOutputStream(fos);
-            Integer i = 1;
             oos.writeObject(containerPo);
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             Log.error(e);
         } finally {
             if (oos != null) {
@@ -173,7 +172,10 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
             NodeContainerPo containerPo = (NodeContainerPo) ois.readObject();
             return containerPo;
         } catch (FileNotFoundException e) {
-        } catch (Exception e) {
+
+        } catch (IOException e) {
+            Log.error(e);
+        } catch (ClassNotFoundException e) {
             Log.error(e);
         } finally {
             if (ois != null) {
