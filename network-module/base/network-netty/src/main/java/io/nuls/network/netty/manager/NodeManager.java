@@ -75,23 +75,17 @@ public class NodeManager {
     }
 
     public void loadDatas() {
-        //获取种子节点
-        List<Node> seedList = getSeedNodes();
-
         //本地已经存储的节点信息
         NodeContainerPo containerPo = getNetworkStorageService().loadNodeContainer();
         if (containerPo != null) {
             NodesContainer container = new NodesContainer(containerPo);
-            for (Node node : seedList) {
-                container.getConnectedNodes().put(node.getId(), node);
-            }
             this.nodesContainer = container;
-        } else {
-
-            for (Node node : seedList) {
-                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                nodesContainer.getCanConnectNodes().put(node.getId(), node);
-            }
+        }
+        //获取种子节点
+        List<Node> seedList = getSeedNodes();
+        for (Node node : seedList) {
+            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+            nodesContainer.getCanConnectNodes().put(node.getId(), node);
         }
     }
 
