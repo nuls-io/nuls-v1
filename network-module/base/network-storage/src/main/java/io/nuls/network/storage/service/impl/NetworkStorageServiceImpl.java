@@ -26,6 +26,7 @@
 package io.nuls.network.storage.service.impl;
 
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.context.NulsContext;
@@ -34,17 +35,22 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.storage.constant.NetworkStorageConstant;
 import io.nuls.network.storage.po.NetworkTransferTool;
+import io.nuls.network.storage.po.NodeContainerPo;
 import io.nuls.network.storage.po.NodePo;
 import io.nuls.network.storage.service.NetworkStorageService;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
-import static io.nuls.core.tools.str.StringUtils.parseLong;
 
 @Component
 public class NetworkStorageServiceImpl implements NetworkStorageService, InitializingBean {
@@ -55,7 +61,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     @Override
     public Node getNode(String nodeId) {
         NodePo nodePo = getDbService().getModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(nodeId), NodePo.class);
-        if(nodePo == null) {
+        if (nodePo == null) {
             return null;
         }
         return NetworkTransferTool.toNode(nodePo);
@@ -124,6 +130,61 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
             return new String(bytes);
         }
         return null;
+    }
+
+    @Override
+    public void saveNodes(Map<String, Node> disConnectNodes, Map<String, Node> canConnectNodes, Map<String, Node> failNodes, Map<String, Node> uncheckNodes, Map<String, Node> connectedNodes) {
+        NodeContainerPo containerPo = createNodeContainerPo(disConnectNodes, canConnectNodes, failNodes, uncheckNodes, connectedNodes);
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+
+        try {
+            fos = new FileOutputStream("./network.txt");
+            oos = new ObjectOutputStream(fos);
+            Integer i = 1;
+            oos.writeObject(containerPo);
+        } catch (Exception e) {
+            Log.error(e);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (oos != null) {
+                try {
+                    oos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private NodeContainerPo createNodeContainerPo(Map<String, Node> disConnectNodes,
+                                                  Map<String, Node> canConnectNodes,
+                                                  Map<String, Node> failNodes,
+                                                  Map<String, Node> uncheckNodes,
+                                                  Map<String, Node> connectedNodes) {
+        NodeContainerPo containerPo = new NodeContainerPo();
+        for (Node node : disConnectNodes.values()) {
+            containerPo.getDisConnectNodes().add(new NodePo(node));
+        }
+        for (Node node : canConnectNodes.values()) {
+            containerPo.getCanConnectNodes().add(new NodePo(node));
+        }
+        for (Node node : failNodes.values()) {
+            containerPo.getFailNodes().add(new NodePo(node));
+        }
+        for (Node node : uncheckNodes.values()) {
+            containerPo.getUncheckNodes().add(new NodePo(node));
+        }
+        for (Node node : connectedNodes.values()) {
+            containerPo.getCanConnectNodes().add(new NodePo(node));
+        }
+        return containerPo;
     }
 
 

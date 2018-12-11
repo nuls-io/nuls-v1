@@ -43,6 +43,7 @@ import io.nuls.network.netty.report.PlatformDepedentReporter;
 import io.nuls.network.netty.task.GetNodeVersionTask;
 import io.nuls.network.netty.task.NodeDiscoverTask;
 import io.nuls.network.netty.task.NodeMaintenanceTask;
+import io.nuls.network.netty.task.SaveNodeInfoTask;
 import io.nuls.network.protocol.message.*;
 import io.nuls.protocol.constant.ProtocolConstant;
 
@@ -55,7 +56,7 @@ import static io.nuls.network.constant.NetworkConstant.*;
 
 public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
-    private  NetworkParam networkParam;
+    private NetworkParam networkParam;
 
     private NettyServer nettyServer;
     private NodeManager nodeManager;
@@ -85,7 +86,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
-
+        executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
         PlatformDepedentReporter reporter = new PlatformDepedentReporter();
         reporter.init();
         reporter.start();

@@ -27,11 +27,12 @@ package io.nuls.network.netty.container;
 
 import io.nuls.network.model.Node;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NodesContainer {
+public class NodesContainer implements Serializable {
 
     private Map<String, Node> canConnectNodes = new ConcurrentHashMap<>();
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
@@ -40,13 +41,13 @@ public class NodesContainer {
     private Map<String, Node> uncheckNodes = new ConcurrentHashMap<>();
 
     public boolean markCanuseNodeByIp(String ip, int type) {
-        if(ip == null) {
+        if (ip == null) {
             return false;
         }
         Iterator<Node> it = canConnectNodes.values().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Node node = it.next();
-            if(ip.equals(node.getIp())) {
+            if (ip.equals(node.getIp())) {
                 node.setStatus(type);
                 return true;
             }
