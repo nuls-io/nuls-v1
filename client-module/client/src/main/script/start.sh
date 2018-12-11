@@ -40,7 +40,7 @@ for file in ${SERVER_HOME}/libs/*.jar; do
 done
 
 # Get standard environment variables
-JAVA_OPTS="-Dfile.encoding=UTF-8 -server -Xms4096m -Xmx4096m"
+JAVA_OPTS="-Dfile.encoding=UTF-8 -server -Xms1024m -Xmx4096m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:MaxDirectMemorySize=256M -XX:PermSize=128M -XX:MaxPermSize=128M -Dio.netty.maxDirectMemory=0"
 
 MAIN_CLASS=io.nuls.client.Bootstrap
 
