@@ -31,6 +31,7 @@ import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
 import io.nuls.client.version.WalletVersionManager;
+import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.date.DateUtil;
@@ -45,6 +46,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.module.manager.ModuleManager;
 import io.nuls.kernel.module.service.ModuleService;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
@@ -119,7 +121,7 @@ public class Bootstrap {
         // if isDaemon flag is true, don't launch the WebView
         boolean isDaemon = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_DAEMON, false);
         if (!isDaemon) {
-//            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
         }
 
         int i = 0;
