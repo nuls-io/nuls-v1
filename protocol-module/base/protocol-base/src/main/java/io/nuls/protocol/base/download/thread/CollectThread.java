@@ -72,7 +72,7 @@ public class CollectThread implements Runnable {
         boolean result = false;
         while (true) {
             try {
-                if (startHeight > endHeight || this.requestThread.isStoped()) {
+                if (startHeight > endHeight || (!this.requestThread.isSuccess() && this.requestThread.isStoped())) {
                     break;
                 }
                 result = pushBlock();

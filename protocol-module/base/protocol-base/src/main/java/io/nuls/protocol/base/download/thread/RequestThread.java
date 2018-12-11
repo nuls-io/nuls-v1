@@ -48,6 +48,7 @@ public class RequestThread implements Runnable {
 
     private static final int count = 10;
     private boolean running = true;
+    private boolean success = false;
 
     public RequestThread(List<Node> nodeList, long startHeight, long endHeight) {
         this.nodeList = nodeList;
@@ -58,10 +59,12 @@ public class RequestThread implements Runnable {
     @Override
     public void run() {
         this.running = true;
+        this.success = false;
         while (true) {
             try {
                 if (startHeight > endHeight) {
                     this.init();
+                    this.success = true;
                     break;
                 }
                 if (this.nodeList == null || this.nodeList.isEmpty()) {
@@ -131,6 +134,10 @@ public class RequestThread implements Runnable {
 
     public boolean isStoped() {
         return !this.running;
+    }
+
+    public boolean isSuccess() {
+        return success;
     }
 
     public long getStartHeight() {
