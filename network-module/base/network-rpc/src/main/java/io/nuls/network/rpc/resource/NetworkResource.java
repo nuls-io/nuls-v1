@@ -71,23 +71,19 @@ public class NetworkResource {
         NetworkInfoDto info = new NetworkInfoDto(NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
                 NulsContext.getInstance().getNetBestBlockHeight(), TimeService.getNetTimeOffset());
 
-        NodeGroup inGroup = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        NodeGroup outGroup = networkService.getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-        int count = 0;
-        for (Node node : inGroup.getNodes().values()) {
-            if (node.getStatus() == NodeConnectStatusEnum.AVAILABLE) {
-                count += 1;
+        Collection<Node> collections = networkService.getAvailableNodes();
+        int inCount = 0;
+        int outCount = 0;
+        for (Node node : collections) {
+            if (node.getType() == Node.IN) {
+                inCount++;
+            } else {
+                outCount++;
             }
         }
-        info.setInCount(count);
 
-        count = 0;
-        for (Node node : outGroup.getNodes().values()) {
-            if (node.getStatus() == NodeConnectStatusEnum.AVAILABLE) {
-                count += 1;
-            }
-        }
-        info.setOutCount(count);
+        info.setInCount(inCount);
+        info.setOutCount(outCount);
         info.setMastUpGrade(NulsContext.mastUpGrade);
         Result result = Result.getSuccess();
         result.setData(info);
@@ -101,19 +97,13 @@ public class NetworkResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String[].class)
     })
-
-
     public RpcClientResult getNode() {
         Set<String> ipSet = new HashSet<>();
-        //todo 最后来实现这个接口
-//        if (ipSet == null || ipSet.isEmpty()) {
-//            ipSet = new HashSet<>();
-//            List<Node> nodeList = networkService.getCanConnectNodes();
-//            for (Node node : nodeList) {
-//                ipSet.add(node.getIp());
-//            }
-//            nodeCacheManager.cacheIpSet(ipSet);
-//        }
+        List<Node> nodeList = networkService.getCanConnectNodes();
+        nodeList.addAll(networkService.getAvailableNodes());
+        for (Node node : nodeList) {
+            ipSet.add(node.getIp());
+        }
         Result result = Result.getSuccess();
         Map<String, Set<String>> map = new HashMap<>();
         map.put("list", ipSet);
