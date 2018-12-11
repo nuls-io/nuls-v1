@@ -54,15 +54,15 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
     @Override
     public void onMessage(GetBlocksByHeightMessage message, Node fromNode) {
 
-        if(message == null || message.getMsgBody() == null || fromNode == null) {
+        if (message == null || message.getMsgBody() == null || fromNode == null) {
             return;
         }
 
         GetBlocksByHeightParam param = message.getMsgBody();
-        if(param.getStartHeight() < 0L || param.getStartHeight() > param.getEndHeight()) {
+        if (param.getStartHeight() < 0L || param.getStartHeight() > param.getEndHeight()) {
             return;
         }
-        if( param.getEndHeight() - param.getStartHeight() >= MAX_SIZE) {
+        if (param.getEndHeight() - param.getStartHeight() >= MAX_SIZE) {
             return;
         }
 
@@ -76,28 +76,33 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
         // react request
         messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
 
-        BlockHeader startBlockHeader = blockService.getBlockHeader(param.getStartHeight()).getData();
-        if(startBlockHeader == null) {
+        Block startBlock = blockService.getBlock(param.getStartHeight()).getData();
+        if (startBlock == null) {
             sendNotFound(requestHash, fromNode);
             return;
         }
-        Block endBlock = blockService.getBlock(param.getEndHeight()).getData();
-        if(endBlock == null) {
-            sendNotFound(requestHash, fromNode);
-            return;
-        }
-
-        Block block = endBlock;
-        while(true) {
+//        Block endBlock = blockService.getBlock(param.getEndHeight()).getData();
+//        if(endBlock == null) {
+//            sendNotFound(requestHash, fromNode);
+//            return;
+//        }
+//
+//        Block block = endBlock;
+//        while(true) {
+//            sendBlock(block, fromNode);
+//            if(block.getHeader().getHash().equals(startBlockHeader.getHash())) {
+//                break;
+//            }
+//            Result<Block> result = blockService.getBlock(block.getHeader().getPreHash());
+//            if (result.isFailed() || (block = result.getData()) == null) {
+//                sendNotFound(requestHash, fromNode);
+//                return;
+//            }
+//        }
+        Block block = startBlock;
+        for (int i = 1; i <= param.size(); i++) {
             sendBlock(block, fromNode);
-            if(block.getHeader().getHash().equals(startBlockHeader.getHash())) {
-                break;
-            }
-            Result<Block> result = blockService.getBlock(block.getHeader().getPreHash());
-            if (result.isFailed() || (block = result.getData()) == null) {
-                sendNotFound(requestHash, fromNode);
-                return;
-            }
+            block = blockService.getBlock(param.getStartHeight() + i).getData();
         }
 
         CompleteMessage completeMessage = new CompleteMessage();
