@@ -172,7 +172,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
             NodeContainerPo containerPo = (NodeContainerPo) ois.readObject();
             return containerPo;
         } catch (FileNotFoundException e) {
-            Log.error(e);
+//            Log.error(e);
         } catch (IOException e) {
             Log.error(e);
         } catch (ClassNotFoundException e) {
