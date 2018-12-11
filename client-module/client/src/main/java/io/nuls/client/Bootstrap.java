@@ -127,7 +127,7 @@ public class Bootstrap {
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
         NulsContext context = NulsContext.getInstance();
-        DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+//        DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         while (true) {
             if (context.getStop() > 0) {
                 if (context.getStop() == 2) {
@@ -148,9 +148,9 @@ public class Bootstrap {
             if (i > 10) {
                 i = 0;
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
-                if (!downloadService.isDownloadSuccess().isSuccess()) {
-                    Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());
-                }
+//                if (!downloadService.isDownloadSuccess().isSuccess()) {
+//                    Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());
+//                }
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
                 Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().size() + " - " + TxMemoryPool.getInstance().getOrphanPoolSize() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
