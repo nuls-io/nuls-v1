@@ -27,6 +27,7 @@ package io.nuls.network.storage.service;
 
 import com.sun.org.apache.xalan.internal.xsltc.dom.NodeCounter;
 import io.nuls.network.model.Node;
+import io.nuls.network.storage.po.NodeContainerPo;
 
 import java.util.List;
 import java.util.Map;
@@ -53,4 +54,6 @@ public interface NetworkStorageService {
     String getExternalIp();
 
     void saveNodes(Map<String, Node> disConnectNodes, Map<String, Node> canConnectNodes, Map<String, Node> failNodes, Map<String, Node> uncheckNodes, Map<String, Node> connectedNodes);
+
+    NodeContainerPo loadNodeContainer();
 }

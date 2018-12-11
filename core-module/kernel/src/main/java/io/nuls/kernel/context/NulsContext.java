@@ -112,6 +112,8 @@ public class NulsContext {
      */
     private Long netBestBlockHeight = 0L;
 
+    private static String dataPath;
+
     public int getStop() {
         return stop;
     }
@@ -286,5 +288,13 @@ public class NulsContext {
 
     public void setDefaultChainId(Short defaultChainId) {
         this.defaultChainId = defaultChainId;
+    }
+
+    public static String getDataPath() {
+        return dataPath;
+    }
+
+    public static void setDataPath(String dataPath) {
+        NulsContext.dataPath = dataPath;
     }
 }

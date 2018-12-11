@@ -34,6 +34,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.storage.constant.NetworkStorageConstant;
@@ -42,9 +43,7 @@ import io.nuls.network.storage.po.NodeContainerPo;
 import io.nuls.network.storage.po.NodePo;
 import io.nuls.network.storage.service.NetworkStorageService;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +53,7 @@ import static io.nuls.core.tools.str.StringUtils.bytes;
 
 @Component
 public class NetworkStorageServiceImpl implements NetworkStorageService, InitializingBean {
+
 
     @Autowired
     private DBService dbService;
@@ -139,20 +139,13 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         ObjectOutputStream oos = null;
 
         try {
-            fos = new FileOutputStream("./network.txt");
+            fos = new FileOutputStream(NulsContext.getDataPath() + "/" + NetworkConstant.NODE_FILE_NAME);
             oos = new ObjectOutputStream(fos);
             Integer i = 1;
             oos.writeObject(containerPo);
         } catch (Exception e) {
             Log.error(e);
         } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
             if (oos != null) {
                 try {
                     oos.close();
@@ -160,7 +153,45 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
                     e.printStackTrace();
                 }
             }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+    }
+
+    @Override
+    public NodeContainerPo loadNodeContainer() {
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream(NulsContext.getDataPath() + "/" + NetworkConstant.NODE_FILE_NAME);
+            ois = new ObjectInputStream(fis);
+            NodeContainerPo containerPo = (NodeContainerPo) ois.readObject();
+            return containerPo;
+        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
+            Log.error(e);
+        } finally {
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 
     private NodeContainerPo createNodeContainerPo(Map<String, Node> disConnectNodes,

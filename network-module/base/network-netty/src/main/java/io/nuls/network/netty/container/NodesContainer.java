@@ -27,6 +27,9 @@ package io.nuls.network.netty.container;
 
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeStatusEnum;
+import io.nuls.network.storage.po.NetworkTransferTool;
+import io.nuls.network.storage.po.NodeContainerPo;
+import io.nuls.network.storage.po.NodePo;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -40,6 +43,38 @@ public class NodesContainer implements Serializable {
     private Map<String, Node> disconnectNodes = new ConcurrentHashMap<>();
     private Map<String, Node> failNodes = new ConcurrentHashMap<>();
     private Map<String, Node> uncheckNodes = new ConcurrentHashMap<>();
+
+    public NodesContainer() {
+
+    }
+
+    public NodesContainer(NodeContainerPo containerPo) {
+        Node node = null;
+        if (containerPo.getDisConnectNodes() != null) {
+            for (NodePo nodePo : containerPo.getDisConnectNodes()) {
+                node = NetworkTransferTool.toNode(nodePo);
+                disconnectNodes.put(node.getId(), node);
+            }
+        }
+        if (containerPo.getUncheckNodes() != null) {
+            for (NodePo nodePo : containerPo.getUncheckNodes()) {
+                node = NetworkTransferTool.toNode(nodePo);
+                uncheckNodes.put(node.getId(), node);
+            }
+        }
+        if (containerPo.getFailNodes() != null) {
+            for (NodePo nodePo : containerPo.getFailNodes()) {
+                node = NetworkTransferTool.toNode(nodePo);
+                failNodes.put(node.getId(), node);
+            }
+        }
+        if (containerPo.getCanConnectNodes() != null) {
+            for (NodePo nodePo : containerPo.getCanConnectNodes()) {
+                node = NetworkTransferTool.toNode(nodePo);
+                canConnectNodes.put(node.getId(), node);
+            }
+        }
+    }
 
     public boolean markCanuseNodeByIp(String ip, int type) {
         if (ip == null) {
