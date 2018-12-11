@@ -203,19 +203,29 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
                                                   Map<String, Node> connectedNodes) {
         NodeContainerPo containerPo = new NodeContainerPo();
         for (Node node : disConnectNodes.values()) {
-            containerPo.getDisConnectNodes().add(new NodePo(node));
+            if (node.getType() == Node.OUT) {
+                containerPo.getDisConnectNodes().add(new NodePo(node));
+            }
         }
         for (Node node : canConnectNodes.values()) {
-            containerPo.getCanConnectNodes().add(new NodePo(node));
+            if (node.getType() == Node.OUT) {
+                containerPo.getCanConnectNodes().add(new NodePo(node));
+            }
         }
         for (Node node : failNodes.values()) {
-            containerPo.getFailNodes().add(new NodePo(node));
+            if (node.getType() == Node.OUT) {
+                containerPo.getFailNodes().add(new NodePo(node));
+            }
         }
         for (Node node : uncheckNodes.values()) {
-            containerPo.getUncheckNodes().add(new NodePo(node));
+            if (node.getType() == Node.OUT) {
+                containerPo.getUncheckNodes().add(new NodePo(node));
+            }
         }
         for (Node node : connectedNodes.values()) {
-            containerPo.getCanConnectNodes().add(new NodePo(node));
+            if (node.getType() == Node.OUT) {
+                containerPo.getCanConnectNodes().add(new NodePo(node));
+            }
         }
         return containerPo;
     }
