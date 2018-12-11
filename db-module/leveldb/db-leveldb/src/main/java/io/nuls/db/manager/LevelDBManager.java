@@ -26,6 +26,7 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
@@ -77,6 +78,7 @@ public class LevelDBManager {
                 isInit = true;
                 File dir = loadDataPath();
                 dataPath = dir.getPath();
+                NulsContext.setDataPath(dataPath);
                 Log.info("LevelDBManager dataPath is " + dataPath);
 
                 initSchema();
@@ -938,5 +940,9 @@ public class LevelDBManager {
 
 //        options.setTableFormatConfig(tableOptions);
         return options;
+    }
+
+    public static String getDataPath() {
+        return dataPath;
     }
 }

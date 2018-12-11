@@ -26,8 +26,11 @@
 package io.nuls.network.storage.po;
 
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
 
-public class NodePo {
+import java.io.Serializable;
+
+public class NodePo implements Serializable {
 
     private String id;
 
@@ -40,6 +43,8 @@ public class NodePo {
     private Long lastFailTime;
 
     private Integer failCount;
+
+    private Integer status;
 
     private Integer connectStatus;
 
@@ -55,7 +60,8 @@ public class NodePo {
         this.lastTime = node.getLastTime();
         this.lastFailTime = node.getLastFailTime();
         this.failCount = node.getFailCount();
-        this.connectStatus = node.getConnectStatus();
+        this.connectStatus = NodeConnectStatusEnum.UNCONNECT;
+        this.status = node.getStatus();
     }
 
 
@@ -113,5 +119,18 @@ public class NodePo {
 
     public void setConnectStatus(Integer connectStatus) {
         this.connectStatus = connectStatus;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public boolean equals(Object obj) {
+        NodePo po = (NodePo) obj;
+        return (this.id.equals(po.getId()));
     }
 }

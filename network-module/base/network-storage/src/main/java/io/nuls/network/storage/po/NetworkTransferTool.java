@@ -33,9 +33,11 @@ public class NetworkTransferTool {
         NodePo po = new NodePo();
         po.setId(node.getId());
         po.setIp(node.getIp());
+        po.setPort(node.getPort());
         po.setLastTime(node.getLastTime());
         po.setLastFailTime(node.getLastFailTime());
         po.setFailCount(node.getFailCount());
+        po.setStatus(node.getStatus());
         po.setConnectStatus(node.getConnectStatus());
         return po;
     }
@@ -43,10 +45,11 @@ public class NetworkTransferTool {
     public static void toPojo(Node node, NodePo po) {
         po.setId(node.getId());
         po.setIp(node.getIp());
+        po.setPort(node.getPort());
         po.setLastTime(node.getLastTime());
         po.setLastFailTime(node.getLastFailTime());
         po.setFailCount(node.getFailCount());
-        po.setConnectStatus(node.getConnectStatus());
+        po.setStatus(node.getStatus());
     }
 
     public static Node toNode(NodePo po) {
@@ -57,6 +60,7 @@ public class NetworkTransferTool {
         node.setFailCount(po.getFailCount());
         node.setLastTime(po.getLastTime());
         node.setLastFailTime(po.getLastFailTime());
+        node.setStatus(po.getStatus());
         node.setConnectStatus(po.getConnectStatus());
         return node;
     }

@@ -40,8 +40,10 @@ import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.container.GroupContainer;
 import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.netty.task.SaveNodeInfoTask;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.storage.po.NodeContainerPo;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.*;
@@ -74,65 +76,47 @@ public class NodeManager {
 
 
     public void loadDatas() {
-
         //本地已经存储的节点信息
-        List<Node> allNodeList = getNetworkStorageService().getAllNodes();
+        NodeContainerPo containerPo = getNetworkStorageService().loadNodeContainer();
+        if (containerPo != null) {
+            NodesContainer container = new NodesContainer(containerPo);
+            this.nodesContainer = container;
+        } else {
 
-        // 合并种子节点
-        for (Node node : allNodeList) {
-            if (node.isSeedNode()) {
-                node.setSeedNode(false);
-            }
-        }
+            List<Node> allNodeList = new ArrayList<>();
+            for (String seedId : networkParam.getSeedIpList()) {
+                try {
+                    String[] ipPort = seedId.split(":");
+                    String ip = ipPort[0];
+                    int port = Integer.parseInt(ipPort[1]);
 
-        for (String seedId : networkParam.getSeedIpList()) {
-
-            boolean exist = false;
-            for (Node node : allNodeList) {
-                if (node.getId().equals(seedId)) {
+                    Node node = new Node(ip, port, Node.OUT);
                     node.setSeedNode(true);
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
 
-                    exist = true;
-                    break;
+                    allNodeList.add(node);
+                } catch (Exception e) {
+                    Log.warn("the seed config is warn of {}", seedId);
                 }
             }
+            Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
+            Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
+            Map<String, Node> failNodes = nodesContainer.getFailNodes();
 
-            if (exist) {
-                continue;
-            }
-            try {
-                String[] ipPort = seedId.split(":");
-                String ip = ipPort[0];
-                int port = Integer.parseInt(ipPort[1]);
-
-                Node node = new Node(ip, port, Node.OUT);
-                node.setSeedNode(true);
-                node.setStatus(NodeStatusEnum.CONNECTABLE);
-
-                allNodeList.add(node);
-            } catch (Exception e) {
-                Log.warn("the seed config is warn of {}", seedId);
-            }
-        }
-
-        Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
-        Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
-        Map<String, Node> failNodes = nodesContainer.getFailNodes();
-
-        for (Node node : allNodeList) {
-            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-            switch (node.getStatus()) {
-                case NodeStatusEnum.CONNECTABLE: {
-                    canConnectNodes.put(node.getId(), node);
-                    break;
+            for (Node node : allNodeList) {
+                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+                switch (node.getStatus()) {
+                    case NodeStatusEnum.CONNECTABLE: {
+                        canConnectNodes.put(node.getId(), node);
+                        break;
+                    }
+                    case NodeStatusEnum.UNAVAILABLE: {
+                        failNodes.put(node.getId(), node);
+                        break;
+                    }
+                    default:
+                        uncheckNodes.put(node.getId(), node);
                 }
-                case NodeStatusEnum.UNAVAILABLE: {
-                    failNodes.put(node.getId(), node);
-                    break;
-                }
-                default:
-                    uncheckNodes.put(node.getId(), node);
             }
         }
     }
@@ -200,6 +184,7 @@ public class NodeManager {
 
     /**
      * 节点连接失败
+     *
      * @param node
      */
     public void nodeConnectFail(Node node) {
@@ -219,7 +204,7 @@ public class NodeManager {
 
         //连接断开后,判断是否是为连接成功，还是连接成功后断开
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
-            node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
             node.setFailCount(0);
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
 
@@ -319,7 +304,7 @@ public class NodeManager {
         String name = "node-" + node.getId();
         boolean exists = AttributeKey.exists(name);
         AttributeKey attributeKey;
-        if(exists) {
+        if (exists) {
             attributeKey = AttributeKey.valueOf(name);
         } else {
             attributeKey = AttributeKey.newInstance(name);
@@ -328,7 +313,7 @@ public class NodeManager {
         attribute.set(node);
     }
 
-    private void sendHandshakeMessage(Node node, int type ) {
+    private void sendHandshakeMessage(Node node, int type) {
         NetworkMessageBody body = new NetworkMessageBody(type, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                 node.getIp());

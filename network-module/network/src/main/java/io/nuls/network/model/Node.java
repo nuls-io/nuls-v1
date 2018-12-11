@@ -146,7 +146,7 @@ public class Node extends BaseNulsData {
     }
 
     public boolean isAlive() {
-        return this.connectStatus == NodeConnectStatusEnum.CONNECTED || this.status == NodeConnectStatusEnum.AVAILABLE;
+        return this.connectStatus == NodeConnectStatusEnum.CONNECTED || this.connectStatus == NodeConnectStatusEnum.AVAILABLE;
     }
 
     @Override
