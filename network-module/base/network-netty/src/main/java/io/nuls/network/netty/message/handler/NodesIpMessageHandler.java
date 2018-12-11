@@ -49,12 +49,12 @@ public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
-        NodeMessageBody body = handshakeMessage.getMsgBody();
-
-//        for(String ip : body.getIpList()) {
-//            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
-//        }
+//        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
+//        NodeMessageBody body = handshakeMessage.getMsgBody();
+//
+////        for(String ip : body.getIpList()) {
+////            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
+////        }
         return null;
     }
 }

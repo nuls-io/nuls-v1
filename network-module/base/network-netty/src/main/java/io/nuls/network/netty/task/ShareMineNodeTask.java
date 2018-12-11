@@ -7,6 +7,8 @@ import io.nuls.network.model.Node;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.manager.ConnectionManager;
 import io.nuls.network.netty.manager.NodeManager;
+import io.nuls.network.protocol.message.GetNodesMessage;
+import io.nuls.network.protocol.message.NodeMessageBody;
 import io.nuls.network.protocol.message.P2PNodeBody;
 import io.nuls.network.protocol.message.P2PNodeMessage;
 
@@ -64,6 +66,8 @@ public class ShareMineNodeTask implements Runnable {
             public void action() {
                 myNode.setChannel(null);
                 hasShare = true;
+
+                getMoreNodes();
             }
         });
 
@@ -130,5 +134,10 @@ public class ShareMineNodeTask implements Runnable {
         P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
         broadcastHandler.broadcastToAllNode(message, null, true, 100);
+    }
+
+    private void getMoreNodes() {
+        GetNodesMessage getNodesMessage = new GetNodesMessage(new NodeMessageBody());
+        broadcastHandler.broadcastToAllNode(getNodesMessage, null, true, 100);
     }
 }

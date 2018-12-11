@@ -53,16 +53,17 @@ public class GetNodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        Collection<Node> availableNodes = nodeManager.getNodes().values();
-        List<String> ipList = new ArrayList<>();
-        for (Node n : availableNodes) {
-            ipList.add(n.getIp());
-        }
-
-        NodeMessageBody messageBody = new NodeMessageBody();
-//        messageBody.setIpList(ipList);
-        NodesIpMessage nodesIpMessage = new NodesIpMessage(messageBody);
-
-        return new NetworkEventResult(true, nodesIpMessage);
+//        Collection<Node> availableNodes = nodeManager.getNodes().values();
+//        List<String> ipList = new ArrayList<>();
+//        for (Node n : availableNodes) {
+//            ipList.add(n.getIp());
+//        }
+//
+//        NodeMessageBody messageBody = new NodeMessageBody();
+////        messageBody.setIpList(ipList);
+//        NodesIpMessage nodesIpMessage = new NodesIpMessage(messageBody);
+//
+//        return new NetworkEventResult(true, nodesIpMessage);
+        return null;
     }
 }
