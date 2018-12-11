@@ -33,6 +33,7 @@ import io.nuls.kernel.model.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,7 +46,7 @@ public class CollectThread implements Runnable {
 
     private long endHeight;
     private long startHeight;
-    private Map<Long, Block> map = new HashMap<>();
+    private Map<Long, Block> map = new ConcurrentHashMap<>();
     private RequestThread requestThread;
     private Lock lock = new ReentrantLock();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
