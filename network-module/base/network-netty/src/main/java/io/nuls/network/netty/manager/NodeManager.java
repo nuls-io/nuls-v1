@@ -76,71 +76,47 @@ public class NodeManager {
 
 
     public void loadDatas() {
-
         //本地已经存储的节点信息
         NodeContainerPo containerPo = getNetworkStorageService().loadNodeContainer();
         if (containerPo != null) {
             NodesContainer container = new NodesContainer(containerPo);
             this.nodesContainer = container;
-        }
+        } else {
 
-        List<Node> allNodeList = getNetworkStorageService().getAllNodes();
+            List<Node> allNodeList = new ArrayList<>();
+            for (String seedId : networkParam.getSeedIpList()) {
+                try {
+                    String[] ipPort = seedId.split(":");
+                    String ip = ipPort[0];
+                    int port = Integer.parseInt(ipPort[1]);
 
-        // 合并种子节点
-        for (Node node : allNodeList) {
-            if (node.isSeedNode()) {
-                node.setSeedNode(false);
-            }
-        }
-
-        for (String seedId : networkParam.getSeedIpList()) {
-
-            boolean exist = false;
-            for (Node node : allNodeList) {
-                if (node.getId().equals(seedId)) {
+                    Node node = new Node(ip, port, Node.OUT);
                     node.setSeedNode(true);
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
 
-                    exist = true;
-                    break;
+                    allNodeList.add(node);
+                } catch (Exception e) {
+                    Log.warn("the seed config is warn of {}", seedId);
                 }
             }
+            Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
+            Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
+            Map<String, Node> failNodes = nodesContainer.getFailNodes();
 
-            if (exist) {
-                continue;
-            }
-            try {
-                String[] ipPort = seedId.split(":");
-                String ip = ipPort[0];
-                int port = Integer.parseInt(ipPort[1]);
-
-                Node node = new Node(ip, port, Node.OUT);
-                node.setSeedNode(true);
-                node.setStatus(NodeStatusEnum.CONNECTABLE);
-
-                allNodeList.add(node);
-            } catch (Exception e) {
-                Log.warn("the seed config is warn of {}", seedId);
-            }
-        }
-
-        Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
-        Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
-        Map<String, Node> failNodes = nodesContainer.getFailNodes();
-
-        for (Node node : allNodeList) {
-            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-            switch (node.getStatus()) {
-                case NodeStatusEnum.CONNECTABLE: {
-                    canConnectNodes.put(node.getId(), node);
-                    break;
+            for (Node node : allNodeList) {
+                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+                switch (node.getStatus()) {
+                    case NodeStatusEnum.CONNECTABLE: {
+                        canConnectNodes.put(node.getId(), node);
+                        break;
+                    }
+                    case NodeStatusEnum.UNAVAILABLE: {
+                        failNodes.put(node.getId(), node);
+                        break;
+                    }
+                    default:
+                        uncheckNodes.put(node.getId(), node);
                 }
-                case NodeStatusEnum.UNAVAILABLE: {
-                    failNodes.put(node.getId(), node);
-                    break;
-                }
-                default:
-                    uncheckNodes.put(node.getId(), node);
             }
         }
     }
