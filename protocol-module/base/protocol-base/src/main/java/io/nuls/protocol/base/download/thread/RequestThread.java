@@ -47,6 +47,7 @@ public class RequestThread implements Runnable {
     private MessageBusService service = NulsContext.getServiceBean(MessageBusService.class);
 
     private static final int count = 10;
+    private boolean running = true;
 
     public RequestThread(List<Node> nodeList, long startHeight, long endHeight) {
         this.nodeList = nodeList;
@@ -56,21 +57,33 @@ public class RequestThread implements Runnable {
 
     @Override
     public void run() {
+        this.running = true;
         while (true) {
             try {
                 if (startHeight > endHeight) {
                     this.init();
-                    return;
+                    break;
+                }
+                if (this.nodeList == null || this.nodeList.isEmpty()) {
+                    break;
                 }
                 if (startHeight - NulsContext.getInstance().getBestHeight() < 1000) {
                     downloadRound();
                     continue;
+                } else {
+                    for (int i = nodeList.size() - 1; i >= 0; i--) {
+                        Node node = nodeList.get(i);
+                        if (!node.isHandShake()) {
+                            nodeList.remove(i);
+                        }
+                    }
                 }
                 Thread.sleep(1000);
             } catch (Exception e) {
                 Log.error(e);
             }
         }
+        this.running = false;
     }
 
     private void init() {
@@ -104,7 +117,15 @@ public class RequestThread implements Runnable {
     }
 
     public boolean retryDownload(long start, int size) {
+        if (nodeList.isEmpty()) {
+            return false;
+        }
         Node node = nodeList.get(randomIndex++ % nodeList.size());
-        return request(node, start, size);
+        request(node, start, size);
+        return true;
+    }
+
+    public boolean isStoped() {
+        return !this.running;
     }
 }

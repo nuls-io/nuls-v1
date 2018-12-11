@@ -167,7 +167,7 @@ public class CreateP2shTransactionForm {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+        if (NulsContext.getInstance().getDefaultChainId() != chainId) {
             return false;
         }
         if (NulsContext.MAIN_NET_VERSION <= 1 || NulsContext.CONTRACT_ADDRESS_TYPE == type) {

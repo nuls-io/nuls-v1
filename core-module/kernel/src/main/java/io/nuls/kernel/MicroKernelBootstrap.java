@@ -29,6 +29,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
@@ -77,6 +78,8 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             NulsConfig.DEFAULT_ENCODING = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
             String language = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
             I18nUtils.setLanguage(language);
+            String chainId = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_CHAIN_ID, "8964");
+            NulsContext.getInstance().setDefaultChainId(Short.parseShort(chainId));
         } catch (Exception e) {
             Log.error(e);
         }

@@ -25,7 +25,6 @@ import io.nuls.kernel.model.Address;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import javax.annotation.Nullable;
-import java.math.BigInteger;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -547,7 +546,7 @@ public class ScriptBuilder {
      * 根据赎回脚本创建P2SH的锁定脚本
      */
     public static Script createP2SHOutputScript(Script redeemScript) {
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+        Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
         //byte[] hash = Utils.sha256hash160(redeemScript.getProgram());
         byte[] hash = address.getAddressBytes();
         return ScriptBuilder.createP2SHOutputScript(hash);

@@ -118,7 +118,7 @@ public class Bootstrap {
         // if isDaemon flag is true, don't launch the WebView
         boolean isDaemon = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_DAEMON, false);
         if (!isDaemon) {
-            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+//            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
         }
 
         int i = 0;

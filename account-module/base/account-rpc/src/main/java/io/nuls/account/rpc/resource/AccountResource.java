@@ -56,7 +56,6 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.Script;
-import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
@@ -1159,7 +1158,7 @@ public class AccountResource {
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
-            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+            Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
             Account account = accountService.getAccount(address).getData();
             if (null != account) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST).toRpcClientResult();

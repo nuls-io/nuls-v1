@@ -80,6 +80,11 @@ public interface NulsConstant {
      * The field name of the code setting in the system configuration.
      */
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+    /**
+     * 节点链id
+     * the main chain id of the node
+     */
+    String CFG_SYSTEM_DEFAULT_CHAIN_ID = "chain.id";
 
     /**
      * 内核模块的模块id

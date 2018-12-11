@@ -43,11 +43,16 @@ public class ConsensusConfig {
     private final static String CFG_CONSENSUS_SECTION = "consensus";
     private final static String PROPERTY_PARTAKE_PACKING = "partake.packing";
     private final static String PROPERTY_SEED_NODES = "seed.nodes";
+    private final static String MIN_PROTOCOL_UPGRADE_DELAY = "min.upgrade.delay";
     private final static String SEED_NODES_DELIMITER = ",";
 
     private static boolean partakePacking = false;
     private static List<byte[]> seedNodeBytesList = new ArrayList<>();
     private static List<String> seedNodeStringList = new ArrayList<>();
+
+
+    private static int minProtocolUpgradeDelay;
+
 
     public static void initConfiguration() throws Exception {
 
@@ -71,6 +76,9 @@ public class ConsensusConfig {
             seedNodeBytesList.add(AddressTool.getAddress(address));
             seedNodeStringList.add(address);
         }
+
+        int minUpgradeDelay = NulsConfig.MODULES_CONFIG.getCfgValue(CFG_CONSENSUS_SECTION, MIN_PROTOCOL_UPGRADE_DELAY, 1000);
+        minProtocolUpgradeDelay = minUpgradeDelay;
     }
 
     public static boolean isPartakePacking() {
@@ -83,5 +91,9 @@ public class ConsensusConfig {
 
     public static List<String> getSeedNodeStringList() {
         return seedNodeStringList;
+    }
+
+    public static int getMinProtocolUpgradeDelay() {
+        return minProtocolUpgradeDelay;
     }
 }

@@ -26,7 +26,6 @@ package io.nuls.ledger.service.impl;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.service.ContractService;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
@@ -351,7 +350,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                                 else{
                                     for (Script scriptSig : transactionSignature.getScripts()) {
                                         Script redeemScript = new Script(scriptSig.getChunks().get(scriptSig.getChunks().size()-1).data);
-                                        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+                                        Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
                                         Script publicScript = SignatureUtil.createOutputScript(address.getAddressBytes());
                                         signtureValidFlag = scriptSig.correctlyNulsSpends(transaction, 0, publicScript);
                                         if (signtureValidFlag) {
@@ -378,7 +377,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     if (java.util.Arrays.equals(realAddressBytes, NulsConstant.BLACK_HOLE_ADDRESS)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_BLOCK_HOLE);
                     }
-                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(realAddressBytes)) {
+                    if (NulsContext.getInstance().getDefaultChainId() != SerializeUtils.bytes2Short(realAddressBytes)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_NOT_BELONGS_TO_CHAIN);
                     }
                 }

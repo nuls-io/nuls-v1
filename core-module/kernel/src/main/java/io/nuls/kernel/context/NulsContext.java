@@ -69,7 +69,7 @@ public class NulsContext {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".8964.
      */
-    public static short DEFAULT_CHAIN_ID = 8964;
+    public Short defaultChainId;
 
     /**
      * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
@@ -276,4 +276,15 @@ public class NulsContext {
         return null;
     }
 
+    public short getDefaultChainId() {
+        if (null == defaultChainId) {
+            Log.error("Default chain id is null!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+        }
+        return defaultChainId;
+    }
+
+    public void setDefaultChainId(Short defaultChainId) {
+        this.defaultChainId = defaultChainId;
+    }
 }

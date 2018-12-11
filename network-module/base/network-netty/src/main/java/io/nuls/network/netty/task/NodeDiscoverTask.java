@@ -25,8 +25,7 @@
 package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.listener.EventListener;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeConnectStatusEnum;
 import io.nuls.network.model.NodeStatusEnum;
@@ -37,11 +36,8 @@ import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.network.protocol.message.P2PNodeBody;
 import io.nuls.network.protocol.message.P2PNodeMessage;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 节点发现任务
@@ -50,26 +46,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class NodeDiscoverTask implements Runnable {
 
-    private final NetworkParam networkParam = NetworkParam.getInstance();
-    private final NodeManager nodeManager = NodeManager.getInstance();
-    private final ConnectionManager connectionManager = ConnectionManager.getInstance();
-    private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+    // 节点探测结果 -- 成功，能连接
+    private final static int PROBE_STATUS_SUCCESS = 1;
+    // 节点探测结果 -- 失败，不能连接，节点不可用
+    private final static int PROBE_STATUS_FAIL = 2;
+    // 节点探测结果 -- 忽略，当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略
+    private final static int PROBE_STATUS_IGNORE = 3;
 
-    private boolean shareStatus;
+    private final NodeManager nodeManager = NodeManager.getInstance();
+    private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+    private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     @Override
     public void run() {
-        if(!shareStatus) {
-            new Thread(() -> {
-                try {
-                    shareMyServer();
-                } catch (Exception e) {
-                    Log.error("share my server error", e);
-                }
-            }).start();
+        try {
+            processNodes();
+        } catch (Exception e) {
+            Log.error(e);
         }
-
-        processNodes();
     }
 
     private void processNodes() {
@@ -97,143 +91,109 @@ public class NodeDiscoverTask implements Runnable {
     private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes) {
 
         for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
-
-            CompletableFuture future = new CompletableFuture<>();
-
             Node node = nodeEntry.getValue();
-
-            node.setConnectedListener(() -> {
-                node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
-                node.getChannel().close();
-            });
-
-            node.setDisconnectListener(() -> {
-                node.setChannel(null);
-
-                if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
-                    node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                    node.setStatus(NodeStatusEnum.CONNECTABLE);
-                    canConnectNodes.put(node.getId(), node);
-
-                    verifyNodes.remove(node.getId());
-                } else if (nodeManager.getAvailableNodesCount() > 0) {
-                    verifyNodes.remove(node.getId());
-                }
-                future.complete(new Object());
-            });
-
-            boolean result = connectionManager.connection(node);
-            if (!result) {
-                verifyNodes.remove(node.getId());
-            }
-            try {
-                future.get(1, TimeUnit.SECONDS);
-            } catch (Exception e) {
-            }
-        }
-    }
-
-
-    private void shareMyServer() {
-
-        if(shareStatus) {
-            return;
-        }
-        shareStatus = true;
-
-        String externalIp = getMyExtranetIp();
-
-        if (externalIp == null) {
-            shareStatus = false;
-            return;
-        }
-
-        Log.info("my external ip  is {}" , externalIp);
-
-        networkParam.getLocalIps().add(externalIp);
-
-        Node myNode = new Node(externalIp, networkParam.getPort(), Node.OUT);
-
-        myNode.setConnectedListener(() -> {
-
-            Log.info("============ connect myself success ========");
-
-            myNode.getChannel().close();
-            doShare(externalIp);
-        });
-
-        myNode.setDisconnectListener(new EventListener() {
-            @Override
-            public void action() {
-
-                Log.info("============ disconnect myself ========");
-
-                myNode.setChannel(null);
-            }
-        });
-
-        boolean success = connectionManager.connection(myNode);
-        Log.info("try connect myself {} ", success);
-    }
-
-    private String getMyExtranetIp() {
-        int nodeCount = 0;
-        long timeout = 20000L;
-        long lastTime = System.currentTimeMillis();
-
-        while (true) {
-            int count = nodeManager.getAvailableNodesCount();
-            if (count == nodeCount && count >= 1) {
-                if (System.currentTimeMillis() - lastTime > timeout) {
-                    break;
-                }
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            } else {
-                nodeCount = count;
-                lastTime = System.currentTimeMillis();
-            }
-        }
-
-        Collection<Node> nodes = nodeManager.getAvailableNodes();
-
-        return getMostSameIp(nodes);
-    }
-
-    private String getMostSameIp(Collection<Node> nodes) {
-
-        Map<String, Integer> ipMaps = new HashMap<>();
-
-        for (Node node : nodes) {
-            String ip = node.getExternalIp();
-            if (ip == null) {
+            boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
+            if (!needProbeNow) {
                 continue;
             }
-            Integer count = ipMaps.get(ip);
-            if (count == null) {
-                ipMaps.put(ip, 1);
-            } else {
-                ipMaps.put(ip, count + 1);
-            }
-        }
+            int status = doProbe(node);
 
-        int maxCount = 0;
-        String ip = null;
-        for (Map.Entry<String, Integer> entry : ipMaps.entrySet()) {
-            if (entry.getValue() > maxCount) {
-                maxCount = entry.getValue();
-                ip = entry.getKey();
+            if (status == PROBE_STATUS_IGNORE/* && !node.isSeedNode()*/) {
+                continue;
             }
-        }
 
-        return ip;
+            verifyNodes.remove(node.getId());
+            if (status == PROBE_STATUS_SUCCESS) {
+                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+                node.setStatus(NodeStatusEnum.CONNECTABLE);
+                node.setFailCount(0);
+                canConnectNodes.put(node.getId(), node);
+
+                if (node.getLastProbeTime() == 0L) {
+                    // 当lastProbeTime为0时，代表第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                    doShare(node);
+                }
+            } else if (status == PROBE_STATUS_FAIL) {
+                nodeManager.nodeConnectFail(node);
+                nodeManager.getNodesContainer().getFailNodes().put(node.getId(), node);
+            }
+            node.setLastProbeTime(TimeService.currentTimeMillis());
+        }
     }
 
-    private void doShare(String externalIp) {
-        P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
+    private boolean checkNeedProbeNow(Node node, Map<String, Node> verifyNodes) {
+        // 探测间隔时间，根据失败的次数来决定，探测失败次数为failCount，探测间隔为probeInterval，定义分别如下：
+        // failCount : 0-10 ，probeInterval = 60s
+        // failCount : 11-20 ，probeInterval = 300s
+        // failCount : 21-30 ，probeInterval = 600s
+        // failCount : 31-50 ，probeInterval = 1800s
+        // failCount : 51-100 ，probeInterval = 3600s
+        // 当一个节点失败次数大于100时，将从节点列表中移除，除非再次收到该节点的分享，否则永远丢弃该节点
+
+        long probeInterval;
+        int failCount = node.getFailCount();
+
+        if (failCount <= 10) {
+            probeInterval = 60 * 1000L;
+        } else if (failCount <= 20) {
+            probeInterval = 300 * 1000L;
+        } else if (failCount <= 30) {
+            probeInterval = 600 * 1000L;
+        } else if (failCount <= 50) {
+            probeInterval = 1800 * 1000L;
+        } else if (failCount <= 100) {
+            probeInterval = 3600 * 1000L;
+        } else {
+            verifyNodes.remove(node.getId());
+            return false;
+        }
+
+        return TimeService.currentTimeMillis() - node.getLastProbeTime() > probeInterval;
+    }
+
+    /*
+     * 执行探测
+     * @param int 探测结果 ： PROBE_STATUS_SUCCESS,成功  PROBE_STATUS_FAIL,失败  PROBE_STATUS_IGNORE,跳过（当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略）
+     */
+    private int doProbe(Node node) {
+
+        if(node == null) {
+            return PROBE_STATUS_FAIL;
+        }
+
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+
+        node.setConnectedListener(() -> {
+            node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
+            node.getChannel().close();
+        });
+
+        node.setDisconnectListener(() -> {
+            node.setChannel(null);
+
+            if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED) {
+                future.complete(PROBE_STATUS_SUCCESS);
+            } else if (nodeManager.getAvailableNodesCount() == 0) {
+                future.complete(PROBE_STATUS_IGNORE);
+            } else {
+                future.complete(PROBE_STATUS_FAIL);
+            }
+        });
+
+        boolean result = connectionManager.connection(node);
+        if (!result) {
+            return PROBE_STATUS_FAIL;
+        }
+        try {
+            return future.get();
+        } catch (Exception e) {
+            Log.error(e);
+            return PROBE_STATUS_IGNORE;
+        }
+    }
+
+    private void doShare(Node node) {
+        P2PNodeBody p2PNodeBody = new P2PNodeBody(node.getIp(), node.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
         broadcastHandler.broadcastToAllNode(message, null, true, 100);
     }

@@ -43,6 +43,7 @@ import io.nuls.network.netty.report.PlatformDepedentReporter;
 import io.nuls.network.netty.task.GetNodeVersionTask;
 import io.nuls.network.netty.task.NodeDiscoverTask;
 import io.nuls.network.netty.task.NodeMaintenanceTask;
+import io.nuls.network.netty.task.ShareMineNodeTask;
 import io.nuls.network.netty.task.SaveNodeInfoTask;
 import io.nuls.network.protocol.message.*;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -87,6 +88,9 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
+
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "share-mine-node", new ShareMineNodeTask());
+
         PlatformDepedentReporter reporter = new PlatformDepedentReporter();
         reporter.init();
         reporter.start();

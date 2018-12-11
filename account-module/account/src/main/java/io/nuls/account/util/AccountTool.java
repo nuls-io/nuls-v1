@@ -27,7 +27,6 @@ package io.nuls.account.util;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.kernel.model.Address;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
@@ -52,7 +51,7 @@ public class AccountTool {
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
-        return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
+        return new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(String prikey) throws NulsException {
@@ -66,7 +65,7 @@ public class AccountTool {
                 throw new NulsException(AccountErrorCode.PRIVATE_KEY_WRONG, e);
             }
         }
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+        Address address = new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);
@@ -83,7 +82,7 @@ public class AccountTool {
 
     public static Address createContractAddress() throws NulsException {
         ECKey key = new ECKey();
-        return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+        return new Address(NulsContext.getInstance().getDefaultChainId(), NulsContext.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
     }
 
 //    /**

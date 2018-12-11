@@ -26,6 +26,7 @@
 package io.nuls.network.netty.container;
 
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeStatusEnum;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -55,26 +56,59 @@ public class NodesContainer implements Serializable {
         return false;
     }
 
-    public boolean nodeExist(String nodeId) {
-        boolean exist = uncheckNodes.containsKey(nodeId);
+    public boolean addNeedCheckNode(Node newNode) {
 
-        if (!exist) {
-            exist = canConnectNodes.containsKey(nodeId);
+        String nodeId = newNode.getId();
+
+        Node node = uncheckNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
 
-        if (!exist) {
-            exist = connectedNodes.containsKey(nodeId);
+        node = canConnectNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
 
-        if (!exist) {
-            exist = disconnectNodes.containsKey(nodeId);
+        node = connectedNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
 
-        if (!exist) {
-            exist = failNodes.containsKey(nodeId);
+        node = disconnectNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
 
-        return exist;
+        node = failNodes.get(nodeId);
+        if (node != null) {
+            node.setFailCount(0);
+            node.setLastProbeTime(0L);
+            node.setStatus(NodeStatusEnum.UNCHECK);
+
+            failNodes.remove(nodeId);
+            uncheckNodes.put(nodeId, node);
+
+            return false;
+        }
+
+        newNode.setLastProbeTime(0L);
+        uncheckNodes.put(nodeId, newNode);
+        newNode.setStatus(NodeStatusEnum.UNCHECK);
+
+        return true;
+    }
+
+    public int getConnectedCount(int type) {
+        int size = 0;
+
+        for (Node node : connectedNodes.values()) {
+            if (node.getType() == type) {
+                size++;
+            }
+        }
+
+        return size;
     }
 
     public Node getNode(String nodeId) {
@@ -120,4 +154,5 @@ public class NodesContainer implements Serializable {
     public void setUncheckNodes(Map<String, Node> uncheckNodes) {
         this.uncheckNodes = uncheckNodes;
     }
+
 }

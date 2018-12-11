@@ -24,6 +24,7 @@
  */
 package io.nuls.network.netty.task;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -52,7 +53,14 @@ public class GetNodeVersionTask implements Runnable {
 
     @Override
     public void run() {
+        try {
+            process();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
 
+    private void process() {
         Collection<Node> connectedNodes = nodeManager.getAvailableNodes();
 
         if(connectedNodes == null) {

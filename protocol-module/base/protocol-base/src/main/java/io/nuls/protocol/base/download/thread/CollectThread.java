@@ -33,6 +33,8 @@ import io.nuls.kernel.model.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -45,7 +47,7 @@ public class CollectThread implements Runnable {
     private long startHeight;
     private Map<Long, Block> map = new HashMap<>();
     private RequestThread requestThread;
-
+    private Lock lock = new ReentrantLock();
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
 
@@ -65,9 +67,10 @@ public class CollectThread implements Runnable {
 
     @Override
     public void run() {
+        lock.lock();
         while (true) {
             try {
-                if (startHeight > endHeight) {
+                if (startHeight > endHeight || this.requestThread.isStoped()) {
                     break;
                 }
                 pushBlock();
@@ -75,7 +78,7 @@ public class CollectThread implements Runnable {
                 Log.error(e);
             }
         }
-        this.init();
+        lock.unlock();
     }
 
     private void init() {
@@ -107,7 +110,10 @@ public class CollectThread implements Runnable {
             Thread.sleep(10L);
             totalWait += 10;
             if (totalWait > 5000) {
-                this.requestThread.retryDownload(height, getRequestSize());
+                boolean b = this.requestThread.retryDownload(height, getRequestSize());
+                if (!b) {
+                    break;
+                }
                 totalWait = 0;
             }
             block = map.get(startHeight);
