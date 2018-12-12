@@ -87,19 +87,21 @@ public class NodeMaintenanceTask implements Runnable {
         }
 
         Collection<Node> canConnectNodes = nodeManager.getCanConnectNodes();
-        if(canConnectNodes.size() <= avaliableNodes.size()) {
-            return new ArrayList<>(canConnectNodes);
+        if(canConnectNodes.size() == 0) {
+            return null;
         }
 
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
-        Collections.shuffle(nodeList);
+        nodeList.removeAll(avaliableNodes);
 
         int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
-        if (maxCount > nodeList.size()) {
+        if(nodeList.size() < maxCount) {
             return nodeList;
-        } else {
-            return nodeList.subList(0, maxCount);
         }
+
+        Collections.shuffle(nodeList);
+
+        return nodeList.subList(0, maxCount);
     }
 }
