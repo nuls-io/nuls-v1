@@ -85,7 +85,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
                 new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "network-task-thread-pool"));
 
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 10000L, 10000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
 
