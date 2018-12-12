@@ -96,6 +96,10 @@ public class NodeMaintenanceTask implements Runnable {
         Collections.shuffle(nodeList);
 
         int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
-        return nodeList.subList(0, maxCount);
+        if (maxCount > nodeList.size()) {
+            return nodeList;
+        } else {
+            return nodeList.subList(0, maxCount);
+        }
     }
 }
