@@ -633,12 +633,30 @@ public class LevelDBManager {
         }
     }
 
+    public static <T> T getModel(byte[] value, Class<T> clazz) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+            ModelWrapper model = new ModelWrapper();
+            ProtostuffIOUtil.mergeFrom(value, model, schema);
+            if (clazz != null && model.getT() != null) {
+                return clazz.cast(model.getT());
+            }
+            return (T) model.getT();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Set<byte[]> keySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<byte[]> keySet = null;
+        Set<byte[]> keySet;
         try {
             DB db = AREAS.get(area);
             keySet = new HashSet<>();
@@ -667,12 +685,11 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<byte[]> keyList = null;
+        List<byte[]> keyList;
         try {
             DB db = AREAS.get(area);
             keyList = new ArrayList<>();
             iterator = db.iterator();
-            String key;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 keyList.add(iterator.peekNext().getKey());
             }
@@ -701,7 +718,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        Set<Entry<byte[], byte[]>> entrySet = null;
+        Set<Entry<byte[], byte[]>> entrySet;
         try {
             DB db = AREAS.get(area);
             entrySet = new HashSet<>();
@@ -735,7 +752,7 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<byte[], byte[]>> entryList = null;
+        List<Entry<byte[], byte[]>> entryList;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
@@ -779,20 +796,19 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<byte[], T>> entryList = null;
+        List<Entry<byte[], T>> entryList;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
             iterator = db.iterator();
-            byte[] key, bytes;
+            byte[] key;
             Map.Entry<byte[], byte[]> entry;
             Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
-            T t = null;
+            T t;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                t = null;
                 entry = iterator.peekNext();
                 key = entry.getKey();
-                t = getModel(area, entry.getKey(), clazz);
+                t = getModel(entry.getValue(), clazz);
                 entryList.add(new Entry<byte[], T>(key, t, comparator));
             }
             // 如果自定义了比较器，则执行排序
@@ -847,18 +863,16 @@ public class LevelDBManager {
             return null;
         }
         DBIterator iterator = null;
-        List<T> list = null;
+        List<T> list;
         try {
             DB db = AREAS.get(area);
             list = new ArrayList<>();
             iterator = db.iterator();
-            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
-            T t = null;
+            T t;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                t = null;
                 entry = iterator.peekNext();
-                t = getModel(area, entry.getKey(), clazz);
+                t = getModel(entry.getValue(), clazz);
                 list.add(t);
             }
         } catch (Exception e) {
