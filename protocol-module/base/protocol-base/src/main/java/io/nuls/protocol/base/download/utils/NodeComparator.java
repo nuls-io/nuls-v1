@@ -36,6 +36,12 @@ public class NodeComparator implements Comparator<Node> {
 
     @Override
     public int compare(Node o1, Node o2) {
+        if (o1 == null) {
+            return 1;
+        }
+        if (o2 == null) {
+            return -1;
+        }
         long offset = o1.getTimeOffset() - o2.getTimeOffset();
         if (offset > 0) {
             return 1;
