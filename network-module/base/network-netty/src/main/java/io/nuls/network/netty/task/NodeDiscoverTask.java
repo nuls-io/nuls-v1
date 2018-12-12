@@ -75,7 +75,7 @@ public class NodeDiscoverTask implements Runnable {
         Map<String, Node> failNodes = nodesContainer.getFailNodes();
         Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
 
-        Log.info("the fail nodes count is {}", failNodes.size());
+//        Log.info("the fail nodes count is {}", failNodes.size());
 
         if (uncheckNodes.size() > 0) {
             probeNodes(uncheckNodes, canConnectNodes);
