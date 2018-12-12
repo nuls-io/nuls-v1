@@ -30,8 +30,10 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.download.utils.NodeComparator;
 import io.nuls.protocol.message.GetBlocksByHeightMessage;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,9 +53,15 @@ public class RequestThread implements Runnable {
     private boolean success = false;
 
     public RequestThread(List<Node> nodeList, long startHeight, long endHeight) {
-        this.nodeList = nodeList;
         this.startHeight = startHeight;
         this.endHeight = endHeight;
+        int nodeCount = 5;
+        if (nodeList.size() <= nodeCount) {
+            this.nodeList = nodeList;
+        } else {
+            Collections.sort(nodeList, new NodeComparator());
+            this.nodeList = nodeList.subList(0, nodeCount);
+        }
     }
 
     @Override
@@ -98,7 +106,7 @@ public class RequestThread implements Runnable {
     private void downloadRound() {
         for (int i = nodeList.size() - 1; i >= 0; i--) {
             Node node = nodeList.get(i);
-            if (!node.isHandShake() || node.getTimeOffset() > 100L) {
+            if (!node.isHandShake()) {
                 nodeList.remove(i);
                 continue;
             }

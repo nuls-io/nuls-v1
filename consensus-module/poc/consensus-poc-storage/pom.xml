@@ -29,26 +29,26 @@
     <parent>
         <artifactId>consensus-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.5</version>
+        <version>1.1.6-beta</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus-poc-storage</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.6-beta</version>
 
     
     <dependencies>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6-beta</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
