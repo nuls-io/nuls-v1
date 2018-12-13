@@ -244,11 +244,6 @@
             <version>1.1.6-beta</version>
         </dependency>
         <dependency>
-            <groupId>io.nuls.network-module</groupId>
-            <artifactId>network-netty</artifactId>
-            <version>1.1.6-beta</version>
-        </dependency>
-        <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
             <version>1.1.6-beta</version>
