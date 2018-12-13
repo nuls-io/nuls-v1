@@ -883,6 +883,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      * 验证创建调用智能合约的交易
      *
      * @param sender          交易创建者
+     * @param value           交易附带的货币量
      * @param gasLimit        最大gas消耗
      * @param price           执行合约单价
      * @param contractAddress 合约地址
@@ -892,7 +893,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      * @return
      */
     @Override
-    public Result validateContractCallTx(String sender, Long gasLimit, Long price, String contractAddress,
+    public Result validateContractCallTx(String sender, Long value, Long gasLimit, Long price, String contractAddress,
                                  String methodName, String methodDesc, String[][] args) {
         AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
         AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
@@ -944,7 +945,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
 
         // 创建链上交易，包含智能合约
-        programCall.setValue(BigInteger.ZERO);
+        programCall.setValue(BigInteger.valueOf(value));
         programCall.setPrice(price.longValue());
         programCall.setGasLimit(gasLimit.longValue());
 
