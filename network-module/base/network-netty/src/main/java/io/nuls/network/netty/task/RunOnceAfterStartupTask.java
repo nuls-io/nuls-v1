@@ -2,7 +2,6 @@ package io.nuls.network.netty.task;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.listener.EventListener;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.manager.ConnectionManager;
@@ -16,28 +15,44 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ShareMineNodeTask implements Runnable {
+public class RunOnceAfterStartupTask implements Runnable {
 
     private final NetworkParam networkParam = NetworkParam.getInstance();
     private final NodeManager nodeManager = NodeManager.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
-    private boolean hasShare;
-
     @Override
     public void run() {
-        while(!hasShare) {
-            try {
-                shareMyServer();
-                Thread.sleep(1000L);
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+
+        waitingForNetworkStability();
+
+        getMoreNodes();
+
+        shareMyServer();
+    }
+
+    // Waiting for network stability
+    // 等待网络稳定
+    private void waitingForNetworkStability() {
+        int nodeCount = 0;
+        long timeout = 10000L;
+        long lastTime = System.currentTimeMillis();
+
+        while (true) {
+            int count = nodeManager.getAvailableNodesCount();
+            if (count == nodeCount && count >= 1) {
+                if (System.currentTimeMillis() - lastTime > timeout) {
+                    break;
                 }
-                Log.error(e);
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            } else {
+                nodeCount = count;
+                lastTime = System.currentTimeMillis();
             }
         }
     }
@@ -61,41 +76,12 @@ public class ShareMineNodeTask implements Runnable {
             doShare(externalIp);
         });
 
-        myNode.setDisconnectListener(new EventListener() {
-            @Override
-            public void action() {
-                myNode.setChannel(null);
-                hasShare = true;
-
-                getMoreNodes();
-            }
-        });
+        myNode.setDisconnectListener(() -> myNode.setChannel(null));
 
         connectionManager.connection(myNode);
     }
 
     private String getMyExtranetIp() {
-        int nodeCount = 0;
-        long timeout = 20000L;
-        long lastTime = System.currentTimeMillis();
-
-        while (true) {
-            int count = nodeManager.getAvailableNodesCount();
-            if (count == nodeCount && count >= 1) {
-                if (System.currentTimeMillis() - lastTime > timeout) {
-                    break;
-                }
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            } else {
-                nodeCount = count;
-                lastTime = System.currentTimeMillis();
-            }
-        }
-
         Collection<Node> nodes = nodeManager.getAvailableNodes();
 
         return getMostSameIp(nodes);

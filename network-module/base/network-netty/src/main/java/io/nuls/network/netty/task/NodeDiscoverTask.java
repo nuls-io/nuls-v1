@@ -57,6 +57,12 @@ public class NodeDiscoverTask implements Runnable {
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
+    private boolean isProcessFailNodes;
+
+    public NodeDiscoverTask(boolean isProcessFailNodes) {
+        this.isProcessFailNodes = isProcessFailNodes;
+    }
+
     @Override
     public void run() {
         try {
@@ -71,22 +77,25 @@ public class NodeDiscoverTask implements Runnable {
 
         Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
 
-        Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
-        Map<String, Node> failNodes = nodesContainer.getFailNodes();
-        Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
+        if (isProcessFailNodes) {
+            Map<String, Node> failNodes = nodesContainer.getFailNodes();
 
 //        Log.info("the fail nodes count is {}", failNodes.size());
 
-        if (uncheckNodes.size() > 0) {
-            probeNodes(uncheckNodes, canConnectNodes);
-        }
+            if (failNodes.size() > 0) {
+                probeNodes(failNodes, canConnectNodes);
+            }
+        } else {
+            Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
+            Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
 
-        if (failNodes.size() > 0) {
-            probeNodes(failNodes, canConnectNodes);
-        }
+            if (uncheckNodes.size() > 0) {
+                probeNodes(uncheckNodes, canConnectNodes);
+            }
 
-        if (disconnectNodes.size() > 0) {
-            probeNodes(disconnectNodes, canConnectNodes);
+            if (disconnectNodes.size() > 0) {
+                probeNodes(disconnectNodes, canConnectNodes);
+            }
         }
     }
 

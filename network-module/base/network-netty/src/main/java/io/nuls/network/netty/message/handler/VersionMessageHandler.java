@@ -61,7 +61,7 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
         }
         node.setBestBlockHeight(body.getBestBlockHeight());
         node.setBestBlockHash(body.getBestBlockHash());
-        node.setTimeOffset(TimeService.currentTimeMillis() - body.getNetworkTime());
+        node.setTimeOffset((TimeService.currentTimeMillis() - node.getLastTime()) / 2);
         return null;
     }
 }

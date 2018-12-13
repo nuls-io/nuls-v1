@@ -56,7 +56,7 @@ public class NodeMaintenanceTask implements Runnable {
     private void process() {
         List<Node> needConnectNodes = getNeedConnectNodes();
 
-        if(needConnectNodes == null) {
+        if(needConnectNodes == null || needConnectNodes.size() == 0) {
             return;
         }
 
@@ -86,12 +86,12 @@ public class NodeMaintenanceTask implements Runnable {
             return null;
         }
 
-        Collection<Node> allNodes = nodeManager.getCanConnectNodes();
-        if(allNodes.size() <= avaliableNodes.size()) {
+        Collection<Node> canConnectNodes = nodeManager.getCanConnectNodes();
+        if(canConnectNodes.size() == 0) {
             return null;
         }
 
-        List<Node> nodeList = new ArrayList<>(allNodes);
+        List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
         nodeList.removeAll(avaliableNodes);
 

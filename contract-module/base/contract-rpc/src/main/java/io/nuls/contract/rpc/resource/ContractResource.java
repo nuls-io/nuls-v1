@@ -424,7 +424,7 @@ public class ContractResource implements InitializingBean {
             @ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult validateCallContract(@ApiParam(name = "validateCallForm", value = "验证调用智能合约", required = true) ContractValidateCall call) {
-        if (call == null || call.getGasLimit() < 0 || call.getPrice() < 0) {
+        if (call == null || call.getGasLimit() < 0 || call.getValue() < 0 || call.getPrice() < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
@@ -449,6 +449,7 @@ public class ContractResource implements InitializingBean {
         }
 
         return contractTxService.validateContractCallTx(call.getSender(),
+                call.getValue(),
                 call.getGasLimit(),
                 call.getPrice(),
                 contractAddress,

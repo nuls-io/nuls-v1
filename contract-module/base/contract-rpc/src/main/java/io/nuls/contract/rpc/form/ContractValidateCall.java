@@ -33,6 +33,8 @@ public class ContractValidateCall {
 
     @ApiModelProperty(name = "sender", value = "交易创建者", required = true)
     private String sender;
+    @ApiModelProperty(name = "value", value = "交易附带的货币量", required = false)
+    private long value;
     @ApiModelProperty(name = "gasLimit", value = "最大gas消耗", required = true)
     private long gasLimit;
     @ApiModelProperty(name = "price", value = "执行合约单价", required = true)
@@ -52,6 +54,14 @@ public class ContractValidateCall {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
     }
 
     public long getGasLimit() {

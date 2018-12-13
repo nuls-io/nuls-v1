@@ -96,7 +96,7 @@ public interface ContractTxService {
     Result contractCallTx(String sender, Na value, Long gasLimit, Long price, String contractAddress,
                           String methodName, String methodDesc, String[][] args, String password, String remark);
 
-    Result validateContractCallTx(String sender, Long gasLimit, Long price, String contractAddress,
+    Result validateContractCallTx(String sender, Long value, Long gasLimit, Long price, String contractAddress,
                                   String methodName, String methodDesc, String[][] args);
 
     /**
