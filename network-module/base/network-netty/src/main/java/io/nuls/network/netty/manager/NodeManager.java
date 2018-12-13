@@ -40,7 +40,6 @@ import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.container.GroupContainer;
 import io.nuls.network.netty.container.NodesContainer;
-import io.nuls.network.netty.task.SaveNodeInfoTask;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.po.NodeContainerPo;
