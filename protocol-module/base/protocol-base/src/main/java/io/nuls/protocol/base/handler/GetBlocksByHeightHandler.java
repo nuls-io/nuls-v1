@@ -100,9 +100,10 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
 //            }
 //        }
         Block block = startBlock;
-        for (long i = param.getStartHeight(); i <= param.getEndHeight(); i++) {
+        sendBlock(block, fromNode);
+        for (long i = param.getStartHeight() + 1; i <= param.getEndHeight(); i++) {
+            block = blockService.getBlock(i).getData();
             sendBlock(block, fromNode);
-            block = blockService.getBlock(i + 1).getData();
         }
 
         CompleteMessage completeMessage = new CompleteMessage();

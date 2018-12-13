@@ -138,11 +138,12 @@ public class CollectThread implements Runnable {
                 if (!b) {
                     break;
                 }
+//                Log.info("Height:" + height + ",累计等待时间ms：：：：：" + totalWait+" , map size:"+map.size());
                 totalWait = 0;
             }
             block = map.remove(startHeight);
         }
-//        Log.info("Height:" + height + ",累计等待时间ms：：：：：" + totalWait);
+//        Log.info("Height:" + height + ",累计等待时间ms：：：：：" + totalWait+" , map size:"+map.size());
         return block;
     }
 
