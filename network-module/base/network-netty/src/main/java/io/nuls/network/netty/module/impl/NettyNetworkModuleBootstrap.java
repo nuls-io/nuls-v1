@@ -39,12 +39,8 @@ import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.network.netty.message.NetworkMessageHandlerPool;
 import io.nuls.network.netty.message.filter.MessageFilterChain;
 import io.nuls.network.netty.message.filter.impl.MagicNumberFilter;
-import io.nuls.network.netty.report.PlatformDepedentReporter;
-import io.nuls.network.netty.task.GetNodeVersionTask;
-import io.nuls.network.netty.task.NodeDiscoverTask;
-import io.nuls.network.netty.task.NodeMaintenanceTask;
-import io.nuls.network.netty.task.ShareMineNodeTask;
-import io.nuls.network.netty.task.SaveNodeInfoTask;
+import io.nuls.network.netty.task.*;
+import io.nuls.network.netty.task.RunOnceAfterStartupTask;
 import io.nuls.network.protocol.message.*;
 import io.nuls.protocol.constant.ProtocolConstant;
 
@@ -80,16 +76,17 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.startAsSync();
 
-
+        // 占用线程最多的应该是失败节点的探测，其它任务有2个线程完全够处理了，所以这里设置总线程数为3
         executorService = TaskManager.createScheduledThreadPool(3,
                 new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "network-task-thread-pool"));
 
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(false), 3000L, 10000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(true), 3000L, 10000L, TimeUnit.MILLISECONDS);
 
-        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "share-mine-node", new ShareMineNodeTask());
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "share-mine-node", new RunOnceAfterStartupTask());
 
 //        PlatformDepedentReporter reporter = new PlatformDepedentReporter();
 //        reporter.init();
