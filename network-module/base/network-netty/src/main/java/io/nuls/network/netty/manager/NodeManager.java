@@ -149,6 +149,8 @@ public class NodeManager {
         Node node = getNode(nodeId);
         if (node.getChannel() != null) {
             node.getChannel().close();
+        } else {
+            nodesContainer.getConnectedNodes().remove(nodeId);
         }
     }
 

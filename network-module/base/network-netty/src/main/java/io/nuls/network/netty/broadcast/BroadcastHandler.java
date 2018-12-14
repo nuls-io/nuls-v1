@@ -26,6 +26,7 @@
 package io.nuls.network.netty.broadcast;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -170,10 +171,10 @@ public class BroadcastHandler {
     }
 
     public BroadcastResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
-//        if (!node.isAlive()) {
-//            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
-//        }
-        if (node.getChannel() == null/* || !node.getChannel().isActive()*/) {
+        if (!node.isAlive()) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
+        }
+        if (node.getChannel() == null || !node.getChannel().isActive()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -184,14 +185,14 @@ public class BroadcastHandler {
             header.setLength(body.size());
 
             if(asyn) {
-                node.getChannel().eventLoop().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                node.getChannel().eventLoop().execute(() -> {
+                    try {
+                        Channel channel = node.getChannel();
+                        if (channel != null) {
+                            channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
             } else {
