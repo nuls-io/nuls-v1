@@ -69,8 +69,8 @@ public class UtxoResource {
             @ApiResponse(code = 200, message = "success", response = AccountUtxoDto.class)
     })
     public RpcClientResult getUtxoByAddressAndLimit(
-            @ApiParam(name="address", value="地址", required = true) @PathParam("address") String address,
-            @ApiParam(name="limit", value="数量", required = true) @PathParam("limit") Integer limit) {
+            @ApiParam(name = "address", value = "地址", required = true) @PathParam("address") String address,
+            @ApiParam(name = "limit", value = "数量", required = true) @PathParam("limit") Integer limit) {
         if (StringUtils.isBlank(address) || limit == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
@@ -92,8 +92,8 @@ public class UtxoResource {
                 if (coin.getNa().equals(Na.ZERO)) {
                     continue;
                 }
-                if(!isLoadAll) {
-                    if(i >= limitValue) {
+                if (!isLoadAll) {
+                    if (i >= limitValue) {
                         break;
                     }
                     i++;
@@ -118,8 +118,8 @@ public class UtxoResource {
             @ApiResponse(code = 200, message = "success", response = AccountUtxoDto.class)
     })
     public RpcClientResult getUtxoByAddressAndAmount(
-            @ApiParam(name="address", value="地址", required = true) @PathParam("address") String address,
-            @ApiParam(name="amount", value="金额", required = true) @PathParam("amount") Long amount) {
+            @ApiParam(name = "address", value = "地址", required = true) @PathParam("address") String address,
+            @ApiParam(name = "amount", value = "金额", required = true) @PathParam("amount") Long amount) {
         if (StringUtils.isBlank(address) || amount == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
@@ -172,8 +172,7 @@ public class UtxoResource {
                 continue;
             }
             //if (Arrays.equals(coin.(), addressBytes))
-            if (Arrays.equals(coin.getAddress(), addressBytes))
-            {
+            if (Arrays.equals(coin.getAddress(), addressBytes)) {
                 coin.setOwner(coinEntryBytes.getKey());
                 coinList.add(coin);
             }
@@ -209,7 +208,7 @@ public class UtxoResource {
             }
             holder.addTotal(value);
             totalNuls = DoubleUtils.sum(totalNuls, value);
-            if (coin.getLockTime() == -1 || coin.getLockTime() > System.currentTimeMillis()||(coin.getLockTime()<1531152000000L&&coin.getLockTime()>height)) {
+            if (coin.getLockTime() == -1 || coin.getLockTime() > System.currentTimeMillis() || (coin.getLockTime() < 1531152000000L && coin.getLockTime() > height)) {
                 holder.addLocked(value);
                 lockedNuls = DoubleUtils.sum(lockedNuls, value);
             }
@@ -227,6 +226,38 @@ public class UtxoResource {
             dtoList.add(dto);
         }
         info.setAddressList(dtoList);
+        result.setData(info);
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/totalCoins")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询代币情况")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = TokenInfoDto.class)
+    })
+    public RpcClientResult getTotalCoins() throws NulsException {
+        long height = NulsContext.getInstance().getBestHeight();
+        List<Entry<byte[], byte[]>> coinBytesList = utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
+        double totalNuls = 0d;
+        double lockedNuls = 0d;
+        Coin coin = new Coin();
+        int index = 0;
+        for (Entry<byte[], byte[]> coinEntryBytes : coinBytesList) {
+            coin.parse(coinEntryBytes.getValue(), 0);
+            double value = coin.getNa().toDouble();
+
+            totalNuls = DoubleUtils.sum(totalNuls, value);
+            if (coin.getLockTime() == -1 || coin.getLockTime() > System.currentTimeMillis() || (coin.getLockTime() < 1531152000000L && coin.getLockTime() > height)) {
+                lockedNuls = DoubleUtils.sum(lockedNuls, value);
+            }
+            System.out.println(index++);
+        }
+        Result<TokenInfoDto> result = Result.getSuccess();
+        TokenInfoDto info = new TokenInfoDto();
+        info.setTotalNuls(DoubleUtils.getRoundStr(totalNuls, 8, true));
+        info.setLockedNuls(DoubleUtils.getRoundStr(lockedNuls, 8, true));
         result.setData(info);
         return result.toRpcClientResult();
     }

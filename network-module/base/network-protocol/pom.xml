@@ -5,21 +5,21 @@
     <parent>
         <artifactId>network-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.6-beta</version>
+        <version>1.1.6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-protocol</artifactId>
-    <version>1.1.6-beta</version>
+    <version>1.1.6</version>
 
     
     <dependencies>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
-            <version>1.1.6-beta</version>
+            <version>1.1.6</version>
         </dependency>
     </dependencies>
     <build>
