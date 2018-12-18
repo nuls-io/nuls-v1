@@ -279,7 +279,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
             }
         }
         try {
-            resultPath = URLDecoder.decode(path, "UTF-8");
+            resultPath = URLDecoder.decode(resultPath, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

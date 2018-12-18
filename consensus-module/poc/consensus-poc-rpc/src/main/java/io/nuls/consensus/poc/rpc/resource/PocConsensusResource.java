@@ -779,6 +779,7 @@ public class PocConsensusResource {
         MeetingMember member = round.getMember(agent.getPackingAddress());
         if (null == member) {
             agent.setStatus(0);
+            agent.setCreditVal(0);
             return;
         }
         agent.setStatus(1);
@@ -1346,7 +1347,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAgentAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-        if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
+        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
             return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH).toRpcClientResult();
         }
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
@@ -1444,7 +1445,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-        if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
+        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
             return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH).toRpcClientResult();
         }
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
@@ -1544,7 +1545,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-        if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
+        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
             return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH).toRpcClientResult();
         }
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
@@ -1614,7 +1615,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
-        if(!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(),account.getPubKey())){
+        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
             return Result.getFailed(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH).toRpcClientResult();
         }
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
