@@ -235,7 +235,7 @@ public class UtxoResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询代币总量")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = TokenInfoDto.class)
+            @ApiResponse(code = 200, message = "success", response = NulsInfoDto.class)
     })
     public RpcClientResult getTotalCoins() throws NulsException {
         Result<NulsInfoDto> result = Result.getSuccess();
