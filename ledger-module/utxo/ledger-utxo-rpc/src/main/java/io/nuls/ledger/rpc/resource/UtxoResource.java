@@ -233,31 +233,15 @@ public class UtxoResource {
     @GET
     @Path("/totalCoins")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询代币情况")
+    @ApiOperation(value = "查询代币总量")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = TokenInfoDto.class)
     })
     public RpcClientResult getTotalCoins() throws NulsException {
-        long height = NulsContext.getInstance().getBestHeight();
-        List<Entry<byte[], byte[]>> coinBytesList = utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
-        double totalNuls = 0d;
-        double lockedNuls = 0d;
-        Coin coin = new Coin();
-        int index = 0;
-        for (Entry<byte[], byte[]> coinEntryBytes : coinBytesList) {
-            coin.parse(coinEntryBytes.getValue(), 0);
-            double value = coin.getNa().toDouble();
-
-            totalNuls = DoubleUtils.sum(totalNuls, value);
-            if (coin.getLockTime() == -1 || coin.getLockTime() > System.currentTimeMillis() || (coin.getLockTime() < 1531152000000L && coin.getLockTime() > height)) {
-                lockedNuls = DoubleUtils.sum(lockedNuls, value);
-            }
-            System.out.println(index++);
-        }
-        Result<TokenInfoDto> result = Result.getSuccess();
-        TokenInfoDto info = new TokenInfoDto();
-        info.setTotalNuls(DoubleUtils.getRoundStr(totalNuls, 8, true));
-        info.setLockedNuls(DoubleUtils.getRoundStr(lockedNuls, 8, true));
+        Result<NulsInfoDto> result = Result.getSuccess();
+        NulsInfoDto info = new NulsInfoDto();
+        info.setTotalNuls(NulsContext.totalNuls);
+        info.setLockedNuls(NulsContext.lockedNuls);
         result.setData(info);
         return result.toRpcClientResult();
     }
