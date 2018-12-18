@@ -107,20 +107,29 @@ public class AgentComparator implements Comparator<Agent> {
                 return 1;
             }
             case COMPREHENSIVE: {
-                //先判断是否可委托，再判断信用值，再判断可委托金额
-                //First judge whether the trust can be entrusted, then judge the credit value, then judge the amount of trust
                 if (o1.canDeposit() && !o2.canDeposit()) {
                     return -1;
-                } else if (o2.canDeposit() == o1.canDeposit()) {
-                    if (o2.getCreditVal() < o1.getCreditVal()) {
+                }
+                if (!o1.canDeposit() && o2.canDeposit()) {
+                    return 1;
+                }
+                int status = o1.getStatus() - o2.getStatus();
+                if (status > 0) {
+                    return -1;
+                }
+                if (status < 0) {
+                    return 1;
+                }
+
+                //先判断是否可委托，再判断信用值，再判断可委托金额
+                //First judge whether the trust can be entrusted, then judge the credit value, then judge the amount of trust
+                if (o2.getCreditVal() < o1.getCreditVal()) {
+                    return -1;
+                } else if (o2.getCreditVal() == o1.getCreditVal()) {
+                    if (o2.getAvailableDepositAmount() < o1.getAvailableDepositAmount()) {
                         return -1;
-                    } else if (o2.getCreditVal() == o1.getCreditVal()) {
-                        if (o2.getAvailableDepositAmount() < o1.getAvailableDepositAmount()) {
-                            return -1;
-                        } else if (o2.getAvailableDepositAmount() == o1.getAvailableDepositAmount()) {
-                            return 0;
-                        }
-                        return 1;
+                    } else if (o2.getAvailableDepositAmount() == o1.getAvailableDepositAmount()) {
+                        return 0;
                     }
                     return 1;
                 }
