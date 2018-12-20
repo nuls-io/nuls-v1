@@ -41,6 +41,7 @@ public interface NulsConstant {
     String NULS_VERSION_XML = "nuls-version.xml";
 
     byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+    byte[] BLACK_HOLE_ADDRESS_TEST_NET = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 
     /**
      * 系统配置文件名称
