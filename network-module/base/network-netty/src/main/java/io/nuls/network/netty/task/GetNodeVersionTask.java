@@ -30,12 +30,15 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeConnectStatusEnum;
+import io.nuls.network.model.NodeStatusEnum;
 import io.nuls.network.netty.broadcast.BroadcastHandler;
 import io.nuls.network.netty.manager.NodeManager;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * 维护节点高度的定时任务
@@ -72,12 +75,29 @@ public class GetNodeVersionTask implements Runnable {
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
         GetVersionMessage getVersionMessage = new GetVersionMessage(body);
 
-        for(Node node : connectedNodes) {
+        Iterator<Node> it = connectedNodes.iterator();
+        while (it.hasNext()) {
+            Node node = it.next();
+
             if (node.getType() == Node.OUT) {
+                if (!checkIsSurvive(node)) {
+                    it.remove();
+                    continue;
+                }
+
                 node.setLastTime(TimeService.currentTimeMillis());
                 broadcastHandler.broadcastToNode(getVersionMessage, node, true);
             }
         }
     }
 
+    private boolean checkIsSurvive(Node node) {
+        if (node.getChannel() == null || node.getStatus() != NodeStatusEnum.CONNECTABLE || node.getConnectStatus() != NodeConnectStatusEnum.AVAILABLE) {
+            if(node.getChannel() != null) {
+                node.getChannel().close();
+            }
+            return false;
+        }
+        return true;
+    }
 }

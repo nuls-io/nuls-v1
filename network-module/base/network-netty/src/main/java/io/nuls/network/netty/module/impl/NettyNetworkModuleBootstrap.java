@@ -83,8 +83,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new GetNodeVersionTask(), 2000L, 3000L, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
-        executorService.scheduleAtFixedRate(new NodeDiscoverTask(false), 3000L, 10000L, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(new NodeDiscoverTask(true), 3000L, 10000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
 
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "share-mine-node", new RunOnceAfterStartupTask());
 

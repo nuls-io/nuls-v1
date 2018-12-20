@@ -24,8 +24,14 @@
 package io.nuls.ledger.module.impl;
 
 
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.module.AbstractLedgerModule;
+import io.nuls.ledger.task.TotalCoinTask;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -34,6 +40,8 @@ import io.nuls.ledger.module.AbstractLedgerModule;
  */
 public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
+    private ScheduledThreadPoolExecutor executorService;
+
     @Override
     public void init() {
 
@@ -41,7 +49,9 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     @Override
     public void start() {
-
+        executorService = TaskManager.createScheduledThreadPool(1,
+                new NulsThreadFactory(LedgerConstant.MODULE_ID_LEDGER, "ledger-task-thread-pool"));
+        executorService.scheduleAtFixedRate(new TotalCoinTask(), 10, 30 * 60, TimeUnit.SECONDS);
     }
 
     @Override

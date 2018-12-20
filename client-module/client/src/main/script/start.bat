@@ -65,7 +65,7 @@ rem echo CLASSPATH=%CLASSPATH%
 
 
 set _EXECJAVA="%NULS_JAVA_HOME%\bin\javaw"
-set _JAVA_OPTS=-Dfile.encoding=UTF-8 -Xms1024m -Xmx4096m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256M -XX:MaxPermSize=256M
+set _JAVA_OPTS=-Dfile.encoding=UTF-8 -server -Xms1024m -Xmx4096m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:MaxDirectMemorySize=256M -XX:PermSize=128M -XX:MaxPermSize=128M
 set _MAINCLASS=io.nuls.client.Bootstrap
 
 goto doExec

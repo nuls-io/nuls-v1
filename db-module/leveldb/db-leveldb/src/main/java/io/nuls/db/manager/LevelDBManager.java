@@ -673,7 +673,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -706,7 +706,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -739,7 +739,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -783,7 +783,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -828,7 +828,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -883,7 +883,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -912,7 +912,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }
@@ -969,7 +969,7 @@ public class LevelDBManager {
             if (iterator != null) {
                 try {
                     iterator.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //skip it
                 }
             }

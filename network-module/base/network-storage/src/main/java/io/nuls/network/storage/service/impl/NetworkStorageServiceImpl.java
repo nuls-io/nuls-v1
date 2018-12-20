@@ -46,6 +46,7 @@ import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
@@ -276,6 +277,11 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
             } else {
                 resultPath += File.separator + p;
             }
+        }
+        try {
+            resultPath = URLDecoder.decode(resultPath, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
         return resultPath;
     }

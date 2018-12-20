@@ -511,7 +511,7 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult createTransactionSimple(@ApiParam(name = "form", value = "转账参数(传入该账户拥有的UTXO)", required = true)
-                                                         TransferSimpleForm form) {
+                                                           TransferSimpleForm form) {
         try {
             if (form == null) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -794,6 +794,38 @@ public class AccountLedgerResource {
             }
             validateResult = this.ledgerService.verifyCoinData(tx, new HashMap<>(), new HashSet<>());
             if (validateResult.isFailed() && !validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            Result result = Result.getSuccess();
+            return result.toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+
+        }
+    }
+
+
+    @POST
+    @Path("/transaction/validate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证交易是否正确", notes = "result.data: resultJson 返回验证结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult validate(@ApiParam(name = "form", value = "验证交易是否正确", required = true) BroadHexTxForm form) {
+        if (StringUtils.isBlank(form.getTxHex())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            byte[] data = Hex.decode(form.getTxHex());
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            ValidateResult validateResult = tx.verify();
+            if (validateResult.isFailed()) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            validateResult = this.ledgerService.verifyCoinData(tx, new HashMap<>(), new HashSet<>());
+            if (validateResult.isFailed()) {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }
             Result result = Result.getSuccess();

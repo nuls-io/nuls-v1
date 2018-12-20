@@ -114,6 +114,10 @@ public class NulsContext {
 
     private static String dataPath;
 
+    public static Long totalNuls = 10000000000000000L;
+
+    public static Long lockedNuls = 0L;
+
     public int getStop() {
         return stop;
     }

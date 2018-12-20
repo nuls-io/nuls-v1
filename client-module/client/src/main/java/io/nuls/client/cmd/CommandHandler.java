@@ -42,6 +42,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.i18n.I18nUtils;
@@ -202,7 +203,10 @@ public class CommandHandler {
         String port = null;
         try {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
+            NulsConfig.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
             port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+            String chainId = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_CHAIN_ID, "8964");
+            NulsContext.getInstance().setDefaultChainId(Short.parseShort(chainId));
         } catch (Exception e) {
             Log.error("CommandHandler start failed", e);
             throw new NulsRuntimeException(KernelErrorCode.FAILED);
@@ -239,7 +243,9 @@ public class CommandHandler {
         } catch (NulsException e) {
             e.printStackTrace();
         }
+
         try {
+
             CONSOLE_READER = new ConsoleReader();
             List<Completer> completers = new ArrayList<Completer>();
             completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
@@ -254,7 +260,7 @@ public class CommandHandler {
                 System.out.print(instance.processCommand(cmdArgs) + "\n");
             } while (line != null);
         } catch (IOException e) {
-
+            e.printStackTrace();
         } finally {
             try {
                 if (!CONSOLE_READER.delete()) {

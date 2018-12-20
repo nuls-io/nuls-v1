@@ -117,12 +117,13 @@ public class NodesContainer implements Serializable {
 
         node = failNodes.get(nodeId);
         if (node != null) {
-            node.setFailCount(0);
-            node.setLastProbeTime(0L);
-            node.setStatus(NodeStatusEnum.UNCHECK);
-
-            failNodes.remove(nodeId);
-            uncheckNodes.put(nodeId, node);
+//
+//            node.setFailCount(0);
+//            node.setLastProbeTime(0L);
+//            node.setStatus(NodeStatusEnum.UNCHECK);
+//
+//            failNodes.remove(nodeId);
+//            uncheckNodes.put(nodeId, node);
 
             return false;
         }

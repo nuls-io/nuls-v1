@@ -57,10 +57,8 @@ public class NodeDiscoverTask implements Runnable {
     private final BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
-    private boolean isProcessFailNodes;
-
-    public NodeDiscoverTask(boolean isProcessFailNodes) {
-        this.isProcessFailNodes = isProcessFailNodes;
+    public NodeDiscoverTask() {
+        new Thread(() -> processFailNodes()).start();
     }
 
     @Override
@@ -77,24 +75,37 @@ public class NodeDiscoverTask implements Runnable {
 
         Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
 
-        if (isProcessFailNodes) {
-            Map<String, Node> failNodes = nodesContainer.getFailNodes();
+        Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
+        Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
 
-//        Log.info("the fail nodes count is {}", failNodes.size());
+        if (uncheckNodes.size() > 0) {
+            probeNodes(uncheckNodes, canConnectNodes);
+        }
 
-            if (failNodes.size() > 0) {
-                probeNodes(failNodes, canConnectNodes);
+        if (disconnectNodes.size() > 0) {
+            probeNodes(disconnectNodes, canConnectNodes);
+        }
+    }
+
+    private void processFailNodes() {
+        try {
+            NodesContainer nodesContainer = nodeManager.getNodesContainer();
+            Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
+            while (true) {
+                Map<String, Node> failNodes = nodesContainer.getFailNodes();
+
+//                Log.info("the fail nodes count is {}", failNodes.size());
+
+                if (failNodes.size() > 0) {
+                    probeNodes(failNodes, canConnectNodes);
+                }
+                Thread.sleep(3000L);
             }
-        } else {
-            Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
-            Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
-
-            if (uncheckNodes.size() > 0) {
-                probeNodes(uncheckNodes, canConnectNodes);
-            }
-
-            if (disconnectNodes.size() > 0) {
-                probeNodes(disconnectNodes, canConnectNodes);
+        } catch (Exception e) {
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException e1) {
+                Log.error(e1);
             }
         }
     }
