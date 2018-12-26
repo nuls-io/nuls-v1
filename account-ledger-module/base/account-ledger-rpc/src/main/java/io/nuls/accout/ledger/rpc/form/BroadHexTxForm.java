@@ -39,11 +39,47 @@ public class BroadHexTxForm {
     @QueryParam("txHex")
     private String txHex;
 
+    @ApiModelProperty(name = "address", value = "地址", required = true)
+    @QueryParam("address")
+    private String address;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
+    @QueryParam("password")
+    private String password;
+
+    @ApiModelProperty(name = "priKey", value = "私钥", required = true)
+    @QueryParam("priKey")
+    private String priKey;
+
     public void setTxHex(String txHex) {
         this.txHex = txHex;
     }
 
     public String getTxHex() {
         return txHex;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPriKey() {
+        return priKey;
+    }
+
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
     }
 }
