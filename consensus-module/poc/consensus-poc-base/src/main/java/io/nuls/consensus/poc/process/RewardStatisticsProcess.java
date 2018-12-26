@@ -97,7 +97,11 @@ public class RewardStatisticsProcess {
         if (NulsContext.getServiceBean(DownloadService.class).isDownloadSuccess().isFailed()) {
             return;
         }
-        queue.add(new RewardStatisticsParam(0, block));
+        try {
+            queue.add(new RewardStatisticsParam(0, block));
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 
     public static void rollbackBlock(Block block) {

@@ -49,7 +49,6 @@ import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.script.TransactionSignature;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -96,19 +95,22 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             }
         }
         CoinData coinData = tx.getCoinData();
-        if (null == coinData) {
+        if (null == coinData || null == coinData.getTo() || coinData.getTo().isEmpty()) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.COINDATA_NOT_FOUND);
         }
-        if (null == coinData.getTo() || coinData.getTo().isEmpty()) {
-            boolean burned = false;
-            for (Coin coin : coinData.getTo()) {
-                if (ArraysTool.arrayEquals(coin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS) && coin.getNa().equals(Na.NA)) {
-                    burned = true;
-                }
+        boolean burned = false;
+        for (Coin coin : coinData.getTo()) {
+            if (ArraysTool.arrayEquals(coin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS) && coin.getNa().equals(Na.NA)) {
+                burned = true;
+                break;
             }
-            if (!burned) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.MUST_BURN_A_NULS);
+            if (!burned && !ArraysTool.arrayEquals(coin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS_TEST_NET) && coin.getNa().equals(Na.NA)) {
+                burned = true;
+                break;
             }
+        }
+        if (!burned) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.MUST_BURN_A_NULS);
         }
 
         TransactionSignature sig = new TransactionSignature();
