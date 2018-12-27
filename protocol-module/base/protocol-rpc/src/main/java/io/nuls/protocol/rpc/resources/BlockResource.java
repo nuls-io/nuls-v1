@@ -248,6 +248,32 @@ public class BlockResource {
     }
 
     @GET
+    @Path("/bytes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getBlockBytes(@QueryParam("height") long height) throws IOException {
+        Result result;
+        if (height < 0) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Block block = null;
+        try {
+            // 包含智能合约内部转账(从合约转出)交易的区块
+            block = blockService.getBlock(height, true).getData();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        if (block == null) {
+            result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
+        } else {
+            result = Result.getSuccess();
+            Map<String, String> map = new HashMap<>();
+            map.put("value", Base64.getEncoder().encodeToString(block.serialize()));
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("根据区块高度查询区块列表，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
     @ApiResponses(value = {
