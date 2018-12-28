@@ -248,7 +248,7 @@ public class BlockResource {
     }
 
     @GET
-    @Path("/bytes")
+    @Path("/bytes/height")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getBlockBytes(@QueryParam("height") long height) throws IOException {
         Result result;
