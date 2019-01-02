@@ -29,7 +29,7 @@
     <parent>
         <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.6</version>
+        <version>1.1.7-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -37,7 +37,7 @@
     <groupId>io.nuls</groupId>
     <artifactId>consensus-module</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.6</version>
+    <version>1.1.7-beta</version>
     <modules>
         <module>consensus</module>
         <module>poc/consensus-poc-base</module>
@@ -51,12 +51,12 @@
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7-beta</version>
         </dependency>
     </dependencies>
 

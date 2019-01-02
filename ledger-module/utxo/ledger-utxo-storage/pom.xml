@@ -29,21 +29,21 @@
     <parent>
         <artifactId>ledger-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.6</version>
+        <version>1.1.7-beta</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.ledger-module</groupId>
     <artifactId>ledger-utxo-storage</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7-beta</version>
 
 
     <dependencies>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7-beta</version>
         </dependency>
     </dependencies>
     <build>
