@@ -73,8 +73,8 @@ public class TransactionResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = TransactionDto.class)
     })
-    public RpcClientResult getTxByHash(@ApiParam(name="hash", value="交易hash", required = true)
-                          @PathParam("hash") String hash) {
+    public RpcClientResult getTxByHash(@ApiParam(name = "hash", value = "交易hash", required = true)
+                                       @PathParam("hash") String hash) {
         if (StringUtils.isBlank(hash)) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
@@ -90,23 +90,23 @@ public class TransactionResource {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
-                if(coinData != null) {
+                if (coinData != null) {
                     // 组装from数据
                     List<Coin> froms = coinData.getFrom();
-                    if(froms != null && froms.size() > 0) {
+                    if (froms != null && froms.size() > 0) {
                         byte[] fromHash, owner;
                         int fromIndex;
                         NulsDigestData fromHashObj;
                         Transaction fromTx;
                         Coin fromUtxo;
-                        for(Coin from : froms) {
+                        for (Coin from : froms) {
                             owner = from.getOwner();
                             // owner拆分出txHash和index
                             fromHash = LedgerUtil.getTxHashBytes(owner);
                             fromIndex = LedgerUtil.getIndex(owner);
                             // 查询from UTXO
                             fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash,0);
+                            fromHashObj.parse(fromHash, 0);
                             fromTx = ledgerService.getTx(fromHashObj);
                             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
                             from.setFrom(fromUtxo);
@@ -116,7 +116,7 @@ public class TransactionResource {
                     List<OutputDto> outputDtoList = new ArrayList<>();
                     // 组装to数据
                     List<Coin> tos = coinData.getTo();
-                    if(tos != null && tos.size() > 0) {
+                    if (tos != null && tos.size() > 0) {
                         byte[] txHashBytes = tx.getHash().serialize();
                         String txHash = hash;
                         OutputDto outputDto = null;
@@ -124,13 +124,13 @@ public class TransactionResource {
                         long bestHeight = NulsContext.getInstance().getBestHeight();
                         long currentTime = TimeService.currentTimeMillis();
                         long lockTime;
-                        for(int i = 0, length = tos.size(); i < length; i++) {
+                        for (int i = 0, length = tos.size(); i < length; i++) {
                             to = tos.get(i);
                             outputDto = new OutputDto(to);
                             outputDto.setTxHash(txHash);
                             outputDto.setIndex(i);
                             temp = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
-                            if(temp == null) {
+                            if (temp == null) {
                                 // 已花费
                                 outputDto.setStatus(3);
                             } else {
@@ -188,18 +188,18 @@ public class TransactionResource {
      * @param txDto
      */
     private void calTransactionValue(TransactionDto txDto) {
-        if(txDto == null) {
+        if (txDto == null) {
             return;
         }
         List<InputDto> inputDtoList = txDto.getInputs();
         Set<String> inputAdressSet = new HashSet<>(inputDtoList.size());
-        for(InputDto inputDto : inputDtoList) {
+        for (InputDto inputDto : inputDtoList) {
             inputAdressSet.add(inputDto.getAddress());
         }
         Na value = Na.ZERO;
         List<OutputDto> outputDtoList = txDto.getOutputs();
-        for(OutputDto outputDto : outputDtoList) {
-            if(inputAdressSet.contains(outputDto.getAddress())) {
+        for (OutputDto outputDto : outputDtoList) {
+            if (inputAdressSet.contains(outputDto.getAddress())) {
                 continue;
             }
             value = value.add(Na.valueOf(outputDto.getValue()));
@@ -227,6 +227,7 @@ public class TransactionResource {
             result = Result.getSuccess();
             Map<String, String> map = new HashMap<>();
             map.put("value", Base64.getEncoder().encodeToString(tx.serialize()));
+            map.put("height", tx.getBlockHeight() + "");
             result.setData(map);
         }
         return result.toRpcClientResult();
