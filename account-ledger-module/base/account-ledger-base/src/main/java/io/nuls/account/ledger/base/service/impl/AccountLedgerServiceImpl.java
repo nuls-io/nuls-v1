@@ -314,6 +314,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
+
         result = localUtxoService.saveUtxoForAccount(tx, addresses);
         if (result.isFailed()) {
             transactionInfoService.deleteTransactionInfo(txInfoPo);
