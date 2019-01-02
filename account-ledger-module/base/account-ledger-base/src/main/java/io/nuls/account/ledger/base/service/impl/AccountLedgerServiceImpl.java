@@ -310,13 +310,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return result;
         }
 
+        result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
+        if (result.isFailed()) {
+            return result;
+        }
         result = localUtxoService.saveUtxoForAccount(tx, addresses);
         if (result.isFailed()) {
             transactionInfoService.deleteTransactionInfo(txInfoPo);
+            unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
             return result;
         }
 
-        result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
 
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
