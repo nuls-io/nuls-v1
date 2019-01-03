@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,18 +25,15 @@
 
 package io.nuls.contract.rpc.cmd;
 
-import io.nuls.contract.rpc.form.ContractCreate;
 import io.nuls.contract.rpc.form.ContractTokenTransfer;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
-import javafx.beans.binding.BooleanBinding;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

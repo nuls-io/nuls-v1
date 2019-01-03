@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,7 @@ public class FileScanUtils {
         str.append("\n");
         str.append(" *");
         str.append("\n");
-        str.append(" * Copyright (c) 2017-2018 nuls.io");
+        str.append(" * Copyright (c) 2017-2019 nuls.io");
         str.append("\n");
         str.append(" *");
         str.append("\n");
