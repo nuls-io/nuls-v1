@@ -146,6 +146,7 @@ public class NodeManager {
     }
 
     public void removeNode(String nodeId) {
+        Log.info("-------------remove node:" + nodeId);
         Node node = getNode(nodeId);
         if (node.getChannel() != null) {
             node.getChannel().close();
@@ -230,6 +231,7 @@ public class NodeManager {
 
         //监听被动连接的断开
         node.setDisconnectListener(() -> {
+            Log.info("------------in node disconnect:" + node.getId());
             nodesContainer.getConnectedNodes().remove(node.getId());
             nodesContainer.markCanuseNodeByIp(ip, NodeStatusEnum.CONNECTABLE);
         });

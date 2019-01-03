@@ -51,6 +51,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId) {
+
         nodeManager.removeNode(nodeId);
     }
 
@@ -111,7 +112,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void reset() {
-        Log.warn("------network reset");
+        Log.info("------network reset");
         nodeManager.reset();
     }
 
