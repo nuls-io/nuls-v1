@@ -45,5 +45,6 @@ public class GasCost {
     public static final int ARRAYSTORE = 5;//把栈项的值存到数组里
     public static final int TRANSFER = 1000;//转账交易
     public static final int SHA3 = 500;//SHA3调用
+    public static final int VERIFY_SIGNATURE = 500;//验证签名
 
 }

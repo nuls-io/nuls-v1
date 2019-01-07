@@ -84,4 +84,13 @@ public class Utils {
      */
     public static native String sha3(byte[] bytes);
 
+    /**
+     * verify signature data(ECDSA)
+     *
+     * @param data(hex encoding string)
+     * @param signature(hex encoding string)
+     * @param pubkey(hex encoding string)
+     * @return verify result
+     */
+    public static native boolean verifySignatureData(String data, String signature, String pubkey);
 }
