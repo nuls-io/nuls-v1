@@ -24,7 +24,6 @@
  */
 package io.nuls.utxo.accounts.service.impl;
 
-import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.log.Log;
@@ -65,7 +64,7 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
     }
 
     private boolean isPermanentUnLocked(int txType) {
-        if (txType == UtxoAccountsConstant.TX_TYPE_CANCEL_DEPOSIT || txType == UtxoAccountsConstant.TX_TYPE_STOP_AGENT) {
+        if (txType == UtxoAccountsConstant.TX_TYPE_CANCEL_DEPOSIT || txType == UtxoAccountsConstant.TX_TYPE_STOP_AGENT || txType == UtxoAccountsConstant.TX_TYPE_RED_PUNISH) {
             return true;
         }
         return false;
