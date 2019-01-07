@@ -24,6 +24,9 @@
  */
 package io.nuls.contract.vm.util;
 
+import io.nuls.core.tools.crypto.ECKey;
+import org.spongycastle.util.encoders.Hex;
+
 public class Utils {
 
     public static int arrayListInitialCapacity(int size) {
@@ -32,6 +35,16 @@ public class Utils {
 
     public static int hashMapInitialCapacity(int size) {
         return Math.max((int) (size / 0.75) + 1, 16);
+    }
+
+    public static boolean verify(String data, String signature, String pub) {
+        if(data == null || signature == null || pub == null) {
+            return false;
+        }
+        byte[] dataBytes = Hex.decode(data);
+        byte[] signatureBytes = Hex.decode(signature);
+        byte[] pubBytes = Hex.decode(pub);
+        return ECKey.verify(dataBytes, signatureBytes, pubBytes);
     }
 
 }
