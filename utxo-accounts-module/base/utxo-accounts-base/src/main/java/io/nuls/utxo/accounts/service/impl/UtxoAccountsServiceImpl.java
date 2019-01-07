@@ -77,28 +77,32 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
         List<Transaction> txs = block.getTxs();
         int txIndex = 0;
         for (Transaction tx : txs) {
-            if (tx.getCoinData() == null) {
-                return true;
-            }
-            List<Coin> from = tx.getCoinData().getFrom();
-            List<Coin> to = tx.getCoinData().getTo();
+            try {
+                if (tx.getCoinData() == null) {
+                    continue;
+                }
+                List<Coin> from = tx.getCoinData().getFrom();
+                List<Coin> to = tx.getCoinData().getTo();
 
-            for (Coin inputCoin : from) {
-                byte[] inputOwner = getInputAddress(inputCoin);
-                inputCoin.setOwner(inputOwner);
-                buildUtxoAccountsBalance(utxoAccountsMap, inputCoin, tx, txIndex, true);
-            }
-            for (Coin outputCoin : to) {
-                buildUtxoAccountsBalance(utxoAccountsMap, outputCoin, tx, txIndex, false);
-            }
-            //若区块中得到合约转账(从合约转出)交易，这段代码应该去掉
-            //增加智能合约内部交易逻辑
+                for (Coin inputCoin : from) {
+                    byte[] inputOwner = getInputAddress(inputCoin);
+                    inputCoin.setOwner(inputOwner);
+                    buildUtxoAccountsBalance(utxoAccountsMap, inputCoin, tx, txIndex, true);
+                }
+                for (Coin outputCoin : to) {
+                    buildUtxoAccountsBalance(utxoAccountsMap, outputCoin, tx, txIndex, false);
+                }
+                //若区块中得到合约转账(从合约转出)交易，这段代码应该去掉
+                //增加智能合约内部交易逻辑
 //            if (tx.getType() == UtxoAccountsConstant.TX_TYPE_CALL_CONTRACT) {
 //                ContractResult contractExecuteResult = contractService.getContractExecuteResult(tx.getHash());
 //                List<ContractTransfer> transferList = contractExecuteResult.getTransfers();
 //                buildContractTranfersBalance(utxoAccountsMap, transferList, block.getHeader().getHeight(), txIndex);
 //            }
-            txIndex++;
+                txIndex++;
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return true;
     }
