@@ -59,7 +59,7 @@ public class ContractResultDto {
     @ApiModelProperty(name = "result", value = "合约执行结果")
     private String result;
 
-    @ApiModelProperty(name = "gasUsed", value = "GasLimit")
+    @ApiModelProperty(name = "gasLimit", value = "GasLimit")
     private long gasLimit;
 
     @ApiModelProperty(name = "gasUsed", value = "已使用Gas")
