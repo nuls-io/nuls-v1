@@ -70,13 +70,22 @@ public class NodeDiscoverTask implements Runnable {
         }
     }
 
+    int i = 0;
     private void processNodes() {
+        i++;
         NodesContainer nodesContainer = nodeManager.getNodesContainer();
 
         Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
 
         Map<String, Node> uncheckNodes = nodesContainer.getUncheckNodes();
         Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
+
+        if(i % 3 == 0) {
+            Log.info("-----------NodeDiscoverTask---------");
+            Log.info("---------uncheckNodes:" + uncheckNodes.size());
+            Log.info("---------canConnectNodes:" + canConnectNodes.size());
+            Log.info("---------disconnectNodes:" + disconnectNodes.size());
+        }
 
         if (uncheckNodes.size() > 0) {
             probeNodes(uncheckNodes, canConnectNodes);

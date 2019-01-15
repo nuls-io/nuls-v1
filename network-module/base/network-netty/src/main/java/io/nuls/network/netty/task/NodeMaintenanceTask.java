@@ -57,7 +57,6 @@ public class NodeMaintenanceTask implements Runnable {
     private void process() {
         List<Node> needConnectNodes = getNeedConnectNodes();
         if (needConnectNodes == null || needConnectNodes.size() == 0) {
-            Log.info("-------needConnectNodes is null");
             return;
         }
 
