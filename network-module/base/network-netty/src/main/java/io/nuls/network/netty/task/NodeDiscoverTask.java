@@ -85,6 +85,7 @@ public class NodeDiscoverTask implements Runnable {
             Log.info("---------uncheckNodes:" + uncheckNodes.size());
             Log.info("---------canConnectNodes:" + canConnectNodes.size());
             Log.info("---------disconnectNodes:" + disconnectNodes.size());
+            Log.info("---------failNodes:" + nodesContainer.getFailNodes().size());
         }
 
         if (uncheckNodes.size() > 0) {
