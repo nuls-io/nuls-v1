@@ -24,32 +24,32 @@
 package io.nuls.core.tools.crypto;
 
 import org.spongycastle.crypto.Digest;
-import org.spongycastle.crypto.digests.SHA3Digest;
+import org.spongycastle.crypto.digests.KeccakDigest;
 
 /**
  * @author: PierreLuo
  * @date: 2018/11/8
  */
-public class Sha3Hash {
+public class KeccakHash {
 
-    public static String sha3(String src) {
+    public static String keccak(String src) {
         if(src == null || src.length() == 0) {
             return null;
         }
         try {
             byte[] bytes = Hex.decode(src);
-            return sha3(bytes);
+            return keccak(bytes);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public static String sha3(byte[] bytes) {
-        return sha3(bytes, 256);
+    public static String keccak(byte[] bytes) {
+        return keccak(bytes, 256);
     }
 
-    public static String sha3(byte[] bytes, int bitLength) {
-        Digest digest = new SHA3Digest(bitLength);
+    public static String keccak(byte[] bytes, int bitLength) {
+        Digest digest = new KeccakDigest(bitLength);
         digest.update(bytes, 0, bytes.length);
         byte[] rsData = new byte[digest.getDigestSize()];
         digest.doFinal(rsData, 0);
