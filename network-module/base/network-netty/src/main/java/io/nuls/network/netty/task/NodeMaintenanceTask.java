@@ -83,13 +83,11 @@ public class NodeMaintenanceTask implements Runnable {
     private List<Node> getNeedConnectNodes() {
 
         Collection<Node> avaliableNodes = nodeManager.getAvailableNodes();
-        Log.info("---------avaliableNodes.size:" + avaliableNodes.size());
         if (avaliableNodes.size() >= networkParam.getMaxOutCount()) {
             return null;
         }
 
         Collection<Node> canConnectNodes = nodeManager.getCanConnectNodes();
-        Log.info("---------canConnectNodes.size:" + canConnectNodes.size());
         if (canConnectNodes.size() == 0) {
             return null;
         }
