@@ -293,13 +293,19 @@ public class BlockServiceImpl implements BlockService {
         List<Transaction> savedList = new ArrayList<>();
         for (Transaction transaction : block.getTxs()) {
             transaction.setBlockHeight(height);
+            boolean needRollback = false;
             Result result = transactionService.commitTx(transaction, block.getHeader());
             if (result.isSuccess()) {
                 result = ledgerService.saveTx(transaction);
+            } else {
+                needRollback = true;
             }
             if (result.isSuccess()) {
                 savedList.add(transaction);
             } else {
+                if (needRollback) {
+                    this.transactionService.rollbackCommit(transaction, block.getHeader());
+                }
                 this.rollbackTxList(savedList, block.getHeader(), false);
                 return result;
             }
@@ -360,7 +366,7 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         boolean txsResult = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
-        if(!txsResult){
+        if (!txsResult) {
             return Result.getFailed();
         }
         BlockHeaderPo po = new BlockHeaderPo();

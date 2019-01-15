@@ -130,6 +130,28 @@ public class TransactionServiceImpl implements TransactionService {
         return Result.getSuccess();
     }
 
+    @Override
+    public Result rollbackCommit(Transaction tx, Object secondaryData) {
+        if (null == tx) {
+            return Result.getSuccess();
+        }
+        List<TransactionProcessor> processorList = TransactionManager.getProcessorList(tx.getClass());
+        List<TransactionProcessor> rollbackedList = new ArrayList<>();
+        for (TransactionProcessor processor : processorList) {
+            Result result = processor.onRollback(tx, secondaryData);
+            if (result.isSuccess()) {
+                rollbackedList.add(processor);
+            } else {
+                for (int i = rollbackedList.size() - 1; i >= 0; i--) {
+                    TransactionProcessor processor1 = rollbackedList.get(i);
+                    processor1.onCommit(tx, secondaryData);
+                }
+                return result;
+            }
+        }
+        return Result.getSuccess();
+    }
+
     /**
      * 转发交易给连接的其他对等节点，允许一个列外（不转发给它）
      * Forward Transaction to other peers of the connection, allowing one column (not forward to it)
