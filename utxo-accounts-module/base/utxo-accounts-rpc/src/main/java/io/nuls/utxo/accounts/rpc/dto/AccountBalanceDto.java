@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,13 @@
  */
 package io.nuls.utxo.accounts.rpc.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.nuls.utxo.accounts.storage.po.LockedBalance;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountBalanceDto {
     private String address;
     private String synBlockHeight;
@@ -40,8 +42,8 @@ public class AccountBalanceDto {
     private String heightLocked;
     private String contractIn;
     private String contractOut;
-    private List<LockedBalance> lockedTimeList=new ArrayList<>();
-    private List<LockedBalance> lockedHeightList=new ArrayList<>();
+    private List<LockedBalance> lockedTimeList;
+    private List<LockedBalance> lockedHeightList;
 
 
     public String getAddress() {

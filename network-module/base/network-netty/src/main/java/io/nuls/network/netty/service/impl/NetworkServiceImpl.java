@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId) {
+
         nodeManager.removeNode(nodeId);
     }
 
@@ -111,7 +112,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void reset() {
-        Log.warn("------network reset");
+        Log.info("------network reset");
         nodeManager.reset();
     }
 

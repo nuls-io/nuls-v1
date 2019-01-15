@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import java.util.*;
 
 /**
  * 节点维护任务
+ *
  * @author: ln
  * @date: 2018/12/8
  */
@@ -55,12 +56,11 @@ public class NodeMaintenanceTask implements Runnable {
 
     private void process() {
         List<Node> needConnectNodes = getNeedConnectNodes();
-
-        if(needConnectNodes == null || needConnectNodes.size() == 0) {
+        if (needConnectNodes == null || needConnectNodes.size() == 0) {
             return;
         }
 
-        for(Node node : needConnectNodes) {
+        for (Node node : needConnectNodes) {
             node.setType(Node.OUT);
             connectionNode(node);
         }
@@ -73,21 +73,22 @@ public class NodeMaintenanceTask implements Runnable {
 
         node.setConnectedListener(() -> nodeManager.nodeConnectSuccess(node));
 
-        node.setDisconnectListener(() -> nodeManager.nodeConnectDisconnect(node));
-
+        node.setDisconnectListener(() -> {
+            Log.info("-----------out node disconnect:" + node.getId());
+            nodeManager.nodeConnectDisconnect(node);
+        });
         return connectionManager.connection(node);
     }
 
     private List<Node> getNeedConnectNodes() {
 
         Collection<Node> avaliableNodes = nodeManager.getAvailableNodes();
-
-        if(avaliableNodes.size() >= networkParam.getMaxOutCount()) {
+        if (avaliableNodes.size() >= networkParam.getMaxOutCount()) {
             return null;
         }
 
         Collection<Node> canConnectNodes = nodeManager.getCanConnectNodes();
-        if(canConnectNodes.size() == 0) {
+        if (canConnectNodes.size() == 0) {
             return null;
         }
 
@@ -96,7 +97,7 @@ public class NodeMaintenanceTask implements Runnable {
         nodeList.removeAll(avaliableNodes);
 
         int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
-        if(nodeList.size() < maxCount) {
+        if (nodeList.size() < maxCount) {
             return nodeList;
         }
 

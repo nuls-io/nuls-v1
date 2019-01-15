@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,5 +45,6 @@ public class GasCost {
     public static final int ARRAYSTORE = 5;//把栈项的值存到数组里
     public static final int TRANSFER = 1000;//转账交易
     public static final int SHA3 = 500;//SHA3调用
+    public static final int VERIFY_SIGNATURE = 500;//验证签名
 
 }

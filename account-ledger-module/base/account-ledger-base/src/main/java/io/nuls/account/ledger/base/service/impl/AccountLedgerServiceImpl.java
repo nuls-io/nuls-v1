@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -310,13 +310,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return result;
         }
 
-        result = localUtxoService.saveUtxoForAccount(tx, addresses);
+        result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
         if (result.isFailed()) {
-            transactionInfoService.deleteTransactionInfo(txInfoPo);
             return result;
         }
 
-        result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
+        result = localUtxoService.saveUtxoForAccount(tx, addresses);
+        if (result.isFailed()) {
+            transactionInfoService.deleteTransactionInfo(txInfoPo);
+            unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+            return result;
+        }
+
 
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));

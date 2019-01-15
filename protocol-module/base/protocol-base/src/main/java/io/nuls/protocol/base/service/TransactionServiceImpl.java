@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -126,6 +126,28 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }
+        return Result.getSuccess();
+    }
+
+    @Override
+    public Result rollbackCommit(Transaction tx, Object secondaryData) {
+        if (null == tx) {
+            return Result.getSuccess();
+        }
+        List<TransactionProcessor> processorList = TransactionManager.getProcessorList(tx.getClass());
+        List<TransactionProcessor> rollbackedList = new ArrayList<>();
+        for (TransactionProcessor processor : processorList) {
+            Result result = processor.onRollback(tx, secondaryData);
+            if (result.isSuccess()) {
+                rollbackedList.add(processor);
+            } else {
+                for (int i = rollbackedList.size() - 1; i >= 0; i--) {
+                    TransactionProcessor processor1 = rollbackedList.get(i);
+                    processor1.onCommit(tx, secondaryData);
+                }
+                return result;
+            }
         }
         return Result.getSuccess();
     }

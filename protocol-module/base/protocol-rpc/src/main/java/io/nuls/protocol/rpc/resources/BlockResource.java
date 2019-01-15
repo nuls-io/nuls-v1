@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -234,6 +234,32 @@ public class BlockResource {
             // 包含智能合约内部转账(从合约转出)交易的区块
             block = blockService.getBlock(NulsDigestData.fromDigestHex(hash), true).getData();
         } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (block == null) {
+            result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
+        } else {
+            result = Result.getSuccess();
+            Map<String, String> map = new HashMap<>();
+            map.put("value", Base64.getEncoder().encodeToString(block.serialize()));
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/bytes/height")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getBlockBytes(@QueryParam("height") long height) throws IOException {
+        Result result;
+        if (height < 0) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Block block = null;
+        try {
+            // 包含智能合约内部转账(从合约转出)交易的区块
+            block = blockService.getBlock(height, true).getData();
+        } catch (Exception e) {
             Log.error(e);
         }
         if (block == null) {

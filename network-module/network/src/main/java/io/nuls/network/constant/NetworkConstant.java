@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ public interface NetworkConstant {
      * -----------[netty configs ]------------
      */
     int READ_IDEL_TIME_OUT = 10;
-    int WRITE_IDEL_TIME_OUT = 0;
+    int WRITE_IDEL_TIME_OUT = 10;
     int ALL_IDEL_TIME_OUT = 0;
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
     int CONNETCI_TIME_OUT = 6000;

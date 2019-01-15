@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,8 @@ public interface TransactionService {
      * @return 操作结果/operating results
      */
     Result rollbackTx(Transaction tx, Object secondaryData);
+
+    Result rollbackCommit(Transaction tx, Object secondaryData);
 
     /**
      * 转发交易给连接的其他对等节点，允许一个列外（不转发给它）

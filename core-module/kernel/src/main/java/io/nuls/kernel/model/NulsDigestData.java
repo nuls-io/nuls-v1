@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -226,15 +226,7 @@ public class NulsDigestData extends BaseNulsData {
         if (!(obj instanceof NulsDigestData)) {
             return false;
         }
-        try {
-            if (this.serialize() == null || ((NulsDigestData) obj).serialize() == null) {
-                return false;
-            }
-
-            if (this.serialize().length != ((NulsDigestData) obj).serialize().length) {
-                return false;
-            }
-        } catch (Exception e) {
+        if(null == this.getDigestBytes() || null == ((NulsDigestData) obj).getDigestBytes()){
             return false;
         }
         return Arrays.equals(this.getDigestBytes(), ((NulsDigestData) obj).getDigestBytes());

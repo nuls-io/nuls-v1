@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ package io.nuls.client.web.view;
 
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.context.NulsContext;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -118,7 +119,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
 //     */
     @Override
     public void stop() throws Exception {
-        System.exit(0);
+        NulsContext.getInstance().exit(1);
     }
 
     private boolean isMac() {
@@ -210,7 +211,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     public void openBrowse() {
         String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
         int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
-        if("0.0.0.0".equals(ip)){
+        if ("0.0.0.0".equals(ip)) {
             ip = RpcConstant.DEFAULT_IP;
         }
         String url = "http://" + ip + ":" + port;

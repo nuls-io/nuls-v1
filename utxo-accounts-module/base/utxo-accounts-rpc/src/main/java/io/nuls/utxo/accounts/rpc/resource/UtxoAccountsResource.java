@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,6 +57,8 @@ import java.util.List;
 public class UtxoAccountsResource {
     @Autowired
     private UtxoAccountsStorageService utxoAccountsStorageService;
+
+
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -69,40 +72,42 @@ public class UtxoAccountsResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         try {
-            Result<UtxoAccountsBalancePo> utxoAccountsBalance=utxoAccountsStorageService.getUtxoAccountsBalanceByAddress(AddressTool.getAddress(address));
-            long synBlockHeight=utxoAccountsStorageService.getHadSynBlockHeight();
-            if(null==utxoAccountsBalance || null==utxoAccountsBalance.getData()){
+            Result<UtxoAccountsBalancePo> utxoAccountsBalance = utxoAccountsStorageService.getUtxoAccountsBalanceByAddress(AddressTool.getAddress(address));
+            long synBlockHeight = utxoAccountsStorageService.getHadSynBlockHeight();
+            if (null == utxoAccountsBalance || null == utxoAccountsBalance.getData()) {
                 return Result.getFailed(UtxoAccountsErrorCode.DATA_NOT_FOUND).toRpcClientResult();
             }
-            UtxoAccountsBalancePo dbAccountsBalance =utxoAccountsBalance.getData();
-            AccountBalanceDto accountBalance=new AccountBalanceDto();
+            UtxoAccountsBalancePo dbAccountsBalance = utxoAccountsBalance.getData();
+            AccountBalanceDto accountBalance = new AccountBalanceDto();
+            accountBalance.setLockedTimeList(new ArrayList<>());
+            accountBalance.setLockedHeightList(new ArrayList<>());
             accountBalance.setAddress(address);
-            long totalNa=dbAccountsBalance.getOutputBalance()-(dbAccountsBalance.getInputBalance());
-            totalNa+=dbAccountsBalance.getContractToBalance();
-            totalNa-=dbAccountsBalance.getContractFromBalance();
-            accountBalance.setNuls( new BigDecimal(totalNa).toPlainString());
-            long timeLockedNa=0;
-            long heightLockedNa=0;
-            long permanentLockedNa=dbAccountsBalance.getLockedPermanentBalance()-(dbAccountsBalance.getUnLockedPermanentBalance());
-            long lockedNa=permanentLockedNa;
-            List<LockedBalance> timeLockedBalance=dbAccountsBalance.getLockedTimeList();
-            long currentTime=TimeService.currentTimeMillis();
-            for(LockedBalance balance:timeLockedBalance){
-                if(balance.getLockedTime()>currentTime){
-                    lockedNa+=balance.getLockedBalance();
-                    timeLockedNa+=balance.getLockedBalance();
+            long totalNa = dbAccountsBalance.getOutputBalance() - (dbAccountsBalance.getInputBalance());
+            totalNa += dbAccountsBalance.getContractToBalance();
+            totalNa -= dbAccountsBalance.getContractFromBalance();
+            accountBalance.setNuls(new BigDecimal(totalNa).toPlainString());
+            long timeLockedNa = 0;
+            long heightLockedNa = 0;
+            long permanentLockedNa = dbAccountsBalance.getLockedPermanentBalance() - (dbAccountsBalance.getUnLockedPermanentBalance());
+            long lockedNa = permanentLockedNa;
+            List<LockedBalance> timeLockedBalance = dbAccountsBalance.getLockedTimeList();
+            long currentTime = TimeService.currentTimeMillis();
+            for (LockedBalance balance : timeLockedBalance) {
+                if (balance.getLockedTime() > currentTime) {
+                    lockedNa += balance.getLockedBalance();
+                    timeLockedNa += balance.getLockedBalance();
                     accountBalance.getLockedTimeList().add(balance);
-                }else{
+                } else {
                     break;
                 }
             }
-            List<LockedBalance> heightLockedBalance=dbAccountsBalance.getLockedHeightList();
-            for(LockedBalance balance:heightLockedBalance){
-                if(balance.getLockedTime()>synBlockHeight){
-                    lockedNa+=balance.getLockedBalance();
-                    heightLockedNa+=balance.getLockedBalance();
+            List<LockedBalance> heightLockedBalance = dbAccountsBalance.getLockedHeightList();
+            for (LockedBalance balance : heightLockedBalance) {
+                if (balance.getLockedTime() > synBlockHeight) {
+                    lockedNa += balance.getLockedBalance();
+                    heightLockedNa += balance.getLockedBalance();
                     accountBalance.getLockedHeightList().add(balance);
-                }else{
+                } else {
                     break;
                 }
             }
@@ -111,10 +116,65 @@ public class UtxoAccountsResource {
             accountBalance.setTimeLocked(new BigDecimal(timeLockedNa).toPlainString());
             accountBalance.setHeightLocked(new BigDecimal(heightLockedNa).toPlainString());
             accountBalance.setSynBlockHeight(String.valueOf(synBlockHeight));
-            long netHeight= NulsContext.getInstance().getNetBestBlockHeight();
+            long netHeight = NulsContext.getInstance().getNetBestBlockHeight();
             accountBalance.setNetBlockHeight(String.valueOf(netHeight));
             accountBalance.setContractIn(String.valueOf(dbAccountsBalance.getContractToBalance()));
             accountBalance.setContractOut(String.valueOf(dbAccountsBalance.getContractFromBalance()));
+            return Result.getSuccess().setData(accountBalance).toRpcClientResult();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        return Result.getFailed(UtxoAccountsErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/balance/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[查询] 查询账户余额信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+                                      @PathParam("address") String address) {
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        try {
+            Result<UtxoAccountsBalancePo> utxoAccountsBalance = utxoAccountsStorageService.getUtxoAccountsBalanceByAddress(AddressTool.getAddress(address));
+            long synBlockHeight = utxoAccountsStorageService.getHadSynBlockHeight();
+            if (null == utxoAccountsBalance || null == utxoAccountsBalance.getData()) {
+                return Result.getFailed(UtxoAccountsErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+            }
+            UtxoAccountsBalancePo dbAccountsBalance = utxoAccountsBalance.getData();
+            AccountBalanceDto accountBalance = new AccountBalanceDto();
+            accountBalance.setAddress(address);
+            long totalNa = dbAccountsBalance.getOutputBalance() - (dbAccountsBalance.getInputBalance());
+            totalNa += dbAccountsBalance.getContractToBalance();
+            totalNa -= dbAccountsBalance.getContractFromBalance();
+            accountBalance.setNuls(new BigDecimal(totalNa).toPlainString());
+            long permanentLockedNa = dbAccountsBalance.getLockedPermanentBalance() - (dbAccountsBalance.getUnLockedPermanentBalance());
+            long lockedNa = permanentLockedNa;
+            List<LockedBalance> timeLockedBalance = dbAccountsBalance.getLockedTimeList();
+            long currentTime = TimeService.currentTimeMillis();
+            for (LockedBalance balance : timeLockedBalance) {
+                if (balance.getLockedTime() > currentTime) {
+                    lockedNa += balance.getLockedBalance();
+                } else {
+                    break;
+                }
+            }
+            List<LockedBalance> heightLockedBalance = dbAccountsBalance.getLockedHeightList();
+            for (LockedBalance balance : heightLockedBalance) {
+                if (balance.getLockedTime() > synBlockHeight) {
+                    lockedNa += balance.getLockedBalance();
+                } else {
+                    break;
+                }
+            }
+            accountBalance.setLocked(new BigDecimal(lockedNa).toPlainString());
+            accountBalance.setSynBlockHeight(String.valueOf(synBlockHeight));
+            long netHeight = NulsContext.getInstance().getNetBestBlockHeight();
+            accountBalance.setNetBlockHeight(String.valueOf(netHeight));
             return Result.getSuccess().setData(accountBalance).toRpcClientResult();
         } catch (NulsException e) {
             Log.error(e);

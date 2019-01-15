@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.contract.sdk.Event;
-import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -34,6 +33,7 @@ import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.util.JsonUtils;
+import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.tools.crypto.Sha3Hash;
 
 import java.util.LinkedHashMap;
@@ -72,6 +72,12 @@ public class NativeUtils {
                     return SUPPORT_NATIVE;
                 } else {
                     return sha3Bytes(methodCode, methodArgs, frame);
+                }
+            case verifySignatureData:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return verifySignatureData(methodCode, methodArgs, frame);
                 }
             default:
                 if (check) {
@@ -251,6 +257,33 @@ public class NativeUtils {
             ref = frame.heap.newString(sha3);
         }
         Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
+    }
+
+    public static final String verifySignatureData = TYPE + "." + "verifySignatureData" + "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z";
+
+    private static Result verifySignatureData(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.VERIFY_SIGNATURE);
+        ObjectRef dataRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef signatureRef = (ObjectRef) methodArgs.invokeArgs[1];
+        ObjectRef pubKeyRef = (ObjectRef) methodArgs.invokeArgs[2];
+        String data = frame.heap.runToString(dataRef);
+        String signature = frame.heap.runToString(signatureRef);
+        String pubKey = frame.heap.runToString(pubKeyRef);
+
+        boolean verify = false;
+        do {
+            if(data == null || signature == null || pubKey == null) {
+                break;
+            }
+            try {
+                verify = Utils.verify(data, signature, pubKey);
+            } catch (Exception e) {
+                verify = false;
+            }
+        } while (false);
+
+        Result result = NativeMethod.result(methodCode, verify, frame);
         return result;
     }
 

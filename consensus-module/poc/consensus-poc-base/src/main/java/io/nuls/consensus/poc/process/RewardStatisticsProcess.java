@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,11 @@ public class RewardStatisticsProcess {
         if (NulsContext.getServiceBean(DownloadService.class).isDownloadSuccess().isFailed()) {
             return;
         }
-        queue.add(new RewardStatisticsParam(0, block));
+        try {
+            queue.add(new RewardStatisticsParam(0, block));
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 
     public static void rollbackBlock(Block block) {

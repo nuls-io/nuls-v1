@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@
  */
 package io.nuls.utxo.accounts.service.impl;
 
-import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.log.Log;
@@ -38,7 +37,6 @@ import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
-import io.nuls.utxo.accounts.constant.UtxoAccountsConstant;
 import io.nuls.utxo.accounts.service.UtxoAccountsService;
 import io.nuls.utxo.accounts.storage.constant.UtxoAccountsStorageConstant;
 import io.nuls.utxo.accounts.storage.po.LocalCacheBlockBalance;
@@ -56,20 +54,6 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
     UtxoAccountsStorageService utxoAccountsStorageService;
     @Autowired
     ContractService contractService;
-
-    private boolean isPermanentLocked(int txType) {
-        if (txType == UtxoAccountsConstant.TX_TYPE_REGISTER_AGENT || txType == UtxoAccountsConstant.TX_TYPE_JOIN_CONSENSUS) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isPermanentUnLocked(int txType) {
-        if (txType == UtxoAccountsConstant.TX_TYPE_CANCEL_DEPOSIT || txType == UtxoAccountsConstant.TX_TYPE_STOP_AGENT) {
-            return true;
-        }
-        return false;
-    }
 
     private byte[] getInputAddress(Coin from) {
         byte[] fromHash;
@@ -93,28 +77,32 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
         List<Transaction> txs = block.getTxs();
         int txIndex = 0;
         for (Transaction tx : txs) {
-            if (tx.getCoinData() == null) {
-                return true;
-            }
-            List<Coin> from = tx.getCoinData().getFrom();
-            List<Coin> to = tx.getCoinData().getTo();
+            try {
+                if (tx.getCoinData() == null) {
+                    continue;
+                }
+                List<Coin> from = tx.getCoinData().getFrom();
+                List<Coin> to = tx.getCoinData().getTo();
 
-            for (Coin inputCoin : from) {
-                byte[] inputOwner = getInputAddress(inputCoin);
-                inputCoin.setOwner(inputOwner);
-                buildUtxoAccountsBalance(utxoAccountsMap, inputCoin, tx, txIndex, true);
-            }
-            for (Coin outputCoin : to) {
-                buildUtxoAccountsBalance(utxoAccountsMap, outputCoin, tx, txIndex, false);
-            }
-            //若区块中得到合约转账(从合约转出)交易，这段代码应该去掉
-            //增加智能合约内部交易逻辑
+                for (Coin inputCoin : from) {
+                    byte[] inputOwner = getInputAddress(inputCoin);
+                    inputCoin.setOwner(inputOwner);
+                    buildUtxoAccountsBalance(utxoAccountsMap, inputCoin, tx, txIndex, true);
+                }
+                for (Coin outputCoin : to) {
+                    buildUtxoAccountsBalance(utxoAccountsMap, outputCoin, tx, txIndex, false);
+                }
+                //若区块中得到合约转账(从合约转出)交易，这段代码应该去掉
+                //增加智能合约内部交易逻辑
 //            if (tx.getType() == UtxoAccountsConstant.TX_TYPE_CALL_CONTRACT) {
 //                ContractResult contractExecuteResult = contractService.getContractExecuteResult(tx.getHash());
 //                List<ContractTransfer> transferList = contractExecuteResult.getTransfers();
 //                buildContractTranfersBalance(utxoAccountsMap, transferList, block.getHeader().getHeight(), txIndex);
 //            }
-            txIndex++;
+                txIndex++;
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return true;
     }
@@ -139,38 +127,28 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
             utxoAccountsMap.put(address, balance);
         }
         if (isInput) {
-            if (isPermanentUnLocked(tx.getType())) {
+            if (coin.getLockTime() == -1) {
                 //remove balance
                 balance.setUnLockedPermanentBalance(balance.getUnLockedPermanentBalance() + (coin.getNa().getValue()));
             }
             balance.setInputBalance(balance.getInputBalance() + (coin.getNa().getValue()));
         } else {
-            if (isPermanentLocked(tx.getType())) {
-                //add locked balance
-                if (coin.getLockTime() == -1) {
-                    balance.setLockedPermanentBalance(balance.getLockedPermanentBalance() + (coin.getNa().getValue()));
+            //add locked balance
+            if (coin.getLockTime() == -1) {
+                balance.setLockedPermanentBalance(balance.getLockedPermanentBalance() + (coin.getNa().getValue()));
+            } else
+                //by time
+                if (coin.getLockTime() > TimeService.currentTimeMillis()) {
+                    LockedBalance lockedBalance = new LockedBalance();
+                    lockedBalance.setLockedBalance(coin.getNa().getValue());
+                    lockedBalance.setLockedTime(coin.getLockTime());
+                    balance.getLockedTimeList().add(lockedBalance);
+                } else if (coin.getLockTime() > netBlockHeight) {
+                    LockedBalance lockedBalance = new LockedBalance();
+                    lockedBalance.setLockedBalance(coin.getNa().getValue());
+                    lockedBalance.setLockedTime(coin.getLockTime());
+                    balance.getLockedHeightList().add(lockedBalance);
                 }
-            } else {
-                //add lockedTime output
-                if (coin.getLockTime() > 0) {
-                    //by time
-                    if (coin.getLockTime() > TimeService.currentTimeMillis()) {
-                        LockedBalance lockedBalance = new LockedBalance();
-                        lockedBalance.setLockedBalance(coin.getNa().getValue());
-                        lockedBalance.setLockedTime(coin.getLockTime());
-                        balance.getLockedTimeList().add(lockedBalance);
-                    } else {
-                        //by height
-                        if (coin.getLockTime() > netBlockHeight) {
-                            LockedBalance lockedBalance = new LockedBalance();
-                            lockedBalance.setLockedBalance(coin.getNa().getValue());
-                            lockedBalance.setLockedTime(coin.getLockTime());
-                            balance.getLockedHeightList().add(lockedBalance);
-                        }
-                    }
-
-                }
-            }
             balance.setOutputBalance(balance.getOutputBalance() + (coin.getNa()).getValue());
         }
 //        balance.setOwner(coin.getOwner());

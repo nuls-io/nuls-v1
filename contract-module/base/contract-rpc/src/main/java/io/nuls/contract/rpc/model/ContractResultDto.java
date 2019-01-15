@@ -1,7 +1,7 @@
 /**
  * MIT License
  * <p>
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ public class ContractResultDto {
     @ApiModelProperty(name = "result", value = "合约执行结果")
     private String result;
 
-    @ApiModelProperty(name = "gasUsed", value = "GasLimit")
+    @ApiModelProperty(name = "gasLimit", value = "GasLimit")
     private long gasLimit;
 
     @ApiModelProperty(name = "gasUsed", value = "已使用Gas")
