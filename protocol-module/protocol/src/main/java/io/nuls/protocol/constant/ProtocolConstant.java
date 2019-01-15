@@ -60,7 +60,7 @@ public interface ProtocolConstant extends NulsConstant {
      * 系统运行的最小连接节点数量
      * The number of minimum connection nodes that the system runs.
      */
-    int ALIVE_MIN_NODE_COUNT = 3;
+    int ALIVE_MIN_NODE_COUNT = 2;
 
     /**
      * 最大区块大小（不包含区块头）
