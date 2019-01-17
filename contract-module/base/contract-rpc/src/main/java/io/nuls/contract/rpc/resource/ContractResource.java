@@ -592,7 +592,7 @@ public class ContractResource implements InitializingBean {
             Na fee = (Na) datas[0];
             Transaction tx = (Transaction) datas[1];
             Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(fromAddress), tx,
-                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                    TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             Map<String, Long> map = new HashMap<>();
             Long maxAmount = null;
             if (rs.isSuccess()) {

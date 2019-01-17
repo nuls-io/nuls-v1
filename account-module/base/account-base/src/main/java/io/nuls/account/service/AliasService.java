@@ -54,10 +54,8 @@ import io.nuls.kernel.script.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
@@ -137,7 +135,7 @@ public class AliasService {
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -177,7 +175,7 @@ public class AliasService {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
                     Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx,
-                            TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                            TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                     if(rs.isSuccess()){
                         Na maxAmount = (Na)rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
@@ -305,7 +303,7 @@ public class AliasService {
             tx.setTime(TimeService.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -349,7 +347,7 @@ public class AliasService {
             tx.setTime(TimeService.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -414,7 +412,7 @@ public class AliasService {
                 tx.setTxData(alias);
                 //交易签名的长度为m*单个签名长度+赎回脚本长度
                 int scriptSignLenth = redeemScript.getProgram().length + m*72;
-                CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                 if (!coinDataResult.isEnough()) {
                     return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
                 }
@@ -500,7 +498,7 @@ public class AliasService {
             tx.setTxData(alias);
             //交易签名的长度为m*单个签名长度+赎回脚本长度
             int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
-            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -607,7 +605,7 @@ public class AliasService {
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);

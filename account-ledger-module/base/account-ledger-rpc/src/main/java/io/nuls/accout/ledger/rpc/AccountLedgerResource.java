@@ -68,7 +68,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PHKSignature;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.*;
@@ -174,7 +173,7 @@ public class AccountLedgerResource {
 
         Result result = accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
-                value, form.getPassword(), remarkBytes, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                value, form.getPassword(), remarkBytes, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -219,7 +218,7 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.sendToAddress(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
-                value, form.getPassword(), remarkBytes, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                value, form.getPassword(), remarkBytes, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -243,7 +242,7 @@ public class AccountLedgerResource {
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.changeWhole(AddressTool.getAddress(form.getAddress()), form.getPassword(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.changeWhole(AddressTool.getAddress(form.getAddress()), form.getPassword(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -333,7 +332,7 @@ public class AccountLedgerResource {
         if (toTotal < 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -386,7 +385,7 @@ public class AccountLedgerResource {
 //        if (toTotal < 0) {
 //            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
 //        }
-//        Result result = accountLedgerService.sendFrom(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+//        Result result = accountLedgerService.sendFrom(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
 //        if (result.isSuccess()) {
 //            Map<String, String> map = new HashMap<>();
 //            map.put("value", (String) result.getData());
@@ -411,7 +410,7 @@ public class AccountLedgerResource {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.estimateFee(AddressTool.getAddress(address), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.estimateFee(AddressTool.getAddress(address), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         Long fee = null;
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
@@ -470,14 +469,14 @@ public class AccountLedgerResource {
 
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
-                AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         Long fee = null;
         Long maxAmount = null;
         Map<String, Long> map = new HashMap<>();
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
             //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
-            long feeMax = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            long feeMax = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
             if (fee > feeMax) {
                 Transaction tx = new TransferTransaction();
                 try {
@@ -491,7 +490,7 @@ public class AccountLedgerResource {
                 coinData.getTo().add(toCoin);
                 tx.setCoinData(coinData);
                 Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                        TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                        TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
                 if (rs.isSuccess()) {
                     maxAmount = ((Na) rs.getData()).getValue();
                 }
@@ -561,7 +560,7 @@ public class AccountLedgerResource {
             coinData.getTo().add(toCoin);
 
             List<Coin> coinList = ConvertCoinTool.convertCoinList(form.getUtxos());
-            CoinDataResult coinDataResult = getCoinData(fromBytes, values, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES, coinList);
+            CoinDataResult coinDataResult = getCoinData(fromBytes, values, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES, coinList);
 
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();

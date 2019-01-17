@@ -246,7 +246,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setTxData(createContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -277,7 +277,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
@@ -620,7 +620,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setTxData(createContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -798,7 +798,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setTxData(callContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -840,7 +840,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 }
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
@@ -1105,7 +1105,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setTxData(callContractData);
 
-            Na fee = accountLedgerService.getTxFee(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            Na fee = accountLedgerService.getTxFee(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             fee = fee.add(imputedGasUsedNa);
             return Result.getSuccess().setData(new Object[]{fee, tx});
         } catch (Exception e) {
@@ -1208,7 +1208,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             CoinData coinData = new CoinData();
 
             // 总花费 终止智能合约的交易手续费按普通交易计算手续费
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -1239,7 +1239,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                    Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);

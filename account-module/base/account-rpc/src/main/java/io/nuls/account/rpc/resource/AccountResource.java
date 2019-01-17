@@ -323,14 +323,14 @@ public class AccountResource {
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
             //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
-            long feeMax = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            long feeMax = TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
             if(fee > feeMax){
                 AliasTransaction tx = new AliasTransaction();
                 tx.setTime(TimeService.currentTimeMillis());
                 Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
                 tx.setTxData(alias);
                 try {
-                    CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                     if (!coinDataResult.isEnough()) {
                         return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
                     }
@@ -351,7 +351,7 @@ public class AccountResource {
                     return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
                 }
                 Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                        TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                        TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                 if (rs.isSuccess()) {
                     maxAmount = ((Na) rs.getData()).getValue();
                 }
@@ -1380,7 +1380,7 @@ public class AccountResource {
         Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
         tx.setTxData(alias);
         try {
-            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
             }
@@ -1402,7 +1402,7 @@ public class AccountResource {
         }
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES,scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
