@@ -25,6 +25,7 @@
 package io.nuls.protocol.base.version;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -138,7 +139,12 @@ public class NulsVersionManager {
      * 读取配置文件信息，生成协议容器
      */
     public static void loadConfig() throws Exception {
-        XmlLoader.loadXml(NulsConstant.NULS_VERSION_XML, new NulsVersionHandler());
+        String mode = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, "mode", "main");
+        if ("main".equals(mode)) {
+            XmlLoader.loadXml(NulsConstant.NULS_VERSION_XML, new NulsVersionHandler());
+        } else {
+            XmlLoader.loadXml(mode + "/" + NulsConstant.NULS_VERSION_XML, new NulsVersionHandler());
+        }
     }
 
     /**
