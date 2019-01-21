@@ -102,6 +102,7 @@ public class NodeDiscoverTask implements Runnable {
                 Thread.sleep(3000L);
             }
         } catch (Exception e) {
+            Log.error(e);
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e1) {
