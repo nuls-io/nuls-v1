@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-version>
+    <!-- 需要解析的子模块配置文件 -->
+    <includes>
+        <include src="account-protocol.xml"/>
+        <include src="consensus-protocol.xml"/>
+        <include src="contract-protocol.xml"/>
+        <include src="network-protocol.xml"/>
+        <include src="protocol-protocol.xml"/>
+    </includes>
+
+    <protocols>
+        <!-- version 版本号 block 版本对应的区块协议-->
+        <!-- persent 当前版本生效共识节点的覆盖率 -->
+        <!-- delay 覆盖率达到后延迟多少块后当前版本生效-->
+        <protocol version="1" block="io.nuls.kernel.model.Block" percent="100" delay="0">
+            <txs>
+                <!-- 当前版本新增的交易协议 -->
+                <tx ref="coinBaseTx_V1"/>
+                <tx ref="transferTx_V1"/>
+                <tx ref="aliasTx_V1"/>
+                <tx ref="createAgentTx_V1"/>
+                <tx ref="depositTx_V1"/>
+                <tx ref="cancelDepositTx_V1"/>
+                <tx ref="stopAgentTx_V1"/>
+                <tx ref="redPunishTx_V1"/>
+                <tx ref="yellowPunishTx_V1"/>
+            </txs>
+
+            <messages>
+                <message ref="getNodesMsg_V1"/>
+                <message ref="nodesMsg_V1"/>
+                <message ref="handshakeMsg_V1"/>
+                <message ref="getVersionMsg_V1"/>
+                <message ref="versionMsg_V1"/>
+                <message ref="p2pNodeMsg_V1"/>
+                <message ref="blockHeaderMsg"/>
+                <message ref="blockMsg"/>
+                <message ref="blocksHashMsg"/>
+                <message ref="completeMsg"/>
+                <message ref="forwardSmallBlockMsg"/>
+                <message ref="forwardTxMsg"/>
+                <message ref="getBlockMsg"/>
+                <message ref="getBlockByHeightMsg"/>
+                <message ref="getBlockByHashMsg"/>
+                <message ref="getSmallBlockMsg"/>
+                <message ref="getTxGroupMsg"/>
+                <message ref="getTxMsg"/>
+                <message ref="NotFoundMsg"/>
+                <message ref="reactMsg"/>
+                <message ref="smallBlockMsg"/>
+                <message ref="transactionMsg"/>
+                <message ref="txGroupMsg"/>
+            </messages>
+        </protocol>
+
+        <!-- extend 版本继承哪个版本-->
+        <protocol version="2" block="" extend="1" percent="90" delay="100">
+            <!-- 当前版本作废的交易协议-->
+            <!--<tx-discards>-->
+            <!--</tx-discards>-->
+            <txs>
+                <tx ref="callContractTx_V1"/>
+                <tx ref="contractTransferTx_V1"/>
+                <tx ref="createContractTx_V1"/>
+                <tx ref="deleteContractTx_V1"/>
+                <tx ref="dappTx_V1"/>
+            </txs>
+        </protocol>
+    </protocols>
+</nuls-version>

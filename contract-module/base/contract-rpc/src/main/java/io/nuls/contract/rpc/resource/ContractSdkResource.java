@@ -63,7 +63,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +150,7 @@ public class ContractSdkResource {
         tx.setTxData(txData);
         List<Coin> coinList = ConvertCoinTool.convertCoinList(createContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size(),
-                TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
+                TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES,
                 coinList);
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
@@ -255,7 +254,7 @@ public class ContractSdkResource {
 
         List<Coin> coinList = ConvertCoinTool.convertCoinList(callContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(),
-                TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
+                TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES,
                 coinList);
 
         if (!coinDataResult.isEnough()) {
@@ -321,7 +320,7 @@ public class ContractSdkResource {
 
         List<Coin> coinList = ConvertCoinTool.convertCoinList(deleteContractTx.getUtxos());
         CoinDataResult coinDataResult = CoinDataTool.getCoinData(senderBytes, Na.ZERO, tx.size(),
-                TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,
+                TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES,
                 coinList);
         if (!coinDataResult.isEnough()) {
             return RpcClientResult.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);

@@ -620,7 +620,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
         Collections.sort(coinList, CoinComparator.getInstance());
         if (null == price) {
-            price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+            price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
         }
         Na values = Na.ZERO;
         Na fee = null;
@@ -782,7 +782,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             coinData.getTo().add(toCoin);
             if (price == null) {
-                price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+                price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
             }
             CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + coinData.size(), price);
             if (!coinDataResult.isEnough()) {
@@ -859,7 +859,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return Result.getFailed(ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
             }
             if (price == null) {
-                price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+                price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
             }
 
             TransactionDataResult txResult = createTransferTx(from, values, price, to, remark);
@@ -934,7 +934,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         tx.setTxData(logicData);
         CoinData coinData = new CoinData();
         try {
-            CoinDataResult coinDataResult = getCoinData(from, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = getCoinData(from, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -964,7 +964,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = getMaxAmountOfOnce(from, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                    Result rs = getMaxAmountOfOnce(from, tx, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
@@ -1036,7 +1036,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinData.getTo().add(toCoin);
             }
             if (price == null) {
-                price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+                price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
             }
 
             CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size(), price);
@@ -1681,7 +1681,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     coinData.getTo().add(toCoin);
                 }
                 if (price == null) {
-                    price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+                    price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
                 }
                 //交易签名的长度为m*单个签名长度+赎回脚本长度
                 int scriptSignLenth = redeemScript.getProgram().length + m * 72;
@@ -1828,7 +1828,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             //交易签名的长度为m*单个签名长度+赎回脚本长度
             int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
-            CoinDataResult coinDataResult = getMutilCoinData(AddressTool.getAddress(fromAddr), values, tx.size() + coinData.size() + scriptSignLenth, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = getMutilCoinData(AddressTool.getAddress(fromAddr), values, tx.size() + coinData.size() + scriptSignLenth, TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
             }
