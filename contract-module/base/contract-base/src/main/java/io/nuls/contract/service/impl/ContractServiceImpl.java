@@ -76,6 +76,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import static io.nuls.ledger.util.LedgerUtil.asBytes;
 import static io.nuls.ledger.util.LedgerUtil.asString;
@@ -1169,10 +1170,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if (contractResult == null) {
             return Result.getSuccess().setData(stateRoot);
         }
-        List<ContractTransfer> transfers = contractResult.getTransfers();
-        byte[] preStateRoot = stateRoot;
-        stateRoot = contractResult.getStateRoot();
         if(tx instanceof CallContractTransaction) {
+            List<ContractTransfer> transfers = contractResult.getTransfers();
+            byte[] preStateRoot = stateRoot;
+            stateRoot = contractResult.getStateRoot();
             // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
             if (!contractResult.isSuccess() && contractResult.getValue() > 0) {
                 Na sendBack = Na.valueOf(contractResult.getValue());
@@ -1219,11 +1220,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                                              List<ContractTransfer> transfers, long time,
                                              Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight) {
         boolean isCorrectContractTransfer = true;
+        // 用于保存本次交易产生的合约转账(从合约转出)交易
+        Map<String, ContractTransferTransaction> successContractTransferTxs = new LinkedHashMap<>();
         // 创建合约转账(从合约转出)交易
         if (transfers != null && transfers.size() > 0) {
-
-            // 用于保存本次交易产生的合约转账(从合约转出)交易
-            Map<String, ContractTransferTransaction> successContractTransferTxs = new LinkedHashMap<>();
             Result<ContractTransferTransaction> contractTransferResult;
             do {
                 // 验证合约转账(从合约转出)交易的最小转移金额
@@ -1299,9 +1299,18 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                         }
                     }
                 }
+            } else {
+                // 归集转入合约地址的UTXOs
+                this.contractExchange(tx, contractResult, time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs);
             }
             // 保存内部转账子交易到父交易对象中
             tx.setContractTransferTxs(successContractTransferTxs.values());
+        } else {
+            // `transfers.size() == 0` 智能合约在打包节点上只执行一次(打包区块和验证区块), 打包节点在打包时已处理过, 不重复处理
+            if(transfers.size() == 0) {
+                this.contractExchange(tx, contractResult, time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs);
+                tx.setContractTransferTxs(successContractTransferTxs.values());
+            }
         }
 
         // 合约执行成功并且合约转账(从合约转出)执行成功，提交这笔交易
@@ -1316,6 +1325,61 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
         }
         return stateRoot;
+    }
+
+    private void contractExchange(Transaction tx, ContractResult contractResult, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
+        if (contractResult.isSuccess()) {
+            Set<String> exchangeSet = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
+                                                                    && ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
+                                                        .map(t -> AddressTool.getStringAddressByBytes(t.getTo())).collect(Collectors.toSet());
+
+            byte[] contractAddress = contractResult.getContractAddress();
+            // NULS转入当前交易的调用合约
+            if(contractResult.getValue() > 0 && !exchangeSet.contains(AddressTool.getStringAddressByBytes(contractAddress))) {
+                this.doContractExchange(tx.getHash(), contractAddress, contractResult.getValue(), time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs);
+            }
+            // NULS转入其他合约（合约内部转账，从调用的合约转出到其他合约）
+            List<ContractTransfer> collect = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
+                                                                            && !exchangeSet.contains(AddressTool.getStringAddressByBytes(t.getTo()))
+                                                                            && !ArraysTool.arrayEquals(t.getTo(), contractAddress)
+                                                                            && !ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
+                                                                .collect(Collectors.toList());
+            collect.stream().forEach(t -> this.doContractExchange(tx.getHash(), t.getTo(), t.getValue().getValue(), time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs));
+        }
+    }
+
+    private void doContractExchange(NulsDigestData hash, byte[] contractAddress, long transferValue, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
+        BigInteger currentBalance = vmContext.getBalance(contractAddress, blockHeight);
+        long currentBalanceLongValue = currentBalance.longValue();
+        if(currentBalanceLongValue == 0 || currentBalanceLongValue == transferValue) {
+            // 如果当前余额等于此次转账金额，则是首次转入的NULS，首次转账不归集
+            // 余额等于0不归集
+            return;
+        }
+        ContractTransfer transfer = new ContractTransfer(contractAddress, contractAddress, Na.valueOf(currentBalanceLongValue), Na.ZERO, false);
+        Result<ContractTransferTransaction> contractTransferResult = this.createContractTransferTx(transfer, time, toMaps, contractUsedCoinMap, blockHeight);
+        if (contractTransferResult.isSuccess()) {
+            ContractTransferTransaction _contractTransferTx = contractTransferResult.getData();
+            if(!this.needExchange(_contractTransferTx)) {
+                return;
+            }
+            // 保存内部转账交易hash和外部合约交易hash
+            transfer.setOrginHash(hash);
+            transfer.setHash(_contractTransferTx.getHash());
+            transfers.add(transfer);
+            successContractTransferTxs.put(_contractTransferTx.getHash().getDigestHex(), _contractTransferTx);
+        }
+    }
+
+    private boolean needExchange(ContractTransferTransaction tx) {
+        CoinData coinData = tx.getCoinData();
+        List<Coin> froms = coinData.getFrom();
+        List<Coin> tos = coinData.getTo();
+        int fromSize = froms.size();
+        if(fromSize == 1 && tos.size() == fromSize) {
+            return false;
+        }
+        return true;
     }
 
     @Override
