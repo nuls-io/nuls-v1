@@ -1379,6 +1379,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(fromSize == 1 && tos.size() == fromSize) {
             return false;
         }
+        if(fromSize < 10) {
+            return false;
+        }
         return true;
     }
 
