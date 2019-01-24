@@ -1363,6 +1363,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             if(!this.needExchange(_contractTransferTx)) {
                 return;
             }
+            Log.info("=======================Contract UTXOs need exchange, tx hash is {}", hash.toString());
             // 保存内部转账交易hash和外部合约交易hash
             transfer.setOrginHash(hash);
             transfer.setHash(_contractTransferTx.getHash());
