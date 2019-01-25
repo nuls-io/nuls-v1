@@ -1,0 +1,130 @@
+package io.nuls.consensus.poc.storage.service.impl;
+
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
+import io.nuls.consensus.poc.storage.po.NextSeedPo;
+import io.nuls.consensus.poc.storage.po.RandomSeedPo;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
+import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.DBService;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Niels
+ */
+@Component
+public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService, InitializingBean {
+
+    private static final byte[] EMPTY = SerializeUtils.uint64ToByteArray(0L);
+
+    @Autowired
+    private DBService dbService;
+
+    @Override
+    public NextSeedPo getNextSeed(byte[] address) {
+        byte[] bytes = dbService.get(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, address);
+        if (null == bytes) {
+            return null;
+        }
+        NextSeedPo po = new NextSeedPo();
+        try {
+            po.parse(new NulsByteBuffer(bytes, 0));
+            po.setAddress(address);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        return po;
+    }
+
+    @Override
+    public boolean saveNextSeed(byte[] address, long nowHeight, byte[] nextSeed, byte[] seedHash) {
+        NextSeedPo po = new NextSeedPo();
+        po.setHeight(nowHeight);
+        po.setNextSeed(nextSeed);
+        po.setSeedHash(seedHash);
+        try {
+            dbService.put(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, address, po.serialize());
+            return true;
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean saveRandomSeed(long height, byte[] seed, byte[] nextSeedHash) {
+        RandomSeedPo po = new RandomSeedPo();
+        po.setSeed(seed);
+        po.setNextSeedHash(nextSeedHash);
+        try {
+            dbService.put(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, SerializeUtils.uint64ToByteArray(height), po.serialize());
+            return true;
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteRandomSeed(long height) {
+        dbService.delete(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, SerializeUtils.uint64ToByteArray(height));
+        return true;
+    }
+
+    private RandomSeedPo getSeed(long height) {
+        byte[] bytes = dbService.get(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, SerializeUtils.uint64ToByteArray(height));
+        if (null == bytes) {
+            return null;
+        }
+        RandomSeedPo po = new RandomSeedPo();
+        try {
+            po.parse(new NulsByteBuffer(bytes, 0));
+            po.setHeight(height);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        return po;
+    }
+
+    @Override
+    public List<RandomSeedPo> getSeeds(long maxHeight, int seedCount) {
+        List<RandomSeedPo> list = new ArrayList<>();
+        while (maxHeight > 0) {
+            RandomSeedPo po = getSeed(maxHeight--);
+            if (null != po && !ArraysTool.arrayEquals(po.getSeed(), EMPTY)) {
+                list.add(po);
+            }
+            if (list.size() >= seedCount) {
+                break;
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public List<RandomSeedPo> getSeeds(long startHeight, long endHeight) {
+        List<RandomSeedPo> list = new ArrayList<>();
+        long height = startHeight;
+        while (height <= endHeight) {
+            RandomSeedPo po = getSeed(height++);
+            if (null != po && !ArraysTool.arrayEquals(po.getSeed(), EMPTY)) {
+                list.add(po);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        dbService.createArea(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS);
+    }
+}
