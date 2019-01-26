@@ -36,6 +36,7 @@ import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
@@ -44,12 +45,16 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.poc.util.RandomSeedUtils;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.BlockLog;
@@ -96,6 +101,8 @@ public class BlockProcess {
 
     private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
+
+    private RandomSeedsStorageService randomSeedsStorageService = NulsContext.getServiceBean(RandomSeedsStorageService.class);
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -354,6 +361,15 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        if (NulsVersionManager.getCurrentVersion() >= 3) {
+                            BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+                            byte[] nextSeed = null;
+                            if (ArraysTool.arrayEquals(block.getHeader().getPackingAddress(), RandomSeedUtils.CACHE_SEED.getAddress())) {
+                                nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
+                            }
+                            randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), block.getHeader().getHeight(), nextSeed, extendsData.getNextSeedHash());
+                            randomSeedsStorageService.saveRandomSeed(block.getHeader().getHeight(), extendsData.getSeed(), extendsData.getNextSeedHash());
+                        }
                         RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容
                         nulsProtocolProcess.processProtocolUpGrade(block.getHeader());

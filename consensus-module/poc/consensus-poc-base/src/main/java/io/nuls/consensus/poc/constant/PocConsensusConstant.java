@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.constant;
 
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.utils.SerializeUtils;
 
 /**
  * @author ln

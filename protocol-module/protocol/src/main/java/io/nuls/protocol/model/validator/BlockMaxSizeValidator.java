@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;

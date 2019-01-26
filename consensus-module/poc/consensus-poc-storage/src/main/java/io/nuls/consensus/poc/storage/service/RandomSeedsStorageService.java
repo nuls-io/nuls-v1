@@ -1,7 +1,7 @@
 package io.nuls.consensus.poc.storage.service;
 
-import io.nuls.consensus.poc.storage.po.NextSeedPo;
 import io.nuls.consensus.poc.storage.po.RandomSeedPo;
+import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import java.util.List;
  */
 public interface RandomSeedsStorageService {
 
-    NextSeedPo getNextSeed(byte[] address);
+    RandomSeedStatusPo getAddressStatus(byte[] address);
 
-    boolean saveNextSeed(byte[] address, long nowHeight, byte[] nextSeed, byte[] seedHash);
+    boolean saveAddressStatus(byte[] address, long nowHeight, byte[] nextSeed, byte[] seedHash);
 
     boolean saveRandomSeed(long height, byte[] seed, byte[] nextSeedHash);
 
