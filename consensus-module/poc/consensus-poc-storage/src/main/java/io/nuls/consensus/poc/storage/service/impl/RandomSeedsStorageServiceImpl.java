@@ -94,12 +94,12 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
     }
 
     @Override
-    public List<RandomSeedPo> getSeeds(long maxHeight, int seedCount) {
-        List<RandomSeedPo> list = new ArrayList<>();
+    public List<byte[]> getSeeds(long maxHeight, int seedCount) {
+        List<byte[]> list = new ArrayList<>();
         while (maxHeight > 0) {
             RandomSeedPo po = getSeed(maxHeight--);
             if (null != po && !ArraysTool.arrayEquals(po.getSeed(), ConsensusStorageConstant.EMPTY_SEED)) {
-                list.add(po);
+                list.add(po.getSeed());
             }
             if (list.size() >= seedCount) {
                 break;
@@ -109,13 +109,13 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
     }
 
     @Override
-    public List<RandomSeedPo> getSeeds(long startHeight, long endHeight) {
-        List<RandomSeedPo> list = new ArrayList<>();
+    public List<byte[]> getSeeds(long startHeight, long endHeight) {
+        List<byte[]> list = new ArrayList<>();
         long height = startHeight;
         while (height <= endHeight) {
             RandomSeedPo po = getSeed(height++);
             if (null != po && !ArraysTool.arrayEquals(po.getSeed(), ConsensusStorageConstant.EMPTY_SEED)) {
-                list.add(po);
+                list.add(po.getSeed());
             }
         }
         return list;

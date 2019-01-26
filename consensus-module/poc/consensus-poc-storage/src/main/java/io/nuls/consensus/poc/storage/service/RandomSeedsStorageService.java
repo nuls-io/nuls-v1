@@ -18,7 +18,7 @@ public interface RandomSeedsStorageService {
 
     boolean deleteRandomSeed(long height);
 
-    List<RandomSeedPo> getSeeds(long maxHeight, int seedCount);
+    List<byte[]> getSeeds(long maxHeight, int seedCount);
 
-    List<RandomSeedPo> getSeeds(long startHeight, long endHeight);
+    List<byte[]> getSeeds(long startHeight, long endHeight);
 }

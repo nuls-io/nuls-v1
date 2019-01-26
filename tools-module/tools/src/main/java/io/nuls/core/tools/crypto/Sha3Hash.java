@@ -33,7 +33,7 @@ import org.spongycastle.crypto.digests.SHA3Digest;
 public class Sha3Hash {
 
     public static String sha3(String src) {
-        if(src == null || src.length() == 0) {
+        if (src == null || src.length() == 0) {
             return null;
         }
         try {
@@ -54,6 +54,14 @@ public class Sha3Hash {
         byte[] rsData = new byte[digest.getDigestSize()];
         digest.doFinal(rsData, 0);
         return Hex.encode(rsData);
+    }
+
+    public static byte[] sha3bytes(byte[] bytes, int bitLength) {
+        Digest digest = new SHA3Digest(bitLength);
+        digest.update(bytes, 0, bytes.length);
+        byte[] rsData = new byte[digest.getDigestSize()];
+        digest.doFinal(rsData, 0);
+        return rsData;
     }
 
 }
