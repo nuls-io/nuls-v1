@@ -1,8 +1,6 @@
 package io.nuls.consensus.poc.rpc.resource;
 
 import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
-import io.nuls.consensus.poc.storage.po.RandomSeedPo;
-import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Sha3Hash;
@@ -15,10 +13,12 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.swagger.annotations.*;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +54,39 @@ public class RandomSeedResource {
         }
         byte[] seed = null;
         RandomSeedDTO dto = new RandomSeedDTO();
+        dto.setCount(list.size());
+        if ("SHA3".equals(algorithm.trim().toUpperCase())) {
+            byte[] bytes = ArraysTool.concatenate(list.toArray(new byte[list.size()][]));
+            seed = Sha3Hash.sha3bytes(bytes, 256);
+            dto.setAlgorithm(algorithm);
+        }
+        BigInteger value = new BigInteger(seed);
+        dto.setSeed(value.toString());
+
+        return Result.getSuccess().setData(dto).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/seed/height")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("根据高度区间生成一个随机种子并返回")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RandomSeedDTO.class)
+    })
+    public RpcClientResult getSeedByHeight(@ApiParam(name = "startHeight", value = "起始高度", required = true)
+                                           @QueryParam("startHeight") long startHeight, @ApiParam(name = "endHeight", value = "截止高度", required = true)
+                                           @QueryParam("endHeight") long endHeight, @ApiParam(name = "algorithm", value = "算法标识：SHA3...", required = true)
+                                           @QueryParam("algorithm") String algorithm) {
+        if (endHeight > context.getBestHeight() || startHeight <= 0 || StringUtils.isBlank(algorithm)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
+        if (list.isEmpty()) {
+            return Result.getFailed().toRpcClientResult();
+        }
+        byte[] seed = null;
+        RandomSeedDTO dto = new RandomSeedDTO();
+        dto.setCount(list.size());
         if ("SHA3".equals(algorithm.trim().toUpperCase())) {
             byte[] bytes = ArraysTool.concatenate(list.toArray(new byte[list.size()][]));
             seed = Sha3Hash.sha3bytes(bytes, 256);
