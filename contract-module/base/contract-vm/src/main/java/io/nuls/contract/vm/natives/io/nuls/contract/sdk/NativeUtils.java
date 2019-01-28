@@ -93,6 +93,18 @@ public class NativeUtils {
                 } else {
                     return getRandomSeedByHeight(methodCode, methodArgs, frame);
                 }
+            case getRandomSeedListByCount:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getRandomSeedListByCount(methodCode, methodArgs, frame);
+                }
+            case getRandomSeedListByHeight:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getRandomSeedListByHeight(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -335,7 +347,7 @@ public class NativeUtils {
         return result;
     }
 
-    public static final String getRandomSeedListByCount = TYPE + "." + "getRandomSeedList" + "(JI)Ljava/util/List<Ljava/math/BigInteger;>;";
+    public static final String getRandomSeedListByCount = TYPE + "." + "getRandomSeedList" + "(JI)Ljava/util/List;";
 
     private static Result getRandomSeedListByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
@@ -360,7 +372,7 @@ public class NativeUtils {
         return objectRef;
     }
 
-    public static final String getRandomSeedListByHeight = TYPE + "." + "getRandomSeedList" + "(JJ)Ljava/util/List<Ljava/math/BigInteger;>;";
+    public static final String getRandomSeedListByHeight = TYPE + "." + "getRandomSeedList" + "(JJ)Ljava/util/List;";
 
     private static Result getRandomSeedListByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);

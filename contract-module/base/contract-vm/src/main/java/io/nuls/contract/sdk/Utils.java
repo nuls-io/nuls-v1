@@ -109,19 +109,19 @@ public class Utils {
      * @param endHeight 截止高度
      * @param seedCount 原始种子数量
      * @param algorithm hash算法标识
-     * @return 原始种子字节数组合并后, 使用hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] val))
+     * @return 原始种子字节数组合并后, 使用hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
      */
-    public static native BigInteger getRandomSeed(long endHeight, int count, String algorithm);
+    public static native BigInteger getRandomSeed(long endHeight, int seedCount, String algorithm);
 
     /**
      * 根据截止高度和原始种子数量，用`SHA3-256`hash算法生成一个随机种子
      *
-     * @param height    截止高度
+     * @param endHeight 截止高度
      * @param seedCount 原始种子数量
-     * @return 原始种子字节数组合并后, 使用`SHA3-256`hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] val))
+     * @return 原始种子字节数组合并后, 使用`SHA3-256`hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
      */
-    public static BigInteger getRandomSeed(long endHeight, int count) {
-        return getRandomSeed(endHeight, count, "SHA3");
+    public static BigInteger getRandomSeed(long endHeight, int seedCount) {
+        return getRandomSeed(endHeight, seedCount, "SHA3");
     }
 
     /**
@@ -130,20 +130,36 @@ public class Utils {
      * @param startHeight 起始高度
      * @param endHeight   截止高度
      * @param algorithm   hash算法标识
-     * @return
+     * @return 原始种子字节数组合并后, 使用hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
      */
     public static native BigInteger getRandomSeed(long startHeight, long endHeight, String algorithm);
 
     /**
-     * @param startHeight
-     * @param endHeight
-     * @return
+     * 根据高度范围，用`SHA3-256`hash算法生成一个随机种子
+     *
+     * @param startHeight 起始高度
+     * @param endHeight   截止高度
+     * @return 原始种子字节数组合并后, 使用`SHA3-256`hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
      */
     public static BigInteger getRandomSeed(long startHeight, long endHeight){
         return getRandomSeed(startHeight, endHeight, "SHA3");
     }
 
-    public static native List<BigInteger> getRandomSeedList(long startHeight, int seedCount);
+    /**
+     * 根据截止高度和原始种子数量，获取原始种子的集合
+     *
+     * @param endHeight 截止高度
+     * @param seedCount 原始种子数量
+     * @return 返回原始种子的集合，元素是字节数组转化的BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static native List<BigInteger> getRandomSeedList(long endHeight, int seedCount);
 
+    /**
+     * 根据高度范围，获取原始种子的集合
+     *
+     * @param startHeight 起始高度
+     * @param endHeight   截止高度
+     * @return 返回原始种子的集合，元素是字节数组转化的BigInteger(new BigInteger(byte[] bytes))
+     */
     public static native List<BigInteger> getRandomSeedList(long startHeight, long endHeight);
 }
