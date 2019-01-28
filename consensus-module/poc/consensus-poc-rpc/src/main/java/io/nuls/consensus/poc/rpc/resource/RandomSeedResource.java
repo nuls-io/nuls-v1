@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -96,5 +97,53 @@ public class RandomSeedResource {
         dto.setSeed(value.toString());
 
         return Result.getSuccess().setData(dto).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/seeds/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("根据高度查找原始种子列表并返回")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getSeedsByCount(@ApiParam(name = "height", value = "最大高度", required = true)
+                                           @QueryParam("height") long height, @ApiParam(name = "count", value = "原始种子个数", required = true)
+                                           @QueryParam("count") int count) {
+        if (height > context.getBestHeight() || count > 128 || count <= 0) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(height, count);
+        if (list.size() != count) {
+            return Result.getFailed().toRpcClientResult();
+        }
+        List<String> seeds = new ArrayList<>();
+        for (byte[] value : list) {
+            seeds.add(new BigInteger(value).toString());
+        }
+        return Result.getSuccess().setData(seeds).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/seeds/height")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("根据高度区间查询原始种子列表并返回")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RandomSeedDTO.class)
+    })
+    public RpcClientResult getSeedsByHeight(@ApiParam(name = "startHeight", value = "起始高度", required = true)
+                                            @QueryParam("startHeight") long startHeight, @ApiParam(name = "endHeight", value = "截止高度", required = true)
+                                            @QueryParam("endHeight") long endHeight) {
+        if (endHeight > context.getBestHeight() || startHeight <= 0) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
+        if (list.isEmpty()) {
+            return Result.getFailed().toRpcClientResult();
+        }
+        List<String> seeds = new ArrayList<>();
+        for (byte[] value : list) {
+            seeds.add(new BigInteger(value).toString());
+        }
+        return Result.getSuccess().setData(seeds).toRpcClientResult();
     }
 }

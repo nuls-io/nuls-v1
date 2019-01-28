@@ -370,7 +370,9 @@ public class BlockProcess {
                             }
                             randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), block.getHeader().getHeight(), nextSeed, extendsData.getNextSeedHash());
                             byte[] seed = extendsData.getSeed();
-                            if (ArraysTool.arrayEquals(bestBlockHeader.getPackingAddress(), block.getHeader().getPackingAddress())) {
+                            RandomSeedStatusPo po = this.randomSeedsStorageService.getAddressStatus(block.getHeader().getPackingAddress());
+
+                            if (null == po || ArraysTool.arrayEquals(bestBlockHeader.getPackingAddress(), block.getHeader().getPackingAddress()) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
                                 seed = ConsensusStorageConstant.EMPTY_SEED;
                             }
                             randomSeedsStorageService.saveRandomSeed(block.getHeader().getHeight(), seed, extendsData.getNextSeedHash());
