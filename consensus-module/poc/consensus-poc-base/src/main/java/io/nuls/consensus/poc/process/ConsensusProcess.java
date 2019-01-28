@@ -314,7 +314,7 @@ public class ConsensusProcess {
             extendsData.setPercent(NulsVersionManager.getCurrentProtocolContainer().getPercent());
             extendsData.setDelay(NulsVersionManager.getCurrentProtocolContainer().getDelay());
         }
-        if (NulsVersionManager.getCurrentVersion() >= 3) {
+        if (NulsVersionManager.getMainVersion() >= 3) {
             RandomSeedStatusPo status = randomSeedsStorageService.getAddressStatus(self.getPackingAddress());
             byte[] seed = ConsensusStorageConstant.EMPTY_SEED;
             if (null != status) {

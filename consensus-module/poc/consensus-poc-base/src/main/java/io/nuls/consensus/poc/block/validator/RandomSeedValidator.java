@@ -27,7 +27,7 @@ public class RandomSeedValidator implements NulsDataValidator<BlockHeader> {
     @Override
     public ValidateResult validate(BlockHeader data) {
         ValidateResult result = ValidateResult.getSuccessResult();
-        if (NulsVersionManager.getCurrentVersion() < 3) {
+        if (NulsVersionManager.getMainVersion() < 3) {
             return result;
         }
         BlockExtendsData extendsData = new BlockExtendsData(data.getExtend());

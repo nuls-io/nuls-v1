@@ -67,5 +67,11 @@
                 <tx ref="dappTx_V1"/>
             </txs>
         </protocol>
-    </protocols>
+    <!-- extend 版本继承哪个版本-->
+    <protocol version="3" block="" extend="2" percent="90" delay="1000">
+        <!-- 当前版本作废的交易协议-->
+        <!--<tx-discards>-->
+        <!--</tx-discards>-->
+    </protocol>
+</protocols>
 </nuls-version>

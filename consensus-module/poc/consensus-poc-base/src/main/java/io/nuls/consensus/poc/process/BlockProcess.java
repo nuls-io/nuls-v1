@@ -361,7 +361,7 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
-                        if (NulsVersionManager.getCurrentVersion() >= 3) {
+                        if (NulsVersionManager.getMainVersion() >= 3) {
                             BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
                             byte[] nextSeed = null;
                             if (ArraysTool.arrayEquals(block.getHeader().getPackingAddress(), RandomSeedUtils.CACHE_SEED.getAddress())) {
