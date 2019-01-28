@@ -45,6 +45,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.consensus.poc.service.impl.RandomSeedService;
 import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
@@ -103,7 +104,7 @@ public class BlockProcess {
     private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
-    private RandomSeedsStorageService randomSeedsStorageService = NulsContext.getServiceBean(RandomSeedsStorageService.class);
+    private RandomSeedService randomSeedService = NulsContext.getServiceBean(RandomSeedService.class);
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -363,17 +364,7 @@ public class BlockProcess {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
                         if (NulsVersionManager.getMainVersion() >= 3) {
-                            BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
-                            byte[] nextSeed = null;
-                            if (ArraysTool.arrayEquals(block.getHeader().getPackingAddress(), RandomSeedUtils.CACHE_SEED.getAddress())) {
-                                nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
-                            }
-                            randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), block.getHeader().getHeight(), nextSeed, extendsData.getNextSeedHash());
-                            byte[] seed = extendsData.getSeed();
-                            if (ArraysTool.arrayEquals(bestBlockHeader.getPackingAddress(), block.getHeader().getPackingAddress())) {
-                                seed = ConsensusStorageConstant.EMPTY_SEED;
-                            }
-                            randomSeedsStorageService.saveRandomSeed(block.getHeader().getHeight(), seed, extendsData.getNextSeedHash());
+                            randomSeedService.processBlock(block.getHeader(), bestBlockHeader);
                         }
                         RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容

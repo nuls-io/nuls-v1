@@ -1383,6 +1383,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(fromSize < 100) {
             return false;
         }
+        if(NulsContext.MAIN_NET_VERSION < 3) {
+            return false;
+        }
         return true;
     }
 

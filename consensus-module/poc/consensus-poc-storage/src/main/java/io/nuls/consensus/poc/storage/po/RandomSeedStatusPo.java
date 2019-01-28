@@ -13,7 +13,6 @@ import java.io.IOException;
 public class RandomSeedStatusPo extends BaseNulsData {
 
     private byte[] address;
-
     private long height;
 
     private byte[] seedHash;
@@ -78,4 +77,5 @@ public class RandomSeedStatusPo extends BaseNulsData {
         }
         return size;
     }
+
 }

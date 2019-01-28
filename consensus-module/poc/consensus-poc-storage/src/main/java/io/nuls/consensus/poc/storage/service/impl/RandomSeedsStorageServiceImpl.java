@@ -59,8 +59,14 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
     }
 
     @Override
-    public boolean saveRandomSeed(long height, byte[] seed, byte[] nextSeedHash) {
+    public void deleteAddressStatus(byte[] address) {
+        dbService.delete(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, address);
+    }
+
+    @Override
+    public boolean saveRandomSeed(long height, long preHeight, byte[] seed, byte[] nextSeedHash) {
         RandomSeedPo po = new RandomSeedPo();
+        po.setPreHeight(preHeight);
         po.setSeed(seed);
         po.setNextSeedHash(nextSeedHash);
         try {
@@ -78,7 +84,8 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
         return true;
     }
 
-    private RandomSeedPo getSeed(long height) {
+    @Override
+    public RandomSeedPo getSeed(long height) {
         byte[] bytes = dbService.get(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, SerializeUtils.uint64ToByteArray(height));
         if (null == bytes) {
             return null;

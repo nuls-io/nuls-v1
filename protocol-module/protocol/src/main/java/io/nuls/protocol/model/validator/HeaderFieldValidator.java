@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -37,7 +36,6 @@ import io.nuls.protocol.constant.ProtocolErroeCode;
 @Component
 public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
 
-    private static final int OLD_HEADER_EXTENDS_MAS_SIZE = 64;
     private static final int HEADER_EXTENDS_MAS_SIZE = 1024;
 
     @Override
@@ -62,10 +60,6 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
                 break;
             }
             if (null != data.getExtend()) {
-                if (NulsContext.MAIN_NET_VERSION <= 1 && data.getExtend().length > OLD_HEADER_EXTENDS_MAS_SIZE) {
-                    failed = true;
-                    break;
-                }
                 if (data.getExtend().length > HEADER_EXTENDS_MAS_SIZE) {
                     failed = true;
                     break;

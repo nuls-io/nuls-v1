@@ -35,6 +35,8 @@ import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
+import io.nuls.consensus.poc.storage.po.RandomSeedPo;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
@@ -132,7 +134,13 @@ public class ConsensusPocServiceImpl implements ConsensusService {
                 nulsProtocolProcess.processProtocolRollback(block.getHeader());
                 RewardStatisticsProcess.rollbackBlock(block);
                 NulsContext.getInstance().setBestBlock(PocConsensusContext.getChainManager().getMasterChain().getBestBlock());
+                RandomSeedPo po = randomSeedsStorageService.getSeed(block.getHeader().getHeight());
                 randomSeedsStorageService.deleteRandomSeed(block.getHeader().getHeight());
+                if (null == po || po.getPreHeight() == 0L) {
+                    randomSeedsStorageService.deleteAddressStatus(block.getHeader().getPackingAddress());
+                } else {
+                    randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), po.getHeight(), po.getSeed(), po.getNextSeedHash());
+                }
             }
         }
         return new Result(success, null);
