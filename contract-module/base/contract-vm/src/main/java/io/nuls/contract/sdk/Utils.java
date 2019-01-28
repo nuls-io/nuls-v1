@@ -1,5 +1,7 @@
 package io.nuls.contract.sdk;
 
+import java.util.List;
+
 public class Utils {
 
     private Utils() {
@@ -19,7 +21,7 @@ public class Utils {
     /**
      * 检查条件，如果条件不满足则回滚
      *
-     * @param expression 检查条件
+     * @param expression   检查条件
      * @param errorMessage 错误信息
      */
     public static void require(boolean expression, String errorMessage) {
@@ -70,6 +72,35 @@ public class Utils {
      */
     public static float pseudoRandom() {
         return pseudoRandom(0x5DEECE66DL);
+    }
+
+    /**
+     * 根据高度和原始种子数量，用特定的算法生成一个随机种子
+     *
+     * @param height    截止高度
+     * @param seedCount 原始种子数量
+     * @param algorithm 算法标识
+     * @return 32位随机数字节数组
+     */
+    public static byte[] getRandomSeed(long height, int seedCount, String algorithm) {
+        //todo
+        return null;
+    }
+
+    public static byte[] getRandomSeed(long startHeight, long endHeight, String algorithm) {
+        //todo
+        return null;
+    }
+
+
+    public static List<byte[]> getRandomSeedList(long height, int seedCount) {
+        //todo
+        return null;
+    }
+
+    public static List<byte[]> getRandomSeedList(long height, long endHeight) {
+        //todo
+        return null;
     }
 
     /**
