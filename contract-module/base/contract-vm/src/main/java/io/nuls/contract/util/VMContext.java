@@ -25,10 +25,13 @@
 package io.nuls.contract.util;
 
 
+import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
+import io.nuls.consensus.poc.rpc.resource.RandomSeedResource;
 import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -37,6 +40,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
@@ -56,6 +60,9 @@ public class VMContext {
 
     @Autowired
     private ContractUtxoService contractUtxoService;
+
+    @Autowired
+    private RandomSeedResource randomSeedResource;
 
     private ThreadLocal<BlockHeader> currentBlockHeader = new ThreadLocal<>();
 
@@ -163,5 +170,25 @@ public class VMContext {
 
     public void removeCurrentBlockHeader() {
         currentBlockHeader.remove();
+    }
+
+    public String getRandomSeedByCount(long endHeight, int count, String algorithm) {
+        RpcClientResult seedByCount = randomSeedResource.getSeedByCount(endHeight, count, algorithm);
+        if(seedByCount.isFailed()) {
+            Log.error(seedByCount.toString());
+            return null;
+        }
+        RandomSeedDTO dto = (RandomSeedDTO) seedByCount.getData();
+        return dto.getSeed();
+    }
+
+    public String getRandomSeedByHeight(long startHeight, long endHeight, String algorithm) {
+        RpcClientResult seedByCount = randomSeedResource.getSeedByHeight(startHeight, endHeight, algorithm);
+        if(seedByCount.isFailed()) {
+            Log.error(seedByCount.toString());
+            return null;
+        }
+        RandomSeedDTO dto = (RandomSeedDTO) seedByCount.getData();
+        return dto.getSeed();
     }
 }

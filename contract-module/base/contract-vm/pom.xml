@@ -61,6 +61,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.nuls.consensus-module</groupId>
+            <artifactId>consensus-poc-rpc</artifactId>
+            <version>1.1.7-beta1</version>
+        </dependency>
+
         <!-- apache commons -->
         <dependency>
             <groupId>commons-codec</groupId>

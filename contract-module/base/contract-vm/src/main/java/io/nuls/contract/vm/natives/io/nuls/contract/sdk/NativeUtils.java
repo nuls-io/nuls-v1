@@ -36,6 +36,7 @@ import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.tools.crypto.Sha3Hash;
 
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -78,6 +79,18 @@ public class NativeUtils {
                     return SUPPORT_NATIVE;
                 } else {
                     return verifySignatureData(methodCode, methodArgs, frame);
+                }
+            case getRandomSeedByCount:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getRandomSeedByCount(methodCode, methodArgs, frame);
+                }
+            case getRandomSeedByHeight:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return getRandomSeedByHeight(methodCode, methodArgs, frame);
                 }
             default:
                 if (check) {
@@ -287,4 +300,37 @@ public class NativeUtils {
         return result;
     }
 
+    public static final String getRandomSeedByCount = TYPE + "." + "getRandomSeedByCount" + "(JILjava/lang/String;)Ljava/math/BigInteger;";
+
+    private static Result getRandomSeedByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
+        long endHeight = (long) methodArgs.invokeArgs[0];
+        int count = (int) methodArgs.invokeArgs[1];
+        ObjectRef algorithmRef = (ObjectRef) methodArgs.invokeArgs[2];
+        String algorithm = frame.heap.runToString(algorithmRef);
+
+        String seed = frame.vm.getRandomSeedByCount(endHeight, count, algorithm);
+
+        ObjectRef objectRef = frame.heap.newBigInteger(seed);
+
+        Result result = NativeMethod.result(methodCode, objectRef, frame);
+        return result;
+    }
+
+    public static final String getRandomSeedByHeight = TYPE + "." + "getRandomSeedByHeight" + "(JJLjava/lang/String;)Ljava/math/BigInteger;";
+
+    private static Result getRandomSeedByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);
+        long startHeight = (long) methodArgs.invokeArgs[0];
+        long endHeight = (long) methodArgs.invokeArgs[1];
+        ObjectRef algorithmRef = (ObjectRef) methodArgs.invokeArgs[2];
+        String algorithm = frame.heap.runToString(algorithmRef);
+
+        String seed = frame.vm.getRandomSeedByHeight(startHeight, endHeight, algorithm);
+
+        ObjectRef objectRef = frame.heap.newBigInteger(seed);
+
+        Result result = NativeMethod.result(methodCode, objectRef, frame);
+        return result;
+    }
 }

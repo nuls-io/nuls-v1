@@ -1093,6 +1093,40 @@ public class VM {
         }
     }
 
+    public String getRandomSeedByCount(long endHeight, int count, String algorithm) {
+        if (this.vmContext != null) {
+            String seed = null;
+            try {
+                seed = this.vmContext.getRandomSeedByCount(endHeight, count, algorithm);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seed == null) {
+                log.error(String.format("seed is null, endHeight: %s, count: %s, algorithm: %s, ", endHeight, count, algorithm));
+            }
+            return seed;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
+        }
+    }
+
+    public String getRandomSeedByHeight(long startHeight, long endHeight, String algorithm) {
+        if (this.vmContext != null) {
+            String seed = null;
+            try {
+                seed = this.vmContext.getRandomSeedByHeight(startHeight, endHeight, algorithm);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seed == null) {
+                log.error(String.format("seed is null, startHeight: %s, endHeight: %s, algorithm: %s, ", startHeight, endHeight, algorithm));
+            }
+            return seed;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
+        }
+    }
+
 //    public BlockHeaderDto getBlockHeader(long number) {
 //        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
 //        blockHeaderDto.setHash("hash" + number);
