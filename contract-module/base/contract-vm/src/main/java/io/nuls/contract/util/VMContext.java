@@ -27,6 +27,7 @@ package io.nuls.contract.util;
 
 import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
 import io.nuls.consensus.poc.rpc.resource.RandomSeedResource;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
@@ -45,6 +46,8 @@ import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,6 +66,9 @@ public class VMContext {
 
     @Autowired
     private RandomSeedResource randomSeedResource;
+
+    @Autowired
+    private RandomSeedsStorageService randomSeedService;
 
     private ThreadLocal<BlockHeader> currentBlockHeader = new ThreadLocal<>();
 
@@ -172,7 +178,7 @@ public class VMContext {
         currentBlockHeader.remove();
     }
 
-    public String getRandomSeedByCount(long endHeight, int count, String algorithm) {
+    public String getRandomSeed(long endHeight, int count, String algorithm) {
         RpcClientResult seedByCount = randomSeedResource.getSeedByCount(endHeight, count, algorithm);
         if(seedByCount.isFailed()) {
             Log.error(seedByCount.toString());
@@ -182,7 +188,7 @@ public class VMContext {
         return dto.getSeed();
     }
 
-    public String getRandomSeedByHeight(long startHeight, long endHeight, String algorithm) {
+    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
         RpcClientResult seedByCount = randomSeedResource.getSeedByHeight(startHeight, endHeight, algorithm);
         if(seedByCount.isFailed()) {
             Log.error(seedByCount.toString());
@@ -190,5 +196,27 @@ public class VMContext {
         }
         RandomSeedDTO dto = (RandomSeedDTO) seedByCount.getData();
         return dto.getSeed();
+    }
+
+    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
+        if (endHeight > NulsContext.getInstance().getBestHeight() || seedCount > 128 || seedCount <= 0) {
+            return new ArrayList<>();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(endHeight, seedCount);
+        if (list.size() != seedCount) {
+            return new ArrayList<>();
+        }
+        return list;
+    }
+
+    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
+        if (endHeight > NulsContext.getInstance().getBestHeight() || startHeight <= 0) {
+            return new ArrayList<>();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return list;
     }
 }

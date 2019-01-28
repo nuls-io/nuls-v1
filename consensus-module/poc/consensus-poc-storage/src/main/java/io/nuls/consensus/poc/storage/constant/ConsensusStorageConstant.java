@@ -25,8 +25,6 @@
 
 package io.nuls.consensus.poc.storage.constant;
 
-import io.nuls.kernel.utils.SerializeUtils;
-
 public interface ConsensusStorageConstant {
 
     String DB_NAME_CONSENSUS_AGENT = "consensus_agent";
@@ -36,6 +34,6 @@ public interface ConsensusStorageConstant {
     String DB_BIFURCATION_EVIDENCE_KEY = "bifurcation_evidence_key";
     String DB_NAME_RANDOM_SEEDS = "random_seed";
 
-    byte[] EMPTY_SEED = SerializeUtils.uint64ToByteArray(0L);
+    byte[] EMPTY_SEED = new byte[32];
 
 }

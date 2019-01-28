@@ -55,6 +55,6 @@ public class RandomSeedPo extends BaseNulsData {
 
     @Override
     public int size() {
-        return 0;
+        return 40;
     }
 }

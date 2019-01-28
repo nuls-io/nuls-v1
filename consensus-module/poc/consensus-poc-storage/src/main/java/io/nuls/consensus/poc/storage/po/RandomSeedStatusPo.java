@@ -72,6 +72,10 @@ public class RandomSeedStatusPo extends BaseNulsData {
 
     @Override
     public int size() {
-        return 0;
+        int size = 48;
+        if (null == nextSeed) {
+            size = 16;
+        }
+        return size;
     }
 }

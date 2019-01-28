@@ -72,4 +72,8 @@ public class Constants {
 
     public static final String CLASS_DESC = "Ljava/lang/Class;";
 
+    public static final String ARRAYLIST_ADD_METHOD_NAME = "add";
+
+    public static final String ARRAYLIST_ADD_METHOD_DESC = "(Ljava/lang/Object;)Z";
+
 }

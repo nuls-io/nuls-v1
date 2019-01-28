@@ -45,6 +45,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
@@ -368,7 +369,11 @@ public class BlockProcess {
                                 nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
                             }
                             randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), block.getHeader().getHeight(), nextSeed, extendsData.getNextSeedHash());
-                            randomSeedsStorageService.saveRandomSeed(block.getHeader().getHeight(), extendsData.getSeed(), extendsData.getNextSeedHash());
+                            byte[] seed = extendsData.getSeed();
+                            if (ArraysTool.arrayEquals(bestBlockHeader.getPackingAddress(), block.getHeader().getPackingAddress())) {
+                                seed = ConsensusStorageConstant.EMPTY_SEED;
+                            }
+                            randomSeedsStorageService.saveRandomSeed(block.getHeader().getHeight(), seed, extendsData.getNextSeedHash());
                         }
                         RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容
