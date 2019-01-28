@@ -13,6 +13,8 @@ import java.io.IOException;
 public class RandomSeedPo extends BaseNulsData {
     private long height;
 
+    private long preHeight;
+
     private byte[] seed;
 
     private byte[] nextSeedHash;
@@ -43,18 +45,28 @@ public class RandomSeedPo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeInt64(preHeight);
         stream.write(seed);
         stream.write(nextSeedHash);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.preHeight = byteBuffer.readInt64();
         this.seed = byteBuffer.readBytes(32);
         this.nextSeedHash = byteBuffer.readBytes(8);
     }
 
     @Override
     public int size() {
-        return 40;
+        return 48;
+    }
+
+    public long getPreHeight() {
+        return preHeight;
+    }
+
+    public void setPreHeight(long preHeight) {
+        this.preHeight = preHeight;
     }
 }

@@ -39,7 +39,9 @@ import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.service.impl.RandomSeedService;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.RandomSeedPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
@@ -79,6 +81,8 @@ public class ForkChainProcess {
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
     private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
+
+    private RandomSeedService randomSeedService;
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -233,7 +237,7 @@ public class ForkChainProcess {
         //Need descending order
         //需要降序排列
         Collections.reverse(rollbackBlockList);
-        if(rollbackBlockList != null && rollbackBlockList.size() > 0 && rollbackBlockList.get(0).getHeader().getHeight() != chainManager.getMasterChain().getBestBlock().getHeader().getHeight()) {
+        if (rollbackBlockList != null && rollbackBlockList.size() > 0 && rollbackBlockList.get(0).getHeader().getHeight() != chainManager.getMasterChain().getBestBlock().getHeader().getHeight()) {
             Log.error("------------------------回滚的起始高度不是主链最新高度");
             Log.error("----------------------- masterChain:" + chainManager.getMasterChain().getBestBlock().getHeader().getHeight() + ",hash:" + chainManager.getMasterChain().getBestBlock().getHeader().getHash().getDigestHex());
             Log.error("----------------------- rollbackBlockList:" + rollbackBlockList.get(0).getHeader().getHeight() + ",hash:" + rollbackBlockList.get(0).getHeader().getHash().getDigestHex());
@@ -470,6 +474,8 @@ public class ForkChainProcess {
                     nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
+
+                    randomSeedService.rollbackBlock(rollbackBlock.getHeader());
                 } else {
                     Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
