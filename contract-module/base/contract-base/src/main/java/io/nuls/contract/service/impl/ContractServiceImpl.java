@@ -131,7 +131,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     /**
-     *
      * @param executor
      * @param number        当前块编号
      * @param prevStateRoot 上一区块状态根
@@ -139,12 +138,12 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
      * @return
      */
     private Result<ContractResult> createContract(ProgramExecutor executor, long number, byte[] prevStateRoot, CreateContractData create) {
-        if(number < 0) {
+        if (number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
 
         // 不能同时为空，批量提交方式stateRoot为空
-        if(executor == null && prevStateRoot == null) {
+        if (executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -162,14 +161,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             programCreate.setArgs(create.getArgs());
 
             ProgramExecutor track;
-            if(executor == null) {
+            if (executor == null) {
                 track = programExecutor.begin(prevStateRoot);
             } else {
                 track = executor.startTracking();
             }
             ProgramResult programResult = track.create(programCreate);
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
-            if(executor == null) {
+            if (executor == null) {
                 track.commit();
             }
 
@@ -187,7 +186,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
             contractResult.setTxTrack(track);
 
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
@@ -216,12 +215,12 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private List<ContractTransfer> generateContractTransfer(List<ProgramTransfer> transfers) {
-        if(transfers == null || transfers.size() == 0) {
+        if (transfers == null || transfers.size() == 0) {
             return new ArrayList<>(0);
         }
         List<ContractTransfer> resultList = new ArrayList<>(transfers.size());
         ContractTransfer contractTransfer;
-        for(ProgramTransfer transfer : transfers) {
+        for (ProgramTransfer transfer : transfers) {
             contractTransfer = new ContractTransfer();
             contractTransfer.setFrom(transfer.getFrom());
             contractTransfer.setTo(transfer.getTo());
@@ -233,7 +232,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     /**
-     *
      * @param executor
      * @param number        当前块编号
      * @param prevStateRoot 上一区块状态根
@@ -241,10 +239,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
      * @return
      */
     private Result<ContractResult> callContract(ProgramExecutor executor, long number, byte[] prevStateRoot, CallContractData call) {
-        if(number < 0) {
+        if (number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(executor == null && prevStateRoot == null) {
+        if (executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -263,7 +261,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             programCall.setArgs(call.getArgs());
 
             ProgramExecutor track;
-            if(executor == null) {
+            if (executor == null) {
                 track = programExecutor.begin(prevStateRoot);
             } else {
                 track = executor.startTracking();
@@ -272,7 +270,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             ProgramResult programResult = track.call(programCall);
 
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
-            if(executor == null) {
+            if (executor == null) {
                 track.commit();
             }
 
@@ -292,7 +290,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
             contractResult.setTxTrack(track);
 
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
@@ -322,7 +320,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     /**
-     *
      * @param executor
      * @param number        当前块编号
      * @param prevStateRoot 上一区块状态根
@@ -330,10 +327,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
      * @return
      */
     private Result<ContractResult> deleteContract(ProgramExecutor executor, long number, byte[] prevStateRoot, DeleteContractData delete) {
-        if(number < 0) {
+        if (number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(executor == null && prevStateRoot == null) {
+        if (executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -341,14 +338,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             byte[] sender = delete.getSender();
             ProgramExecutor track;
 
-            if(executor == null) {
+            if (executor == null) {
                 track = programExecutor.begin(prevStateRoot);
             } else {
                 track = executor.startTracking();
             }
             ProgramResult programResult = track.stop(contractAddress, sender);
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
-            if(executor == null) {
+            if (executor == null) {
                 track.commit();
             }
 
@@ -365,7 +362,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
             contractResult.setTxTrack(track);
 
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
@@ -420,7 +417,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
 
         // 保存非合约交易转入合约地址的utxo
-        if(tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
             result = contractUtxoService.saveUtxoForContractAddress(tx);
             if (result.isFailed()) {
                 Log.error("save confirmed non-call-contract transfer utxo error, reason is {}.", result.getMsg());
@@ -472,7 +469,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         for (int i = 0; i < txs.size(); i++) {
             result = saveConfirmedTransaction(txs.get(i));
             if (result.isSuccess()) {
-                if(result.getData() != null && (int) result.getData() == 1) {
+                if (result.getData() != null && (int) result.getData() == 1) {
                     savedTxList.add(txs.get(i));
                 }
             } else {
@@ -510,7 +507,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
 
         // 删除非合约交易转入合约地址的utxo
-        if(tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
             result = contractUtxoService.deleteUtxoOfTransaction(tx);
             if (result.isFailed()) {
                 Log.error("rollback non-call-contract transfer utxo error, reason is {}.", result.getMsg());
@@ -557,8 +554,8 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
      * @param toMaps
      * @param contractUsedCoinMap 组装时不操作toMaps, 用 contractUsedCoinMap 来检查UTXO是否已经被使用，如果已使用则跳过
      *                            (合约转账(从合约转出)不同于普通转账，普通转账有本地账本来维护UTXO，并且在打包前已经组装好UTXO，
-     *                              而合约转账(从合约转出)是在打包时才组装，此时从合约账本[DB]及打包交易[toMaps]中拿到所有的utxo来组装，
-     *                              用 contractUsedCoinMap 来代表已使用的UTXO)
+     *                            而合约转账(从合约转出)是在打包时才组装，此时从合约账本[DB]及打包交易[toMaps]中拿到所有的utxo来组装，
+     *                            用 contractUsedCoinMap 来代表已使用的UTXO)
      * @param bestHeight
      * @return
      */
@@ -566,7 +563,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                                                          Map<String, Coin> toMaps,
                                                          Map<String, Coin> contractUsedCoinMap, Long bestHeight) {
         try {
-            if(!ContractLedgerUtil.isExistContractAddress(from)) {
+            if (!ContractLedgerUtil.isExistContractAddress(from)) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
@@ -592,7 +589,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             tx.setCoinData(coinData);
             byte successByte;
             byte[] remark = null;
-            if(isSendBack) {
+            if (isSendBack) {
                 successByte = 0;
                 remark = ContractConstant.SEND_BACK_REMARK.getBytes(NulsConfig.DEFAULT_ENCODING);
             } else {
@@ -636,7 +633,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             Coin toCoin;
             Coin cloneCoin;
             String key;
-            for(Map.Entry<String, Coin> toMapsEntry : toMapsEntries) {
+            for (Map.Entry<String, Coin> toMapsEntry : toMapsEntries) {
                 key = toMapsEntry.getKey();
                 toCoin = toMapsEntry.getValue();
                 if (Arrays.equals(toCoin.getAddress(), address) && !contractUsedCoinMap.containsKey(key)) {
@@ -662,7 +659,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 将所有余额从小到大排序后，累计未花费的余额
             for (int i = 0, length = coinList.size(); i < length; i++) {
                 coin = coinList.get(i);
-                if(bestHeight != null) {
+                if (bestHeight != null) {
                     if (!coin.usable(bestHeight)) {
                         continue;
                     }
@@ -675,8 +672,8 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     continue;
                 }
                 // for contract, 使用过的UTXO不能再使用
-                if(StringUtils.isNotBlank(coin.getKey())) {
-                    if(contractUsedCoinMap.containsKey(coin.getKey())) {
+                if (StringUtils.isNotBlank(coin.getKey())) {
+                    if (contractUsedCoinMap.containsKey(coin.getKey())) {
                         continue;
                     }
                     contractUsedCoinMap.put(coin.getKey(), coin);
@@ -712,35 +709,35 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot, boolean isForkChain) {
-        if(tx == null || height < 0) {
+        if (tx == null || height < 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         int txType = tx.getType();
 
         // 分叉链切换主链时，重新执行智能合约
-        if(!isForkChain) {
+        if (!isForkChain) {
             ContractTransaction contractTx = (ContractTransaction) tx;
             // 打包、验证区块，合约只执行一次
             ContractResult contractExecutedResult;
             contractExecutedResult = contractTx.getContractResult();
-            if(contractExecutedResult == null) {
+            if (contractExecutedResult == null) {
                 contractExecutedResult = getContractExecuteResult(tx.getHash());
-                if(contractExecutedResult != null) {
-                    if(Log.isDebugEnabled()) {
+                if (contractExecutedResult != null) {
+                    if (Log.isDebugEnabled()) {
                         Log.debug("===get ContractResult from db.");
                     }
                 }
             } else {
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("===get ContractResult from tx object.");
                 }
             }
-            if(contractExecutedResult != null) {
+            if (contractExecutedResult != null) {
                 contractExecutedResult.setTxTrack(track);
-                if(contractExecutedResult.isSuccess()) {
+                if (contractExecutedResult.isSuccess()) {
                     // 刷新临时余额
-                    if(contractExecutedResult.isSuccess()) {
-                        if(tx instanceof CallContractTransaction) {
+                    if (contractExecutedResult.isSuccess()) {
+                        if (tx instanceof CallContractTransaction) {
                             this.refreshTempBalance((CallContractTransaction) tx, contractExecutedResult, height);
                         }
                     } else {
@@ -749,7 +746,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     }
                     return Result.getSuccess().setData(contractExecutedResult);
                 } else {
-                    if(Log.isDebugEnabled()) {
+                    if (Log.isDebugEnabled()) {
                         Log.debug("contractExecutedResult failed. {}", contractExecutedResult.toString());
                     }
                     return Result.getFailed().setData(contractExecutedResult);
@@ -760,22 +757,22 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTransaction = (CreateContractTransaction) tx;
             CreateContractData createContractData = createContractTransaction.getTxData();
-            if(!ContractUtil.checkPrice(createContractData.getPrice())) {
+            if (!ContractUtil.checkPrice(createContractData.getPrice())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
             Result<ContractResult> result = createContract(track, height, stateRoot, createContractData);
             ContractResult contractResult = result.getData();
             if (contractResult != null && contractResult.isSuccess()) {
                 Result nrc20Result = vmHelper.validateNrc20Contract((ProgramExecutor) contractResult.getTxTrack(), createContractTransaction, contractResult);
-                if(nrc20Result.isFailed()) {
+                if (nrc20Result.isFailed()) {
                     contractResult.setError(true);
-                    if(ContractErrorCode.CONTRACT_NRC20_SYMBOL_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
+                    if (ContractErrorCode.CONTRACT_NRC20_SYMBOL_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
                         contractResult.setErrorMessage("The format of the symbol is incorrect.");
-                    } else if(ContractErrorCode.CONTRACT_NAME_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
+                    } else if (ContractErrorCode.CONTRACT_NAME_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
                         contractResult.setErrorMessage("The format of the name is incorrect.");
-                    } else if(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_DECIMALS.equals(nrc20Result.getErrorCode())) {
+                    } else if (ContractErrorCode.CONTRACT_NRC20_MAXIMUM_DECIMALS.equals(nrc20Result.getErrorCode())) {
                         contractResult.setErrorMessage("The value of decimals ranges from 0 to 18.");
-                    } else if(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY.equals(nrc20Result.getErrorCode())) {
+                    } else if (ContractErrorCode.CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY.equals(nrc20Result.getErrorCode())) {
                         contractResult.setErrorMessage("The value of totalSupply ranges from 1 to 2^256 - 1.");
                     } else {
                         contractResult.setErrorMessage("Unkown error.");
@@ -784,31 +781,31 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 }
             }
             return result;
-        } else if(txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
-            if(!ContractUtil.checkPrice(callContractData.getPrice())) {
+            if (!ContractUtil.checkPrice(callContractData.getPrice())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
             Result<ContractResult> result = callContract(track, height, stateRoot, callContractData);
             byte[] contractAddress = callContractData.getContractAddress();
             BigInteger preBalance = vmContext.getBalance(contractAddress, height);
             ContractResult contractResult = result.getData();
-            if(!contractResult.isSuccess()) {
-                if(Log.isDebugEnabled()) {
+            if (!contractResult.isSuccess()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("contractResult failed. {}", contractResult.toString());
                 }
             }
             contractResult.setPreBalance(preBalance);
             // 刷新临时余额
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 this.refreshTempBalance(callContractTransaction, contractResult, height);
             } else {
                 // 合约调用失败，把需要退还的UTXO记录到结果对象中
                 contractResult.setValue(callContractData.getValue());
             }
             return result;
-        } else if(txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
             DeleteContractTransaction deleteContractTransaction = (DeleteContractTransaction) tx;
             DeleteContractData deleteContractData = deleteContractTransaction.getTxData();
             Result<ContractResult> result = deleteContract(track, height, stateRoot, deleteContractData);
@@ -825,24 +822,24 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         contractExecutedResult.setPreBalance(preBalance);
         // 增加转入
         long value = callContractData.getValue();
-        if(value > 0) {
+        if (value > 0) {
             contractBalanceManager.addTempBalance(contractAddress, Na.valueOf(value));
         }
         // 增加转入, 扣除转出
         List<ContractTransfer> transfers = contractExecutedResult.getTransfers();
-        if(transfers != null && transfers.size() > 0) {
+        if (transfers != null && transfers.size() > 0) {
             LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
             LinkedHashMap<String, Na> contractOutNa = contracts[0];
             LinkedHashMap<String, Na> contractInNa = contracts[1];
             byte[] contractBytes;
             Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
-            for(Map.Entry<String, Na> in : ins) {
+            for (Map.Entry<String, Na> in : ins) {
                 contractBytes = asBytes(in.getKey());
                 vmContext.getBalance(contractBytes, height);
                 contractBalanceManager.addTempBalance(contractBytes, in.getValue());
             }
             Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
-            for(Map.Entry<String, Na> out : outs) {
+            for (Map.Entry<String, Na> out : outs) {
                 contractBytes = asBytes(out.getKey());
                 vmContext.getBalance(contractBytes, height);
                 contractBalanceManager.minusTempBalance(contractBytes, out.getValue());
@@ -857,25 +854,25 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         contracts[0] = contractOutNa;
         contracts[1] = contractInNa;
 
-        byte[] from,to;
+        byte[] from, to;
         Na transferValue;
-        for(ContractTransfer transfer : transfers) {
+        for (ContractTransfer transfer : transfers) {
             from = transfer.getFrom();
             to = transfer.getTo();
             transferValue = transfer.getValue();
-            if(ContractUtil.isLegalContractAddress(from)) {
+            if (ContractUtil.isLegalContractAddress(from)) {
                 String contract = asString(from);
                 Na na = contractOutNa.get(contract);
-                if(na == null) {
+                if (na == null) {
                     contractOutNa.put(contract, transferValue);
                 } else {
                     contractOutNa.put(contract, na.add(transferValue));
                 }
             }
-            if(ContractUtil.isLegalContractAddress(to)) {
+            if (ContractUtil.isLegalContractAddress(to)) {
                 String contract = asString(to);
                 Na na = contractInNa.get(contract);
-                if(na == null) {
+                if (na == null) {
                     contractInNa.put(contract, transferValue);
                 } else {
                     contractInNa.put(contract, na.add(transferValue));
@@ -886,33 +883,32 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
 
-
     private void rollbackContractTempBalance(Transaction tx, ContractResult contractResult) {
-        if(tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
             byte[] contractAddress = callContractData.getContractAddress();
             // 增加转出, 扣除转入
             List<ContractTransfer> transfers = contractResult.getTransfers();
-            if(transfers != null && transfers.size() > 0) {
+            if (transfers != null && transfers.size() > 0) {
                 LinkedHashMap<String, Na>[] contracts = this.filterContractNa(transfers);
                 LinkedHashMap<String, Na> contractOutNa = contracts[0];
                 LinkedHashMap<String, Na> contractInNa = contracts[1];
                 byte[] contractBytes;
                 Set<Map.Entry<String, Na>> outs = contractOutNa.entrySet();
-                for(Map.Entry<String, Na> out : outs) {
+                for (Map.Entry<String, Na> out : outs) {
                     contractBytes = asBytes(out.getKey());
                     contractBalanceManager.addTempBalance(contractBytes, out.getValue());
                 }
                 Set<Map.Entry<String, Na>> ins = contractInNa.entrySet();
-                for(Map.Entry<String, Na> in : ins) {
+                for (Map.Entry<String, Na> in : ins) {
                     contractBytes = asBytes(in.getKey());
                     contractBalanceManager.minusTempBalance(contractBytes, in.getValue());
                 }
             }
             // 扣除转入
             long value = callContractData.getValue();
-            if(value > 0) {
+            if (value > 0) {
                 contractBalanceManager.minusTempBalance(contractAddress, Na.valueOf(value));
             }
         }
@@ -929,15 +925,15 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private void rollbackContractTransferTxs(Map<String, ContractTransferTransaction> successContractTransferTxs, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
-        if(successContractTransferTxs != null && successContractTransferTxs.size() > 0) {
+        if (successContractTransferTxs != null && successContractTransferTxs.size() > 0) {
             Collection<ContractTransferTransaction> values = successContractTransferTxs.values();
-            for(Transaction tx : values) {
+            for (Transaction tx : values) {
                 rollbackToMapAndContractUsedCoinMap(tx, toMaps, contractUsedCoinMap);
             }
         }
     }
 
-    private void rollbackToMapAndContractUsedCoinMap(Transaction tx, Map<String, Coin> toMaps, Map<String,Coin> contractUsedCoinMap) {
+    private void rollbackToMapAndContractUsedCoinMap(Transaction tx, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
         if (tx == null || tx.getCoinData() == null || contractUsedCoinMap == null) {
             return;
         }
@@ -947,7 +943,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         String key;
         for (Coin from : froms) {
             key = from.getKey();
-            if(key != null) {
+            if (key != null) {
                 contractUsedCoinMap.remove(from.getKey());
             }
         }
@@ -964,7 +960,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private Result<ContractTransferTransaction> createContractTransferTx(ContractTransfer transfer, long blockTime, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long bestHeight) {
         Result<ContractTransferTransaction> result;
         result = transfer(transfer.getFrom(), transfer.getTo(), transfer.getValue(), transfer.getFee(), transfer.isSendBack(), transfer.getOrginHash(), blockTime, toMaps, contractUsedCoinMap, bestHeight);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             result.getData().setTransfer(transfer);
         } else {
             Log.error("contract transfer failed. Reason: " + result);
@@ -976,14 +972,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         // 合约执行失败而退回的转入金额暂时不收取手续费
         Na transferFee = Na.ZERO;
 
-        if(sendBack.compareTo(transferFee) <= 0) {
+        if (sendBack.compareTo(transferFee) <= 0) {
             transferFee = sendBack;
         }
 
         List<ContractTransfer> contractTransferList = new ArrayList<>();
         try {
             Set<String> addressFromTX = SignatureUtil.getAddressFromTX(tx);
-            if(addressFromTX == null || addressFromTX.size() == 0) {
+            if (addressFromTX == null || addressFromTX.size() == 0) {
                 return contractTransferList;
             }
             Object[] array = addressFromTX.toArray();
@@ -993,19 +989,19 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             List<Coin> toList = coinData.getTo();
             HashMap<String, Na> sendBackMap = MapUtil.createHashMap(toList.size());
             String ownerStr;
-            for(Coin coin : toList) {
-                if(!ArraysTool.arrayEquals(fromAddressBytes, coin.getOwner())) {
+            for (Coin coin : toList) {
+                if (!ArraysTool.arrayEquals(fromAddressBytes, coin.getOwner())) {
                     ownerStr = AddressTool.getStringAddressByBytes(coin.getOwner());
                     Na addressNa = sendBackMap.get(ownerStr);
-                    if(addressNa == null) {
+                    if (addressNa == null) {
                         sendBackMap.put(ownerStr, coin.getNa());
                     } else {
                         sendBackMap.put(ownerStr, addressNa.add(coin.getNa()));
                     }
                 }
             }
-            if(sendBackMap.size() > 0) {
-                for(Map.Entry<String, Na> entry : sendBackMap.entrySet()) {
+            if (sendBackMap.size() > 0) {
+                for (Map.Entry<String, Na> entry : sendBackMap.entrySet()) {
                     ContractTransfer transfer = new ContractTransfer(AddressTool.getAddress(entry.getKey()), fromAddressBytes, entry.getValue(), transferFee, true);
                     contractTransferList.add(transfer);
                 }
@@ -1031,16 +1027,16 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if(po == null) {
+            if (po == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
-            if(!po.isNrc20()) {
+            if (!po.isNrc20()) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_NOT_NRC20);
             }
 
             ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, "balanceOf", null, address);
             Result<ContractTokenInfo> result;
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
             } else {
@@ -1090,10 +1086,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
             Result<List<ContractTokenInfo>> tokenListResult = contractBalanceManager.getAllTokensByAccount(address);
             List<ContractTokenInfo> list = tokenListResult.getData();
-            if(list != null && list.size() > 0) {
+            if (list != null && list.size() > 0) {
                 byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
                 ProgramExecutor track = programExecutor.begin(prevStateRoot);
-                for(ContractTokenInfo tokenInfo : list) {
+                for (ContractTokenInfo tokenInfo : list) {
                     tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
                 }
             }
@@ -1118,7 +1114,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if(po == null) {
+            if (po == null) {
                 return false;
             }
             return po.isNrc20();
@@ -1148,7 +1144,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     @Override
     public Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(String address, NulsDigestData hash) {
         try {
-            if(hash == null) {
+            if (hash == null) {
                 return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
             }
             Result accountResult = accountService.getAccount(address);
@@ -1170,7 +1166,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if (contractResult == null) {
             return Result.getSuccess().setData(stateRoot);
         }
-        if(tx instanceof CallContractTransaction) {
+        if (tx instanceof CallContractTransaction) {
             List<ContractTransfer> transfers = contractResult.getTransfers();
             byte[] preStateRoot = stateRoot;
             stateRoot = contractResult.getStateRoot();
@@ -1188,9 +1184,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         } else {
             // 提交这笔交易
             Object txTrackObj = contractResult.getTxTrack();
-            if(contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            if (contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
                 ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("===tx track commit.");
                 }
                 txTrack.commit();
@@ -1204,10 +1200,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private Result verifyTransfer(List<ContractTransfer> transfers) {
-        if(transfers == null || transfers.size() == 0) {
+        if (transfers == null || transfers.size() == 0) {
             return Result.getSuccess();
         }
-        for(ContractTransfer transfer : transfers) {
+        for (ContractTransfer transfer : transfers) {
             if (transfer.getValue().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
                 return Result.getFailed(TransactionErrorCode.TOO_SMALL_AMOUNT);
             }
@@ -1218,7 +1214,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private byte[] handleContractTransferTxs(CallContractTransaction tx, ContractResult contractResult,
                                              byte[] stateRoot, byte[] preStateRoot,
                                              List<ContractTransfer> transfers, long time,
-                                             Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight) {
+                                             Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight) {
         boolean isCorrectContractTransfer = true;
         // 用于保存本次交易产生的合约转账(从合约转出)交易
         Map<String, ContractTransferTransaction> successContractTransferTxs = new LinkedHashMap<>();
@@ -1228,7 +1224,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             do {
                 // 验证合约转账(从合约转出)交易的最小转移金额
                 Result result = this.verifyTransfer(transfers);
-                if(result.isFailed()) {
+                if (result.isFailed()) {
                     isCorrectContractTransfer = false;
                     contractResult.setError(true);
                     String errorMsg = contractResult.getErrorMessage();
@@ -1262,7 +1258,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
             // 如果合约转账(从合约转出)出现错误，整笔合约交易视作合约执行失败
             if (!isCorrectContractTransfer) {
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
                 }
                 // 执行合约产生的状态根回滚到上一个世界状态
@@ -1282,7 +1278,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
                     Na sendBack = Na.valueOf(contractResult.getValue());
                     List<ContractTransfer> transferList = this.createReturnFundsContractTransfer(tx, sendBack);
-                    for(ContractTransfer transfer : transferList) {
+                    for (ContractTransfer transfer : transferList) {
                         transfer.setOrginHash(tx.getHash());
                         contractTransferResult = this.createContractTransferTx(transfer, time, toMaps, contractUsedCoinMap, blockHeight);
 
@@ -1307,18 +1303,18 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             tx.setContractTransferTxs(successContractTransferTxs.values());
         } else {
             // `transfers.size() == 0` 智能合约在打包节点上只执行一次(打包区块和验证区块), 打包节点在打包时已处理过, 不重复处理
-            if(transfers.size() == 0) {
+            if (transfers.size() == 0) {
                 this.contractExchange(tx, contractResult, time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs);
                 tx.setContractTransferTxs(successContractTransferTxs.values());
             }
         }
 
         // 合约执行成功并且合约转账(从合约转出)执行成功，提交这笔交易
-        if(contractResult.isSuccess() && isCorrectContractTransfer) {
+        if (contractResult.isSuccess() && isCorrectContractTransfer) {
             Object txTrackObj = contractResult.getTxTrack();
-            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
                 ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("===tx track commit.");
                 }
                 txTrack.commit();
@@ -1330,20 +1326,20 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private void contractExchange(Transaction tx, ContractResult contractResult, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
         if (contractResult.isSuccess()) {
             Set<String> exchangeSet = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
-                                                                    && ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
-                                                        .map(t -> AddressTool.getStringAddressByBytes(t.getTo())).collect(Collectors.toSet());
+                    && ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
+                    .map(t -> AddressTool.getStringAddressByBytes(t.getTo())).collect(Collectors.toSet());
 
             byte[] contractAddress = contractResult.getContractAddress();
             // NULS转入当前交易的调用合约
-            if(contractResult.getValue() > 0 && !exchangeSet.contains(AddressTool.getStringAddressByBytes(contractAddress))) {
+            if (contractResult.getValue() > 0 && !exchangeSet.contains(AddressTool.getStringAddressByBytes(contractAddress))) {
                 this.doContractExchange(tx.getHash(), contractAddress, contractResult.getValue(), time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs);
             }
             // NULS转入其他合约（合约内部转账，从调用的合约转出到其他合约）
             List<ContractTransfer> collect = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
-                                                                            && !exchangeSet.contains(AddressTool.getStringAddressByBytes(t.getTo()))
-                                                                            && !ArraysTool.arrayEquals(t.getTo(), contractAddress)
-                                                                            && !ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
-                                                                .collect(Collectors.toList());
+                    && !exchangeSet.contains(AddressTool.getStringAddressByBytes(t.getTo()))
+                    && !ArraysTool.arrayEquals(t.getTo(), contractAddress)
+                    && !ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
+                    .collect(Collectors.toList());
             collect.stream().forEach(t -> this.doContractExchange(tx.getHash(), t.getTo(), t.getValue().getValue(), time, toMaps, contractUsedCoinMap, blockHeight, transfers, successContractTransferTxs));
         }
     }
@@ -1351,7 +1347,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private void doContractExchange(NulsDigestData hash, byte[] contractAddress, long transferValue, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
         BigInteger currentBalance = vmContext.getBalance(contractAddress, blockHeight);
         long currentBalanceLongValue = currentBalance.longValue();
-        if(currentBalanceLongValue == 0 || currentBalanceLongValue == transferValue) {
+        if (currentBalanceLongValue == 0 || currentBalanceLongValue == transferValue) {
             // 如果当前余额等于此次转账金额，则是首次转入的NULS，首次转账不归集
             // 余额等于0不归集
             return;
@@ -1360,7 +1356,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         Result<ContractTransferTransaction> contractTransferResult = this.createContractTransferTx(transfer, time, toMaps, contractUsedCoinMap, blockHeight);
         if (contractTransferResult.isSuccess()) {
             ContractTransferTransaction _contractTransferTx = contractTransferResult.getData();
-            if(!this.needExchange(_contractTransferTx)) {
+            if (!this.needExchange(_contractTransferTx)) {
                 return;
             }
             Log.info("=======================Contract UTXOs need exchange, tx hash is {}", hash.toString());
@@ -1377,10 +1373,13 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         List<Coin> froms = coinData.getFrom();
         List<Coin> tos = coinData.getTo();
         int fromSize = froms.size();
-        if(fromSize == 1 && tos.size() == fromSize) {
+        if (fromSize == 1 && tos.size() == fromSize) {
             return false;
         }
-        if(fromSize < 10) {
+        if (fromSize < 10) {
+            return false;
+        }
+        if (NulsContext.MAIN_NET_VERSION < 3) {
             return false;
         }
         return true;
@@ -1400,7 +1399,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         byte[] preStateRoot = stateRoot;
         stateRoot = contractResult.getStateRoot();
         do {
-            if(tx instanceof CallContractTransaction) {
+            if (tx instanceof CallContractTransaction) {
                 // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
                 if (!contractResult.isSuccess() && contractResult.getValue() > 0) {
                     // 智能合约在打包节点上只执行一次(打包区块和验证区块), 打包节点在打包时已处理过contractResult, 不重复处理
@@ -1416,9 +1415,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             } else {
                 // 提交这笔交易
                 Object txTrackObj = contractResult.getTxTrack();
-                if(contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+                if (contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
                     ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
-                    if(Log.isDebugEnabled()) {
+                    if (Log.isDebugEnabled()) {
                         Log.debug("===tx track commit.");
                     }
                     txTrack.commit();
@@ -1434,14 +1433,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     @Override
     public Result<ContractResult> batchPackageTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
-        if(stateRoot == null) {
+        if (stateRoot == null) {
             return Result.getFailed();
         }
 
         BlockHeader blockHeader = block.getHeader();
         long blockTime = blockHeader.getTime();
         ProgramExecutor executor = localProgramExecutor.get();
-        if(executor == null) {
+        if (executor == null) {
             return Result.getFailed();
         }
 
@@ -1459,14 +1458,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     @Override
     public Result<ContractResult> batchProcessTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain) {
-        if(stateRoot == null) {
+        if (stateRoot == null) {
             return Result.getFailed();
         }
 
         BlockHeader blockHeader = block.getHeader();
         long blockTime = blockHeader.getTime();
         ProgramExecutor executor = localProgramExecutor.get();
-        if(executor == null) {
+        if (executor == null) {
             return Result.getFailed();
         }
 
@@ -1477,7 +1476,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         ContractResult contractResult = invokeContractResult.getData();
         if (contractResult != null) {
             Result<byte[]> handleContractResult;
-            if(isForkChain) {
+            if (isForkChain) {
                 handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap, bestHeight);
             } else {
                 handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
@@ -1501,7 +1500,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     @Override
     public void createBatchExecute(byte[] stateRoot) {
         localProgramExecutor.remove();
-        if(stateRoot == null) {
+        if (stateRoot == null) {
             return;
         }
         ProgramExecutor executor = programExecutor.begin(stateRoot);
@@ -1511,7 +1510,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     @Override
     public Result<byte[]> commitBatchExecute() {
         ProgramExecutor executor = localProgramExecutor.get();
-        if(executor == null) {
+        if (executor == null) {
             return Result.getSuccess();
         }
         executor.commit();
