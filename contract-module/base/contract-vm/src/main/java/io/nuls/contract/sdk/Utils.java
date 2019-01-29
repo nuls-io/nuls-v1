@@ -1,5 +1,6 @@
 package io.nuls.contract.sdk;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class Utils {
@@ -75,43 +76,20 @@ public class Utils {
     }
 
     /**
-     * 根据高度和原始种子数量，用特定的算法生成一个随机种子
      *
-     * @param height    截止高度
-     * @param seedCount 原始种子数量
-     * @param algorithm 算法标识
-     * @return 32位随机数字节数组
+     * Please note that this is the SHA-3 FIPS 202 standard, not Keccak-256.
+     *
+     * @param src source string (hex encoding string)
+     * @return sha3-256 hash (hex encoding string)
      */
-    public static byte[] getRandomSeed(long height, int seedCount, String algorithm) {
-        //todo
-        return null;
-    }
-
-    public static byte[] getRandomSeed(long startHeight, long endHeight, String algorithm) {
-        //todo
-        return null;
-    }
-
-
-    public static List<byte[]> getRandomSeedList(long height, int seedCount) {
-        //todo
-        return null;
-    }
-
-    public static List<byte[]> getRandomSeedList(long height, long endHeight) {
-        //todo
-        return null;
-    }
+    public static native String sha3(String hexString);
 
     /**
-     * @param src source string
-     * @return sha3-256 hash (utf-8 encode)
-     */
-    public static native String sha3(String src);
-
-    /**
+     *
+     * Please note that this is the SHA-3 FIPS 202 standard, not Keccak-256.
+     *
      * @param bytes source byte array
-     * @return sha3-256 hash
+     * @return sha3-256 hash (hex encoding string)
      */
     public static native String sha3(byte[] bytes);
 
@@ -124,4 +102,64 @@ public class Utils {
      * @return verify result
      */
     public static native boolean verifySignatureData(String data, String signature, String pubkey);
+
+    /**
+     * 根据截止高度和原始种子数量，用特定的算法生成一个随机种子
+     *
+     * @param endHeight 截止高度
+     * @param seedCount 原始种子数量
+     * @param algorithm hash算法标识
+     * @return 原始种子字节数组合并后, 使用hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static native BigInteger getRandomSeed(long endHeight, int seedCount, String algorithm);
+
+    /**
+     * 根据截止高度和原始种子数量，用`SHA3-256`hash算法生成一个随机种子
+     *
+     * @param endHeight 截止高度
+     * @param seedCount 原始种子数量
+     * @return 原始种子字节数组合并后, 使用`SHA3-256`hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static BigInteger getRandomSeed(long endHeight, int seedCount) {
+        return getRandomSeed(endHeight, seedCount, "SHA3");
+    }
+
+    /**
+     * 根据高度范围，用特定的算法生成一个随机种子
+     *
+     * @param startHeight 起始高度
+     * @param endHeight   截止高度
+     * @param algorithm   hash算法标识
+     * @return 原始种子字节数组合并后, 使用hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static native BigInteger getRandomSeed(long startHeight, long endHeight, String algorithm);
+
+    /**
+     * 根据高度范围，用`SHA3-256`hash算法生成一个随机种子
+     *
+     * @param startHeight 起始高度
+     * @param endHeight   截止高度
+     * @return 原始种子字节数组合并后, 使用`SHA3-256`hash算法得到32位hash字节数组, 再转化为BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static BigInteger getRandomSeed(long startHeight, long endHeight){
+        return getRandomSeed(startHeight, endHeight, "SHA3");
+    }
+
+    /**
+     * 根据截止高度和原始种子数量，获取原始种子的集合
+     *
+     * @param endHeight 截止高度
+     * @param seedCount 原始种子数量
+     * @return 返回原始种子的集合，元素是字节数组转化的BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static native List<BigInteger> getRandomSeedList(long endHeight, int seedCount);
+
+    /**
+     * 根据高度范围，获取原始种子的集合
+     *
+     * @param startHeight 起始高度
+     * @param endHeight   截止高度
+     * @return 返回原始种子的集合，元素是字节数组转化的BigInteger(new BigInteger(byte[] bytes))
+     */
+    public static native List<BigInteger> getRandomSeedList(long startHeight, long endHeight);
 }
