@@ -2,7 +2,6 @@ package io.nuls.consensus.poc.rpc.resource;
 
 import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
-import io.nuls.core.tools.crypto.RandomSeedCaculator;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
