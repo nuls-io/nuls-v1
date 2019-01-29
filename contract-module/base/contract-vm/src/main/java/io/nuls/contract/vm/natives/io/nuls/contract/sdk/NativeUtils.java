@@ -36,6 +36,7 @@ import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.tools.crypto.Sha3Hash;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -299,7 +300,7 @@ public class NativeUtils {
 
         boolean verify = false;
         do {
-            if(data == null || signature == null || pubKey == null) {
+            if (data == null || signature == null || pubKey == null) {
                 break;
             }
             try {
@@ -323,7 +324,9 @@ public class NativeUtils {
         String algorithm = frame.heap.runToString(algorithmRef);
 
         String seed = frame.vm.getRandomSeed(endHeight, count, algorithm);
-
+        if (StringUtils.isBlank(seed)) {
+            seed = "0";
+        }
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
@@ -340,7 +343,9 @@ public class NativeUtils {
         String algorithm = frame.heap.runToString(algorithmRef);
 
         String seed = frame.vm.getRandomSeed(startHeight, endHeight, algorithm);
-
+        if (StringUtils.isBlank(seed)) {
+            seed = "0";
+        }
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
@@ -366,7 +371,7 @@ public class NativeUtils {
         ObjectRef objectRef = frame.heap.newArrayList();
 
         MethodCode arrayListAddMethodCode = frame.vm.methodArea.loadMethod(VariableType.ARRAYLIST_TYPE.getType(), Constants.ARRAYLIST_ADD_METHOD_NAME, Constants.ARRAYLIST_ADD_METHOD_DESC);
-        for(byte[] seed : seeds) {
+        for (byte[] seed : seeds) {
             frame.vm.run(arrayListAddMethodCode, new Object[]{objectRef, frame.heap.newBigInteger(seed)}, false);
         }
         return objectRef;
