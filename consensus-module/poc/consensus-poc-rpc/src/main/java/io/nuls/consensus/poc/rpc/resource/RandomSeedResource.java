@@ -9,6 +9,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.utils.RandomSeedCaculator;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.GET;
