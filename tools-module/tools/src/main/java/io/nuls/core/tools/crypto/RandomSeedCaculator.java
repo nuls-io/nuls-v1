@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Niels
  */
-public class RandomSeedUtils {
+public class RandomSeedCaculator {
 
     public static byte[] clac(List<byte[]> seeds, String algorithm) {
         if (StringUtils.isBlank(algorithm)) {
