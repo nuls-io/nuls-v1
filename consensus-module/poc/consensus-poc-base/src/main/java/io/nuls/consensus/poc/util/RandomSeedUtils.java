@@ -15,7 +15,6 @@ public class RandomSeedUtils {
 
     public static byte[] createRandomSeed() {
         BigInteger value = new BigInteger(256, new Random());
-        System.out.println(value.toString());
         byte[] result = value.toByteArray();
         if (result.length > 32) {
             byte[] temp = new byte[32];

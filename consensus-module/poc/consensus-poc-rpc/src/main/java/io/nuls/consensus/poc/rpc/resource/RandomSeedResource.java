@@ -3,6 +3,7 @@ package io.nuls.consensus.poc.rpc.resource;
 import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
 import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.crypto.RandomSeedUtils;
 import io.nuls.core.tools.crypto.Sha3Hash;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -53,14 +54,13 @@ public class RandomSeedResource {
         if (list.size() != count) {
             return Result.getFailed().toRpcClientResult();
         }
-        byte[] seed = null;
+        byte[] seed = RandomSeedUtils.clac(list, algorithm);
+        if (null == seed) {
+            return Result.getFailed().toRpcClientResult();
+        }
         RandomSeedDTO dto = new RandomSeedDTO();
         dto.setCount(list.size());
-        if ("SHA3".equals(algorithm.trim().toUpperCase())) {
-            byte[] bytes = ArraysTool.concatenate(list.toArray(new byte[list.size()][]));
-            seed = Sha3Hash.sha3bytes(bytes, 256);
-            dto.setAlgorithm(algorithm);
-        }
+        dto.setAlgorithm(algorithm);
         BigInteger value = new BigInteger(seed);
         dto.setSeed(value.toString());
 
@@ -85,14 +85,13 @@ public class RandomSeedResource {
         if (list.isEmpty()) {
             return Result.getFailed().toRpcClientResult();
         }
-        byte[] seed = null;
+        byte[] seed = RandomSeedUtils.clac(list, algorithm);
+        if (null == seed) {
+            return Result.getFailed().toRpcClientResult();
+        }
         RandomSeedDTO dto = new RandomSeedDTO();
         dto.setCount(list.size());
-        if ("SHA3".equals(algorithm.trim().toUpperCase())) {
-            byte[] bytes = ArraysTool.concatenate(list.toArray(new byte[list.size()][]));
-            seed = Sha3Hash.sha3bytes(bytes, 256);
-            dto.setAlgorithm(algorithm);
-        }
+        dto.setAlgorithm(algorithm);
         BigInteger value = new BigInteger(seed);
         dto.setSeed(value.toString());
 

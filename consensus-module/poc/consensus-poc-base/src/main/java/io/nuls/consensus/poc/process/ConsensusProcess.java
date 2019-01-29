@@ -53,6 +53,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -326,6 +327,7 @@ public class ConsensusProcess {
             extendsData.setNextSeedHash(nextSeedHash);
             RandomSeedStatusPo po = new RandomSeedStatusPo();
             po.setAddress(self.getPackingAddress());
+            Log.info("{}====={}====={}", bd.getHeight(), Hex.encode(nextSeed), Hex.encode(nextSeedHash));
             po.setSeedHash(nextSeedHash);
             po.setNextSeed(nextSeed);
             po.setHeight(bd.getHeight());

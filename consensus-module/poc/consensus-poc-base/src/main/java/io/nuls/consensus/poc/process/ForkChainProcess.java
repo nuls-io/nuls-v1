@@ -82,7 +82,7 @@ public class ForkChainProcess {
 
     private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
-    private RandomSeedService randomSeedService;
+    private RandomSeedService randomSeedService = NulsContext.getServiceBean(RandomSeedService.class);
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;

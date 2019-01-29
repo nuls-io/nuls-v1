@@ -26,7 +26,7 @@ public class RandomSeedService {
         if (ArraysTool.arrayEquals(header.getPackingAddress(), RandomSeedUtils.CACHE_SEED.getAddress())) {
             nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
         }
-        randomSeedsStorageService.saveAddressStatus(header.getPackingAddress(), header.getHeight(), nextSeed, extendsData.getNextSeedHash());
+
         byte[] seed = extendsData.getSeed();
         RandomSeedStatusPo po = this.randomSeedsStorageService.getAddressStatus(header.getPackingAddress());
         long preHeight = 0;
@@ -36,6 +36,7 @@ public class RandomSeedService {
         if (null != po) {
             preHeight = po.getHeight();
         }
+        randomSeedsStorageService.saveAddressStatus(header.getPackingAddress(), header.getHeight(), nextSeed, extendsData.getNextSeedHash());
         randomSeedsStorageService.saveRandomSeed(header.getHeight(), preHeight, seed, extendsData.getNextSeedHash());
     }
 
