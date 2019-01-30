@@ -105,7 +105,7 @@ public class SignatureUtil {
      */
     public static Set<String> getAddressFromTX(Transaction tx) throws NulsException {
         Set<String> addressSet = new HashSet<>();
-        if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
+        if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
             return null;
         }
         try {

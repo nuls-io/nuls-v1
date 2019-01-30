@@ -39,7 +39,9 @@ import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.service.impl.RandomSeedService;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.RandomSeedPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
@@ -56,6 +58,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
@@ -79,6 +82,8 @@ public class ForkChainProcess {
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
     private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
+
+    private RandomSeedService randomSeedService = NulsContext.getServiceBean(RandomSeedService.class);
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -233,7 +238,7 @@ public class ForkChainProcess {
         //Need descending order
         //需要降序排列
         Collections.reverse(rollbackBlockList);
-        if(rollbackBlockList != null && rollbackBlockList.size() > 0 && rollbackBlockList.get(0).getHeader().getHeight() != chainManager.getMasterChain().getBestBlock().getHeader().getHeight()) {
+        if (rollbackBlockList != null && rollbackBlockList.size() > 0 && rollbackBlockList.get(0).getHeader().getHeight() != chainManager.getMasterChain().getBestBlock().getHeader().getHeight()) {
             Log.error("------------------------回滚的起始高度不是主链最新高度");
             Log.error("----------------------- masterChain:" + chainManager.getMasterChain().getBestBlock().getHeader().getHeight() + ",hash:" + chainManager.getMasterChain().getBestBlock().getHeader().getHash().getDigestHex());
             Log.error("----------------------- rollbackBlockList:" + rollbackBlockList.get(0).getHeader().getHeight() + ",hash:" + rollbackBlockList.get(0).getHeader().getHash().getDigestHex());
@@ -272,6 +277,7 @@ public class ForkChainProcess {
                 if (rs.isSuccess()) {
                     //回滚版本更新统计数据
                     nulsProtocolProcess.processProtocolRollback(rollBlock.getHeader());
+                    randomSeedService.rollbackBlock(rollBlock.getHeader());
                 }
                 RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
@@ -440,6 +446,8 @@ public class ForkChainProcess {
                     //更新版本协议内容
                     successList.add(newBlock);
                     nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
+                    BlockHeader preHeader = blockService.getBlockHeader(newBlock.getHeader().getPreHash()).getData();
+                    randomSeedService.processBlock(newBlock.getHeader(), preHeader);
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
                     changeSuccess = false;
@@ -470,8 +478,11 @@ public class ForkChainProcess {
                     nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
+
+                    randomSeedService.rollbackBlock(rollbackBlock.getHeader());
                 } else {
                     Collections.reverse(rollbackList);
+                    BlockHeader preHeader = null;
                     for (Block block : rollbackList) {
                         try {
                             Result rs = blockService.saveBlock(block);
@@ -479,7 +490,12 @@ public class ForkChainProcess {
                             if (rs.isSuccess()) {
                                 //更新版本协议内容
                                 nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                                if (preHeader == null) {
+                                    preHeader = blockService.getBlockHeader(block.getHeader().getPreHash()).getData();
+                                }
+                                randomSeedService.processBlock(block.getHeader(), preHeader);
                             }
+                            preHeader = block.getHeader();
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
                             break;
@@ -490,6 +506,7 @@ public class ForkChainProcess {
                 }
             } catch (Exception e) {
                 Collections.reverse(rollbackList);
+                BlockHeader preHeader = null;
                 for (Block block : rollbackList) {
                     try {
                         Result rs = blockService.saveBlock(block);
@@ -497,7 +514,12 @@ public class ForkChainProcess {
                         if (rs.isSuccess()) {
                             //更新版本协议内容
                             nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                            if (preHeader == null) {
+                                preHeader = blockService.getBlockHeader(block.getHeader().getPreHash()).getData();
+                            }
+                            randomSeedService.processBlock(block.getHeader(), preHeader);
                         }
+                        preHeader = block.getHeader();
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;

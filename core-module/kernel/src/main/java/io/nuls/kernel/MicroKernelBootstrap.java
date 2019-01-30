@@ -63,10 +63,17 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
      */
     @Override
     public void init() {
+        String folder = null;
         try {
             NulsConfig.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
-        } catch (IOException e) {
+
+            String mode = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, "mode", "main");
+            if ("main".equals(mode)) {
+                NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
+            } else {
+                NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(mode + "/" + NulsConstant.MODULES_CONFIG_FILE);
+            }
+        } catch (Exception e) {
             Log.error("Client start failed", e);
             throw new RuntimeException("Client start failed");
         }

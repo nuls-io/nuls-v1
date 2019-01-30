@@ -383,6 +383,11 @@ public class Heap {
         return objectRef;
     }
 
+    public ObjectRef newArrayList() {
+        ObjectRef objectRef = runNewObject(VariableType.ARRAYLIST_TYPE);
+        return objectRef;
+    }
+
     public ObjectRef newString(String str) {
         if (str == null) {
             return null;
@@ -394,6 +399,11 @@ public class Heap {
     }
 
     public ObjectRef newBigInteger(String value) {
+        ObjectRef objectRef = runNewObject(VariableType.BIGINTEGER_TYPE, value);
+        return objectRef;
+    }
+
+    public ObjectRef newBigInteger(byte[] value) {
         ObjectRef objectRef = runNewObject(VariableType.BIGINTEGER_TYPE, value);
         return objectRef;
     }

@@ -33,7 +33,7 @@ import org.spongycastle.crypto.digests.KeccakDigest;
 public class KeccakHash {
 
     public static String keccak(String src) {
-        if(src == null || src.length() == 0) {
+        if (src == null || src.length() == 0) {
             return null;
         }
         try {
@@ -56,4 +56,11 @@ public class KeccakHash {
         return Hex.encode(rsData);
     }
 
+    public static byte[] keccakBytes(byte[] bytes, int bitLength) {
+        Digest digest = new KeccakDigest(bitLength);
+        digest.update(bytes, 0, bytes.length);
+        byte[] rsData = new byte[digest.getDigestSize()];
+        digest.doFinal(rsData, 0);
+        return rsData;
+    }
 }

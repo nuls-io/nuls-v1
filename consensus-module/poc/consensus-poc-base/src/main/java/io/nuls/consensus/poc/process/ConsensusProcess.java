@@ -44,11 +44,16 @@ import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
+import io.nuls.consensus.poc.storage.po.RandomSeedStatusPo;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.poc.util.RandomSeedUtils;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -90,6 +95,8 @@ public class ConsensusProcess {
     private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+
+    private RandomSeedsStorageService randomSeedsStorageService = NulsContext.getServiceBean(RandomSeedsStorageService.class);
 
     private boolean hasPacking;
     private long memoryPoolLastClearTime;
@@ -307,6 +314,24 @@ public class ConsensusProcess {
             extendsData.setCurrentVersion(NulsVersionManager.getCurrentVersion());
             extendsData.setPercent(NulsVersionManager.getCurrentProtocolContainer().getPercent());
             extendsData.setDelay(NulsVersionManager.getCurrentProtocolContainer().getDelay());
+        }
+        if (NulsVersionManager.getMainVersion() >= 3) {
+            RandomSeedStatusPo status = randomSeedsStorageService.getAddressStatus(self.getPackingAddress());
+            byte[] seed = ConsensusStorageConstant.EMPTY_SEED;
+            if (null != status && status.getNextSeed() != null) {
+                seed = status.getNextSeed();
+            }
+            extendsData.setSeed(seed);
+            byte[] nextSeed = RandomSeedUtils.createRandomSeed();
+            byte[] nextSeedHash = RandomSeedUtils.getLastDigestEightBytes(nextSeed);
+            extendsData.setNextSeedHash(nextSeedHash);
+            RandomSeedStatusPo po = new RandomSeedStatusPo();
+            po.setAddress(self.getPackingAddress());
+            Log.info("{}====={}====={}", bd.getHeight(), Hex.encode(nextSeed), Hex.encode(nextSeedHash));
+            po.setSeedHash(nextSeedHash);
+            po.setNextSeed(nextSeed);
+            po.setHeight(bd.getHeight());
+            RandomSeedUtils.CACHE_SEED = po;
         }
 
         StringBuilder str = new StringBuilder();

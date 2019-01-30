@@ -147,7 +147,6 @@ public class Bootstrap {
             }
             if (i > 10) {
                 i = 0;
-                Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
                 if (!downloadService.isDownloadSuccess().isSuccess() && CollectThread.getInstance().getStartHeight() > 0) {
                     Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());
                 }
