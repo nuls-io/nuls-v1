@@ -317,6 +317,7 @@ public class NativeUtils {
     public static final String getRandomSeedByCount = TYPE + "." + "getRandomSeed" + "(JILjava/lang/String;)Ljava/math/BigInteger;";
 
     private static Result getRandomSeedByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
         long endHeight = (long) methodArgs.invokeArgs[0];
         int count = (int) methodArgs.invokeArgs[1];
@@ -330,12 +331,14 @@ public class NativeUtils {
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
         return result;
     }
 
     public static final String getRandomSeedByHeight = TYPE + "." + "getRandomSeed" + "(JJLjava/lang/String;)Ljava/math/BigInteger;";
 
     private static Result getRandomSeedByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);
         long startHeight = (long) methodArgs.invokeArgs[0];
         long endHeight = (long) methodArgs.invokeArgs[1];
@@ -349,21 +352,28 @@ public class NativeUtils {
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
         return result;
     }
 
     public static final String getRandomSeedListByCount = TYPE + "." + "getRandomSeedList" + "(JI)Ljava/util/List;";
 
     private static Result getRandomSeedListByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
         long endHeight = (long) methodArgs.invokeArgs[0];
         int count = (int) methodArgs.invokeArgs[1];
 
         List<byte[]> seeds = frame.vm.getRandomSeedList(endHeight, count);
+        int i = seeds.size() - 1;
+        if(i > 0) {
+            frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED * i);
+        }
 
         ObjectRef objectRef = newBigIntegerArrayList(frame, seeds);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
         return result;
     }
 
@@ -380,15 +390,21 @@ public class NativeUtils {
     public static final String getRandomSeedListByHeight = TYPE + "." + "getRandomSeedList" + "(JJ)Ljava/util/List;";
 
     private static Result getRandomSeedListByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);
         long startHeight = (long) methodArgs.invokeArgs[0];
         long endHeight = (long) methodArgs.invokeArgs[1];
 
         List<byte[]> seeds = frame.vm.getRandomSeedList(startHeight, endHeight);
+        int i = seeds.size() - 1;
+        if(i > 0) {
+            frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED * i);
+        }
 
         ObjectRef objectRef = newBigIntegerArrayList(frame, seeds);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
+        frame.setAddGas(true);
         return result;
     }
 }
