@@ -1328,7 +1328,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private void contractExchange(Transaction tx, ContractResult contractResult, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
-        if (contractResult.isSuccess()) {
+        if (contractResult.isSuccess() && NulsContext.MAIN_NET_VERSION >= 3) {
             Set<String> exchangeSet = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
                                                                     && ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
                                                         .map(t -> AddressTool.getStringAddressByBytes(t.getTo())).collect(Collectors.toSet());
