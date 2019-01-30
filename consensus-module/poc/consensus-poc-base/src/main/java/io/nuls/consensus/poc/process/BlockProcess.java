@@ -363,9 +363,7 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
-                        if (NulsVersionManager.getMainVersion() >= 3) {
-                            randomSeedService.processBlock(block.getHeader(), bestBlockHeader);
-                        }
+                        randomSeedService.processBlock(block.getHeader(), bestBlockHeader);
                         RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容
                         nulsProtocolProcess.processProtocolUpGrade(block.getHeader());

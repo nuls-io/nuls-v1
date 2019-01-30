@@ -46,9 +46,11 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
     @Override
     public boolean saveAddressStatus(byte[] address, long nowHeight, byte[] nextSeed, byte[] seedHash) {
         RandomSeedStatusPo po = new RandomSeedStatusPo();
+        po.setAddress(address);
         po.setHeight(nowHeight);
         po.setNextSeed(nextSeed);
         po.setSeedHash(seedHash);
+//        System.out.println(po.toString());
         try {
             dbService.put(ConsensusStorageConstant.DB_NAME_RANDOM_SEEDS, address, po.serialize());
             return true;
@@ -103,7 +105,8 @@ public class RandomSeedsStorageServiceImpl implements RandomSeedsStorageService,
     @Override
     public List<byte[]> getSeeds(long maxHeight, int seedCount) {
         List<byte[]> list = new ArrayList<>();
-        while (maxHeight > 0) {
+        long minHeight = maxHeight - 1000L;
+        while (maxHeight > minHeight) {
             RandomSeedPo po = getSeed(maxHeight--);
             if (null != po && !ArraysTool.arrayEquals(po.getSeed(), ConsensusStorageConstant.EMPTY_SEED)) {
                 list.add(po.getSeed());

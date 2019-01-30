@@ -10,6 +10,7 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.protocol.base.version.NulsVersionManager;
 
 /**
  * @author Niels
@@ -21,6 +22,9 @@ public class RandomSeedService {
     private RandomSeedsStorageService randomSeedsStorageService;
 
     public void processBlock(BlockHeader header, BlockHeader preHeader) {
+        if (NulsVersionManager.getMainVersion() < 3) {
+            return;
+        }
         BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
         byte[] nextSeed = null;
         if (ArraysTool.arrayEquals(header.getPackingAddress(), RandomSeedUtils.CACHE_SEED.getAddress())) {
@@ -41,12 +45,15 @@ public class RandomSeedService {
     }
 
     public void rollbackBlock(BlockHeader header) {
+        if (NulsVersionManager.getMainVersion() < 3) {
+            return;
+        }
         RandomSeedPo po = randomSeedsStorageService.getSeed(header.getHeight());
         randomSeedsStorageService.deleteRandomSeed(header.getHeight());
         if (null == po || po.getPreHeight() == 0L) {
             randomSeedsStorageService.deleteAddressStatus(header.getPackingAddress());
         } else {
-            randomSeedsStorageService.saveAddressStatus(header.getPackingAddress(), po.getHeight(), po.getSeed(), po.getNextSeedHash());
+            randomSeedsStorageService.saveAddressStatus(header.getPackingAddress(), po.getPreHeight(), po.getSeed(), RandomSeedUtils.getLastDigestEightBytes(po.getSeed()));
         }
     }
 }

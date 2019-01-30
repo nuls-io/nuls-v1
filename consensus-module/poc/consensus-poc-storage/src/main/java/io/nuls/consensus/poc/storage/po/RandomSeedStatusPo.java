@@ -1,11 +1,14 @@
 package io.nuls.consensus.poc.storage.po;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -78,4 +81,16 @@ public class RandomSeedStatusPo extends BaseNulsData {
         return size;
     }
 
+    @Override
+    public String toString() {
+        String result = "{" +
+                "address=" + AddressTool.getStringAddressByBytes(address) +
+                ", height=" + height +
+                ", seedHash=" + Hex.encode(seedHash);
+        if (null != nextSeed) {
+            result += ", nextSeed=" + Hex.encode(nextSeed);
+        }
+        result += '}';
+        return result;
+    }
 }

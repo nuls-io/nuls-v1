@@ -76,7 +76,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
     @Autowired
     private TransactionCacheStorageService transactionCacheStorageService;
     @Autowired
-    private RandomSeedsStorageService randomSeedsStorageService;
+    private RandomSeedService randomSeedsService;
 
     @Override
     public Result newTx(Transaction<? extends BaseNulsData> tx) {
@@ -134,13 +134,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
                 nulsProtocolProcess.processProtocolRollback(block.getHeader());
                 RewardStatisticsProcess.rollbackBlock(block);
                 NulsContext.getInstance().setBestBlock(PocConsensusContext.getChainManager().getMasterChain().getBestBlock());
-                RandomSeedPo po = randomSeedsStorageService.getSeed(block.getHeader().getHeight());
-                randomSeedsStorageService.deleteRandomSeed(block.getHeader().getHeight());
-                if (null == po || po.getPreHeight() == 0L) {
-                    randomSeedsStorageService.deleteAddressStatus(block.getHeader().getPackingAddress());
-                } else {
-                    randomSeedsStorageService.saveAddressStatus(block.getHeader().getPackingAddress(), po.getHeight(), po.getSeed(), po.getNextSeedHash());
-                }
+                randomSeedsService.rollbackBlock(block.getHeader());
             }
         }
         return new Result(success, null);

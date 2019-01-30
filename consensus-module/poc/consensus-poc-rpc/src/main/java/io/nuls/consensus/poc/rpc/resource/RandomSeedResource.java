@@ -76,7 +76,7 @@ public class RandomSeedResource {
                                            @QueryParam("startHeight") long startHeight, @ApiParam(name = "endHeight", value = "截止高度", required = true)
                                            @QueryParam("endHeight") long endHeight, @ApiParam(name = "algorithm", value = "算法标识：SHA3...", required = true)
                                            @QueryParam("algorithm") String algorithm) {
-        if (endHeight > context.getBestHeight() || startHeight <= 0 || StringUtils.isBlank(algorithm)) {
+        if (endHeight > context.getBestHeight() || startHeight <= 0 || (endHeight - startHeight) > 1000L || StringUtils.isBlank(algorithm)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
@@ -130,7 +130,7 @@ public class RandomSeedResource {
     public RpcClientResult getSeedsByHeight(@ApiParam(name = "startHeight", value = "起始高度", required = true)
                                             @QueryParam("startHeight") long startHeight, @ApiParam(name = "endHeight", value = "截止高度", required = true)
                                             @QueryParam("endHeight") long endHeight) {
-        if (endHeight > context.getBestHeight() || startHeight <= 0) {
+        if (endHeight > context.getBestHeight() || startHeight <= 0 || (endHeight - startHeight) > 1000L) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);

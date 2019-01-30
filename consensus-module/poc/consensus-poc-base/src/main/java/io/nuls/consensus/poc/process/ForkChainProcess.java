@@ -58,6 +58,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
@@ -276,6 +277,7 @@ public class ForkChainProcess {
                 if (rs.isSuccess()) {
                     //回滚版本更新统计数据
                     nulsProtocolProcess.processProtocolRollback(rollBlock.getHeader());
+                    randomSeedService.rollbackBlock(rollBlock.getHeader());
                 }
                 RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
@@ -444,6 +446,8 @@ public class ForkChainProcess {
                     //更新版本协议内容
                     successList.add(newBlock);
                     nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
+                    BlockHeader preHeader = blockService.getBlockHeader(newBlock.getHeader().getPreHash()).getData();
+                    randomSeedService.processBlock(newBlock.getHeader(), preHeader);
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
                     changeSuccess = false;
@@ -478,6 +482,7 @@ public class ForkChainProcess {
                     randomSeedService.rollbackBlock(rollbackBlock.getHeader());
                 } else {
                     Collections.reverse(rollbackList);
+                    BlockHeader preHeader = null;
                     for (Block block : rollbackList) {
                         try {
                             Result rs = blockService.saveBlock(block);
@@ -485,7 +490,12 @@ public class ForkChainProcess {
                             if (rs.isSuccess()) {
                                 //更新版本协议内容
                                 nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                                if (preHeader == null) {
+                                    preHeader = blockService.getBlockHeader(block.getHeader().getPreHash()).getData();
+                                }
+                                randomSeedService.processBlock(block.getHeader(), preHeader);
                             }
+                            preHeader = block.getHeader();
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
                             break;
@@ -496,6 +506,7 @@ public class ForkChainProcess {
                 }
             } catch (Exception e) {
                 Collections.reverse(rollbackList);
+                BlockHeader preHeader = null;
                 for (Block block : rollbackList) {
                     try {
                         Result rs = blockService.saveBlock(block);
@@ -503,7 +514,12 @@ public class ForkChainProcess {
                         if (rs.isSuccess()) {
                             //更新版本协议内容
                             nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                            if (preHeader == null) {
+                                preHeader = blockService.getBlockHeader(block.getHeader().getPreHash()).getData();
+                            }
+                            randomSeedService.processBlock(block.getHeader(), preHeader);
                         }
+                        preHeader = block.getHeader();
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;
