@@ -57,7 +57,7 @@ public class RandomSeedResource {
             return Result.getFailed().toRpcClientResult();
         }
         RandomSeedDTO dto = new RandomSeedDTO();
-        dto.setCount(list.size());
+        dto.setCount(count);
         dto.setAlgorithm(algorithm);
         BigInteger value = new BigInteger(seed);
         dto.setSeed(value.toString());
