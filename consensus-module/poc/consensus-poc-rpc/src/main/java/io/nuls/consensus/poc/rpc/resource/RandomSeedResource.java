@@ -80,6 +80,7 @@ public class RandomSeedResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
+        int count = list.size();
         if (list.isEmpty()) {
             return Result.getFailed().toRpcClientResult();
         }
@@ -88,7 +89,7 @@ public class RandomSeedResource {
             return Result.getFailed().toRpcClientResult();
         }
         RandomSeedDTO dto = new RandomSeedDTO();
-        dto.setCount(list.size());
+        dto.setCount(count);
         dto.setAlgorithm(algorithm);
         BigInteger value = new BigInteger(seed);
         dto.setSeed(value.toString());
