@@ -34,6 +34,7 @@ public class RandomSeedService {
         byte[] seed = extendsData.getSeed();
         RandomSeedStatusPo po = this.randomSeedsStorageService.getAddressStatus(header.getPackingAddress());
         long preHeight = 0;
+        // pierre test comment out
         if (null == po || ArraysTool.arrayEquals(preHeader.getPackingAddress(), header.getPackingAddress()) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
             seed = ConsensusStorageConstant.EMPTY_SEED;
         }
