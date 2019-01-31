@@ -143,6 +143,23 @@ public class ContractBalanceManager {
             ContractBalance balance;
             String strAddress;
 
+            if(addUtxoList != null) {
+                for (Coin coin : addUtxoList) {
+                    strAddress = asString(coin.getTempOwner());
+                    balance = balanceMap.get(strAddress);
+                    if(balance == null) {
+                        balance = new ContractBalance();
+                        balanceMap.put(strAddress, balance);
+                    }
+                    // 共识奖励的utxo
+                    if(coin.getLockTime() != 0) {
+                        balance.getConsensusRewardCoins().put(coin.getKey(), coin);
+                    } else {
+                        balance.addUsable(coin.getNa());
+                    }
+                }
+            }
+
             if(deleteUtxoList != null) {
                 for (Coin coin : deleteUtxoList) {
                     strAddress = asString(coin.getTempOwner());
@@ -160,22 +177,6 @@ public class ContractBalanceManager {
                 }
             }
 
-            if(addUtxoList != null) {
-                for (Coin coin : addUtxoList) {
-                    strAddress = asString(coin.getTempOwner());
-                    balance = balanceMap.get(strAddress);
-                    if(balance == null) {
-                        balance = new ContractBalance();
-                        balanceMap.put(strAddress, balance);
-                    }
-                    // 共识奖励的utxo
-                    if(coin.getLockTime() != 0) {
-                        balance.getConsensusRewardCoins().put(coin.getKey(), coin);
-                    } else {
-                        balance.addUsable(coin.getNa());
-                    }
-                }
-            }
         } finally {
             lock.unlock();
         }
