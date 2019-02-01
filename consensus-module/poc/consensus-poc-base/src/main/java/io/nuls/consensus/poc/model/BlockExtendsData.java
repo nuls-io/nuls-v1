@@ -163,7 +163,7 @@ public class BlockExtendsData extends BaseNulsData {
             this.delay = byteBuffer.readUint32();
             this.stateRoot = byteBuffer.readByLengthByte();
         }
-        if (!byteBuffer.isFinished()) {
+        if (!byteBuffer.isFinished() && byteBuffer.getPayload().length >= (byteBuffer.getCursor() + 40)) {
             this.seed = byteBuffer.readBytes(32);
             this.nextSeedHash = byteBuffer.readBytes(8);
         }
