@@ -92,6 +92,7 @@ public class VariableType {
     public static final VariableType CLASS_CAST_EXCEPTION_TYPE = valueOf("Ljava/lang/ClassCastException;");
     public static final VariableType STACK_OVERFLOW_ERROR_TYPE = valueOf("Ljava/lang/StackOverflowError;");
     public static final VariableType BIGINTEGER_TYPE = valueOf("Ljava/math/BigInteger;");
+    public static final VariableType ARRAYLIST_TYPE = valueOf("Ljava/util/ArrayList;");
     public static final VariableType STRINGBUILDER_TYPE = valueOf("Ljava/lang/StringBuilder;");
     public static final VariableType ADDRESS_TYPE = valueOf("Lio/nuls/contract/sdk/Address;");
     public static final VariableType BLOCK_HEADER_TYPE = valueOf("Lio/nuls/contract/sdk/BlockHeader;");

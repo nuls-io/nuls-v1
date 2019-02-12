@@ -1074,7 +1074,7 @@ public class VM {
 
     public BlockHeaderDto getBlockHeader(long number) {
         if (this.vmContext != null) {
-            BlockHeaderDto blockHeader = null;
+            BlockHeaderDto blockHeader;
             try {
                 if (number == programInvoke.getNumber() + 1) {
                     blockHeader = this.vmContext.getCurrentBlockHeader();
@@ -1090,6 +1090,74 @@ public class VM {
             return blockHeader;
         } else {
             throw new RuntimeException(String.format("vmContext is null, number: %s", number));
+        }
+    }
+
+    public String getRandomSeed(long endHeight, int count, String algorithm) {
+        if (this.vmContext != null) {
+            String seed;
+            try {
+                seed = this.vmContext.getRandomSeed(endHeight, count, algorithm);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seed == null) {
+                log.error(String.format("seed is null, endHeight: %s, count: %s, algorithm: %s, ", endHeight, count, algorithm));
+            }
+            return seed;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
+        }
+    }
+
+    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
+        if (this.vmContext != null) {
+            String seed;
+            try {
+                seed = this.vmContext.getRandomSeed(startHeight, endHeight, algorithm);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seed == null) {
+                log.error(String.format("seed is null, startHeight: %s, endHeight: %s, algorithm: %s, ", startHeight, endHeight, algorithm));
+            }
+            return seed;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
+        }
+    }
+
+    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
+        if (this.vmContext != null) {
+            List<byte[]> seeds;
+            try {
+                seeds = this.vmContext.getRandomSeedList(endHeight, seedCount);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seeds.isEmpty()) {
+                log.error(String.format("seeds is empty, endHeight: %s, seedCount: %s", endHeight, seedCount));
+            }
+            return seeds;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
+        }
+    }
+
+    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
+        if (this.vmContext != null) {
+            List<byte[]> seeds;
+            try {
+                seeds = this.vmContext.getRandomSeedList(startHeight, endHeight);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (seeds.isEmpty()) {
+                log.error(String.format("seeds is empty, startHeight: %s, endHeight: %s", startHeight, endHeight));
+            }
+            return seeds;
+        } else {
+            throw new RuntimeException(String.format("vmContext is null"));
         }
     }
 

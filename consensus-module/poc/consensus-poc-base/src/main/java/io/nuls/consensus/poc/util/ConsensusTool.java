@@ -78,8 +78,6 @@ import java.util.*;
 public class ConsensusTool {
 
     private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
-    private static AgentStorageService agentStorageService = NulsContext.getServiceBean(AgentStorageService.class);
-    private static DepositStorageService depositStorageService = NulsContext.getServiceBean(DepositStorageService.class);
     private static LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     /**
      * pierre add 合约服务接口

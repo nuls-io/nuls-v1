@@ -124,6 +124,7 @@ public class PocConsensusResource {
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
         List<Agent> agentList = new ArrayList<>();
+        long totalDeposit = 0;
 
         for (int i = allAgentList.size() - 1; i >= 0; i--) {
             Agent agent = allAgentList.get(i);
@@ -132,14 +133,26 @@ public class PocConsensusResource {
             } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 continue;
             }
+            totalDeposit += agent.getDeposit().getValue();
             agentList.add(agent);
         }
+
+        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        for (Deposit deposit : deposits) {
+            if (deposit.getDelHeight() > 0 && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+
+            totalDeposit += deposit.getDeposit().getValue();
+        }
+
+
         MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
-        long totalDeposit = 0;
         int packingAgentCount = 0;
         if (null != round) {
             for (MeetingMember member : round.getMemberList()) {
-                totalDeposit += (member.getTotalDeposit().getValue() + member.getOwnDeposit().getValue());
                 if (member.getAgent() != null) {
                     packingAgentCount++;
                 }

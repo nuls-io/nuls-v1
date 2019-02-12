@@ -284,7 +284,7 @@ public class NulsProtocolProcess {
 
                 //新的轮次开始时，也许会有节点时上一轮已经退出的，因此在这一轮里要去掉
                 Iterator<String> iterator = container.getAddressSet().iterator();
-                if(iterator != null) {
+                if (iterator != null) {
                     while (iterator.hasNext()) {
                         String address = iterator.next();
                         if (!memberAddressSet.contains(address)) {
@@ -435,21 +435,23 @@ public class NulsProtocolProcess {
     private void containerRollBack(long versionHeight) {
         List<ProtocolInfoPo> infoPoList = getVersionManagerStorageService().getProtocolInfoList(versionHeight);
         //用数据库已保存的每个区块统计的协议信息覆盖容器
-        int version = NulsContext.MAIN_NET_VERSION;
-        boolean b = false;
         if (infoPoList != null && !infoPoList.isEmpty()) {
             for (ProtocolInfoPo infoPo : infoPoList) {
                 ProtocolContainer container = NulsVersionManager.getProtocolContainer(infoPo.getVersion());
                 copyProtocolFromInfoPo(container, infoPo);
-                //获取未升级版本最高的版本
-                if (container.getStatus() != ProtocolContainer.VALID && version >= container.getVersion()) {
-                    version = container.getVersion() - 1;
-                    b = true;
-                }
             }
         }
-        //如果当前主网版本已经高于未升级的最高协议版本，则说明回滚的时候，协议降级，需要做降级处理
-        if (NulsContext.MAIN_NET_VERSION > version && b == true) {
+
+        ProtocolContainer container = NulsVersionManager.getProtocolContainer(NulsContext.MAIN_NET_VERSION);
+        if (container.getStatus() != ProtocolContainer.VALID) {
+            int version = NulsContext.MAIN_NET_VERSION;
+            while (true) {
+                version--;
+                container = NulsVersionManager.getProtocolContainer(version);
+                if (container.getStatus() == ProtocolContainer.VALID) {
+                    break;
+                }
+            }
             NulsContext.MAIN_NET_VERSION = version;
             getVersionManagerStorageService().saveMainVersion(version);
             if (version == 1) {
@@ -468,7 +470,7 @@ public class NulsProtocolProcess {
         //遇到这个情况的时候，需要复制到container里，重新保存到数据库后，再递归判断是否还有
         for (int i = tempInfoPoList.size() - 1; i >= 0; i--) {
             ProtocolTempInfoPo tempInfoPo = tempInfoPoList.get(i);
-            ProtocolContainer container = NulsVersionManager.getProtocolContainer(tempInfoPo.getVersion(),tempInfoPo.getPercent(), tempInfoPo.getDelay());
+            ProtocolContainer container = NulsVersionManager.getProtocolContainer(tempInfoPo.getVersion(), tempInfoPo.getPercent(), tempInfoPo.getDelay());
             if (container != null) {
                 copyProtocolFromTempInfoPo(container, tempInfoPo);
                 getVersionManagerStorageService().removeProtocolTempInfoList(versionHeight);

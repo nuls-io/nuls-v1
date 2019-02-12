@@ -1328,7 +1328,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private void contractExchange(Transaction tx, ContractResult contractResult, long time, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long blockHeight, List<ContractTransfer> transfers, Map<String, ContractTransferTransaction> successContractTransferTxs) {
-        if (contractResult.isSuccess()) {
+        if (contractResult.isSuccess() && NulsContext.MAIN_NET_VERSION >= 3) {
             Set<String> exchangeSet = transfers.stream().filter(t -> ContractUtil.isLegalContractAddress(t.getTo())
                                                                     && ArraysTool.arrayEquals(t.getTo(), t.getFrom()))
                                                         .map(t -> AddressTool.getStringAddressByBytes(t.getTo())).collect(Collectors.toSet());
@@ -1363,6 +1363,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             if(!this.needExchange(_contractTransferTx)) {
                 return;
             }
+            Log.info("Contract UTXOs need exchange, orgin tx hash is {}, current tx hash is {}", hash.toString(), _contractTransferTx.getHash().toString());
             // 保存内部转账交易hash和外部合约交易hash
             transfer.setOrginHash(hash);
             transfer.setHash(_contractTransferTx.getHash());
@@ -1377,6 +1378,12 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         List<Coin> tos = coinData.getTo();
         int fromSize = froms.size();
         if(fromSize == 1 && tos.size() == fromSize) {
+            return false;
+        }
+        if(fromSize < 100) {
+            return false;
+        }
+        if(NulsContext.MAIN_NET_VERSION < 3) {
             return false;
         }
         return true;
