@@ -5,42 +5,42 @@
     <parent>
         <artifactId>protocol-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.7-beta3</version>
+        <version>1.1.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol</artifactId>
-    <version>1.1.7-beta3</version>
+    <version>1.1.7</version>
 
 
     <dependencies>
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>cache</artifactId>
-            <version>1.1.7-beta3</version>
+            <version>1.1.7</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network</artifactId>
-            <version>1.1.7-beta3</version>
+            <version>1.1.7</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract</artifactId>
-            <version>1.1.7-beta3</version>
+            <version>1.1.7</version>
         </dependency>
         <!--临时方案，后期优化-->
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.1.7-beta3</version>
+            <version>1.1.7</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger</artifactId>
-            <version>1.1.7-beta3</version>
+            <version>1.1.7</version>
         </dependency>
     </dependencies>
     <build>
