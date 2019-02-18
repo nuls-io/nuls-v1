@@ -5,12 +5,12 @@
     <parent>
         <artifactId>contract-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.1.7</version>
+        <version>1.2.0-beta1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls.contract-module</groupId>
     <artifactId>contract</artifactId>
-    <version>1.1.7</version>
+    <version>1.2.0-beta1</version>
     <packaging>jar</packaging>
     <name>contract</name>
 
@@ -18,20 +18,20 @@
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.0-beta1</version>
         </dependency>
 
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.0-beta1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.0-beta1</version>
             <scope>test</scope>
         </dependency>
 

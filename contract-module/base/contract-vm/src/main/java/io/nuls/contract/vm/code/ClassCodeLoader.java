@@ -98,6 +98,10 @@ public class ClassCodeLoader {
         return RESOURCE_CLASS_CODES.get(className);
     }
 
+    public static ClassCode getFromNewestResource(String className) {
+        return RESOURCE_CLASS_CODES_NEWEST.get(className);
+    }
+
     public static ClassCode loadFromResourceOrTmp(String className) {
         ClassCode classCode = RESOURCE_CLASS_CODES.get(className);
         if (classCode == null) {
