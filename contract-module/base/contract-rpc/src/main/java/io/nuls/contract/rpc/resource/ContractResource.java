@@ -313,9 +313,8 @@ public class ContractResource implements InitializingBean {
             }
 
             String sender = create.getSender();
-            Result<Account> accountResult = accountService.getAccount(sender);
-            if (accountResult.isFailed()) {
-                return Result.getSuccess().setData(resultMap).toRpcClientResult();
+            if (!AddressTool.validAddress(sender)) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
 
             String contractCode = create.getContractCode();
@@ -674,9 +673,8 @@ public class ContractResource implements InitializingBean {
             resultMap.put("gasLimit", 1);
 
             String sender = call.getSender();
-            Result<Account> accountResult = accountService.getAccount(sender);
-            if (accountResult.isFailed()) {
-                return Result.getSuccess().setData(resultMap).toRpcClientResult();
+            if (!AddressTool.validAddress(sender)) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
 
             String contractAddress = call.getContractAddress();
