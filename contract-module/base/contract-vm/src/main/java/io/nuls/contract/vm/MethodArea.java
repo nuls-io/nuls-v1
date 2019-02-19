@@ -107,7 +107,7 @@ public class MethodArea {
         if (classCode != null) {
             return classCode;
         }
-        classCode = ClassCodeLoader.getFromResource(className);
+        classCode = ClassCodeLoader.getFromNewestResource(className);
         if (classCode == null) {
             classCode = this.loadClassCodes.get(className);
         }

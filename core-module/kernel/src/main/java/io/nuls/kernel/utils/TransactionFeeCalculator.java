@@ -34,8 +34,8 @@ import io.nuls.kernel.model.Na;
  */
 public class TransactionFeeCalculator {
 
-    public static final Na MIN_PRECE_PRE_1024_BYTES = Na.valueOf(100000);
-    public static final Na OTHER_PRECE_PRE_1024_BYTES = Na.valueOf(1000000);
+    public static final Na MIN_PRICE_PRE_1024_BYTES = Na.valueOf(100000);
+    public static final Na OTHER_PRICE_PRE_1024_BYTES = Na.valueOf(1000000);
 
     public static final int KB = 1024;
 
@@ -46,9 +46,9 @@ public class TransactionFeeCalculator {
 //     * @param size 交易大小/size of the transaction
 //     */
     public static final Na getTransferFee(int size) {
-        Na fee = MIN_PRECE_PRE_1024_BYTES.multiply(size / KB);
+        Na fee = MIN_PRICE_PRE_1024_BYTES.multiply(size / KB);
         if (size % KB > 0) {
-            fee = fee.add(MIN_PRECE_PRE_1024_BYTES);
+            fee = fee.add(MIN_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -60,9 +60,9 @@ public class TransactionFeeCalculator {
 //     * @param size 交易大小/size of the transaction
 //     */
     public static final Na getMaxFee(int size) {
-        Na fee = OTHER_PRECE_PRE_1024_BYTES.multiply(size / KB);
+        Na fee = OTHER_PRICE_PRE_1024_BYTES.multiply(size / KB);
         if (size % KB > 0) {
-            fee = fee.add(OTHER_PRECE_PRE_1024_BYTES);
+            fee = fee.add(OTHER_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -74,10 +74,10 @@ public class TransactionFeeCalculator {
 //     * @param size 交易大小/size of the transaction
 //     */
     public static final Na getFee(int size, Na price) {
-        if (price.isLessThan(MIN_PRECE_PRE_1024_BYTES)) {
+        if (price.isLessThan(MIN_PRICE_PRE_1024_BYTES)) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
-        if (price.isGreaterThan(OTHER_PRECE_PRE_1024_BYTES)) {
+        if (price.isGreaterThan(OTHER_PRICE_PRE_1024_BYTES)) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         Na fee = price.multiply(size / KB);

@@ -53,7 +53,6 @@ import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
@@ -73,7 +72,6 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.base.version.NulsVersionManager;
-import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
@@ -126,6 +124,7 @@ public class PocConsensusResource {
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
         List<Agent> agentList = new ArrayList<>();
+        long totalDeposit = 0;
 
         for (int i = allAgentList.size() - 1; i >= 0; i--) {
             Agent agent = allAgentList.get(i);
@@ -134,14 +133,26 @@ public class PocConsensusResource {
             } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 continue;
             }
+            totalDeposit += agent.getDeposit().getValue();
             agentList.add(agent);
         }
+
+        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        for (Deposit deposit : deposits) {
+            if (deposit.getDelHeight() > 0 && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+
+            totalDeposit += deposit.getDeposit().getValue();
+        }
+
+
         MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
-        long totalDeposit = 0;
         int packingAgentCount = 0;
         if (null != round) {
             for (MeetingMember member : round.getMemberList()) {
-                totalDeposit += (member.getTotalDeposit().getValue() + member.getOwnDeposit().getValue());
                 if (member.getAgent() != null) {
                     packingAgentCount++;
                 }
@@ -270,7 +281,7 @@ public class PocConsensusResource {
         }
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() - P2PHKSignature.SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() - P2PHKSignature.SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
@@ -305,7 +316,7 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
@@ -319,10 +330,10 @@ public class PocConsensusResource {
 
     //计算最大交易金额，如果手续费在最大值范围内则说明交易没有超出大小，则不需要计算直接返回null
     private Long getMaxAmount(Na fee, String address, Transaction tx) {
-        long feeMax = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+        long feeMax = TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
         Long maxAmount = null;
         if (fee.getValue() > feeMax) {
-            Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
             if (rs.isSuccess()) {
                 maxAmount = ((Na) rs.getData()).getValue();
             }
@@ -484,7 +495,7 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
@@ -536,7 +547,7 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
 
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -575,7 +586,7 @@ public class PocConsensusResource {
             if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                 //重新算一次交易(不超出最大交易数据大小下)的最大金额
                 Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx,
-                        TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                        TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
                 if (rs.isSuccess()) {
                     Na maxAmount = (Na) rs.getData();
                     rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
@@ -1191,7 +1202,7 @@ public class PocConsensusResource {
         }
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
@@ -1199,7 +1210,7 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, scriptSignLenth);
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1240,7 +1251,7 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
@@ -1248,7 +1259,7 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, scriptSignLenth);
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1299,7 +1310,7 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, 0);
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, 0);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1381,7 +1392,7 @@ public class PocConsensusResource {
         tx.setCoinData(coinData);
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
-        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         if (null != result) {
             if (result.isEnough()) {
                 tx.getCoinData().setFrom(result.getCoinList());
@@ -1474,7 +1485,7 @@ public class PocConsensusResource {
         tx.setCoinData(coinData);
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
-        CoinDataResult result = accountLedgerService.getMutilCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getMutilCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES);
         if (null != result) {
             if (result.isEnough()) {
                 tx.getCoinData().setFrom(result.getCoinList());

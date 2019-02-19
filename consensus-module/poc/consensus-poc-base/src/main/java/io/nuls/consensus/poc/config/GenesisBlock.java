@@ -26,6 +26,7 @@ package io.nuls.consensus.poc.config;
 
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.model.BlockExtendsData;
+import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.io.StringFileLoader;
@@ -33,7 +34,9 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -76,7 +79,12 @@ public final class GenesisBlock extends Block {
         if (INSTANCE.status == 0) {
             String json = null;
             try {
-                json = StringFileLoader.read(GENESIS_BLOCK_FILE);
+                String mode = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, "mode", "main");
+                if ("main".equals(mode)) {
+                    json = StringFileLoader.read(GENESIS_BLOCK_FILE);
+                } else {
+                    json = StringFileLoader.read(mode + "/" + GENESIS_BLOCK_FILE);
+                }
             } catch (NulsException e) {
                 Log.error(e);
             }
@@ -137,7 +145,7 @@ public final class GenesisBlock extends Block {
         tx.setTime(this.blockTime);
         tx.setCoinData(coinData);
         String remark = (String) jsonMap.get(CONFIG_FILED_REMARK);
-        if(StringUtils.isNotBlank(remark)) {
+        if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(Hex.decode(remark));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));

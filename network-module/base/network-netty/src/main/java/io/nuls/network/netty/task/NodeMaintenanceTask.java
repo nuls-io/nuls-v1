@@ -57,7 +57,6 @@ public class NodeMaintenanceTask implements Runnable {
     private void process() {
         List<Node> needConnectNodes = getNeedConnectNodes();
         if (needConnectNodes == null || needConnectNodes.size() == 0) {
-            Log.info("-------needConnectNodes is null");
             return;
         }
 
@@ -75,7 +74,6 @@ public class NodeMaintenanceTask implements Runnable {
         node.setConnectedListener(() -> nodeManager.nodeConnectSuccess(node));
 
         node.setDisconnectListener(() -> {
-            Log.info("-----------out node disconnect:" + node.getId());
             nodeManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);
@@ -84,13 +82,11 @@ public class NodeMaintenanceTask implements Runnable {
     private List<Node> getNeedConnectNodes() {
 
         Collection<Node> avaliableNodes = nodeManager.getAvailableNodes();
-        Log.info("---------avaliableNodes.size:" + avaliableNodes.size());
         if (avaliableNodes.size() >= networkParam.getMaxOutCount()) {
             return null;
         }
 
         Collection<Node> canConnectNodes = nodeManager.getCanConnectNodes();
-        Log.info("---------canConnectNodes.size:" + canConnectNodes.size());
         if (canConnectNodes.size() == 0) {
             return null;
         }

@@ -203,7 +203,7 @@ public class ScriptUtil {
             Coin toCoin = new Coin(to, values);
             coinData.getTo().add(toCoin);
             if (price == null) {
-                price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
+                price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
             }
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(from, values, tx.size() +  + coinData.size(), price);
             if (!coinDataResult.isEnough()) {

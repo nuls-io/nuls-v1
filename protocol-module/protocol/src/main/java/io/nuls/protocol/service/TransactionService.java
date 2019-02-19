@@ -61,6 +61,8 @@ public interface TransactionService {
      */
     Result rollbackTx(Transaction tx, Object secondaryData);
 
+    Result rollbackCommit(Transaction tx, Object secondaryData);
+
     /**
      * 转发交易给连接的其他对等节点，允许一个列外（不转发给它）
      * Forward Transaction to other peers of the connection, allowing one column (not forward to it)

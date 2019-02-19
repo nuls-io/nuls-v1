@@ -28,6 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.nuls.contract.vm.util.Constants;
+import io.nuls.kernel.context.NulsContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,8 @@ import java.util.jar.JarInputStream;
 public class ClassCodeLoader {
 
     private static final Map<String, ClassCode> RESOURCE_CLASS_CODES;
+    private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_V3;
+    private static final Map<String, ClassCode> RESOURCE_CLASS_CODES_NEWEST;
 
     private static final LoadingCache<ClassCodeCacheKey, Map<String, ClassCode>> CACHE;
 
@@ -66,6 +69,8 @@ public class ClassCodeLoader {
                     }
                 });
         RESOURCE_CLASS_CODES = loadFromResource();
+        RESOURCE_CLASS_CODES_V3 = loadFromResource_v3();
+        RESOURCE_CLASS_CODES_NEWEST = RESOURCE_CLASS_CODES_V3;
     }
 
     public static ClassCode load(String className) {
@@ -78,7 +83,7 @@ public class ClassCodeLoader {
     }
 
     public static ClassCode loadFromResource(String className) {
-        ClassCode classCode = RESOURCE_CLASS_CODES.get(className);
+        ClassCode classCode = RESOURCE_CLASS_CODES_NEWEST.get(className);
         if (classCode == null) {
             throw new RuntimeException("can't load class " + className);
         } else {
@@ -87,7 +92,14 @@ public class ClassCodeLoader {
     }
 
     public static ClassCode getFromResource(String className) {
+        if(NulsContext.MAIN_NET_VERSION >= 3) {
+            return RESOURCE_CLASS_CODES_V3.get(className);
+        }
         return RESOURCE_CLASS_CODES.get(className);
+    }
+
+    public static ClassCode getFromNewestResource(String className) {
+        return RESOURCE_CLASS_CODES_NEWEST.get(className);
     }
 
     public static ClassCode loadFromResourceOrTmp(String className) {
@@ -167,8 +179,16 @@ public class ClassCodeLoader {
         return classCode;
     }
 
+    private static Map<String, ClassCode> loadFromResource_v3() {
+        return loadFromResourceWithResourceName("/used_classes_v3");
+    }
+
     private static Map<String, ClassCode> loadFromResource() {
-        InputStream inputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes");
+        return loadFromResourceWithResourceName("/used_classes");
+    }
+
+    private static Map<String, ClassCode> loadFromResourceWithResourceName(String usedClassesName) {
+        InputStream inputStream = ClassCodeLoader.class.getResourceAsStream(usedClassesName);
         if (inputStream == null) {
             return new HashMap<>();
         } else {

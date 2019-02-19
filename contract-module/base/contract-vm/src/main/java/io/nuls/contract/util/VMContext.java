@@ -25,10 +25,14 @@
 package io.nuls.contract.util;
 
 
+import io.nuls.consensus.poc.rpc.model.RandomSeedDTO;
+import io.nuls.consensus.poc.rpc.resource.RandomSeedResource;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -37,10 +41,13 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,6 +63,12 @@ public class VMContext {
 
     @Autowired
     private ContractUtxoService contractUtxoService;
+
+    @Autowired
+    private RandomSeedResource randomSeedResource;
+
+    @Autowired
+    private RandomSeedsStorageService randomSeedService;
 
     private ThreadLocal<BlockHeader> currentBlockHeader = new ThreadLocal<>();
 
@@ -163,5 +176,47 @@ public class VMContext {
 
     public void removeCurrentBlockHeader() {
         currentBlockHeader.remove();
+    }
+
+    public String getRandomSeed(long endHeight, int count, String algorithm) {
+        RpcClientResult seedByCount = randomSeedResource.getSeedByCount(endHeight, count, algorithm);
+        if(seedByCount.isFailed()) {
+            Log.error(seedByCount.toString());
+            return null;
+        }
+        RandomSeedDTO dto = (RandomSeedDTO) seedByCount.getData();
+        return dto.getSeed();
+    }
+
+    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
+        RpcClientResult seedByCount = randomSeedResource.getSeedByHeight(startHeight, endHeight, algorithm);
+        if(seedByCount.isFailed()) {
+            Log.error(seedByCount.toString());
+            return null;
+        }
+        RandomSeedDTO dto = (RandomSeedDTO) seedByCount.getData();
+        return dto.getSeed();
+    }
+
+    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
+        if (endHeight > NulsContext.getInstance().getBestHeight() || seedCount > 128 || seedCount <= 0) {
+            return new ArrayList<>();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(endHeight, seedCount);
+        if (list.size() != seedCount) {
+            return new ArrayList<>();
+        }
+        return list;
+    }
+
+    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
+        if (endHeight > NulsContext.getInstance().getBestHeight() || startHeight <= 0) {
+            return new ArrayList<>();
+        }
+        List<byte[]> list = randomSeedService.getSeeds(startHeight, endHeight);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return list;
     }
 }

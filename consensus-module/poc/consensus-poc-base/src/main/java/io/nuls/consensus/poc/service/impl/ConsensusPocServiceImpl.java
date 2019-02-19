@@ -35,6 +35,9 @@ import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
+import io.nuls.consensus.poc.storage.po.RandomSeedPo;
+import io.nuls.consensus.poc.storage.service.RandomSeedsStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.service.ConsensusService;
@@ -72,6 +75,8 @@ public class ConsensusPocServiceImpl implements ConsensusService {
     private TransactionQueueStorageService transactionQueueStorageService;
     @Autowired
     private TransactionCacheStorageService transactionCacheStorageService;
+    @Autowired
+    private RandomSeedService randomSeedsService;
 
     @Override
     public Result newTx(Transaction<? extends BaseNulsData> tx) {
@@ -87,7 +92,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
 //        }
 
 //        boolean success = txMemoryPool.add(new TxContainer(tx), false);
-        boolean success =  transactionQueueStorageService.putTx(tx);
+        boolean success = transactionQueueStorageService.putTx(tx);
         return new Result(success, null);
     }
 
@@ -129,6 +134,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
                 nulsProtocolProcess.processProtocolRollback(block.getHeader());
                 RewardStatisticsProcess.rollbackBlock(block);
                 NulsContext.getInstance().setBestBlock(PocConsensusContext.getChainManager().getMasterChain().getBestBlock());
+                randomSeedsService.rollbackBlock(block.getHeader());
             }
         }
         return new Result(success, null);
@@ -142,7 +148,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
     @Override
     public Transaction getTx(NulsDigestData hash) {
         Transaction tx = transactionCacheStorageService.getTx(hash);
-        if(tx == null) {
+        if (tx == null) {
             tx = ledgerService.getTx(hash);
         }
         return tx;

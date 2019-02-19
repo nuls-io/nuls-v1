@@ -28,6 +28,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.tx.ContractTransferTransaction;
 import io.nuls.contract.entity.txdata.CallContractData;
@@ -106,19 +107,19 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 Log.error(e);
             }
 
+            ContractResult contractResult = tx.getContractResult();
+            if (contractResult == null) {
+                contractResult = contractService.getContractExecuteResult(tx.getHash());
+            }
             CallContractData txData = tx.getTxData();
             byte[] senderContractAddressBytes = txData.getContractAddress();
             Result<ContractAddressInfoPo> senderContractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(senderContractAddressBytes);
             ContractAddressInfoPo po = senderContractAddressInfoResult.getData();
-            if(po != null) {
-                ContractResult contractResult = tx.getContractResult();
-                if(contractResult == null) {
-                    contractResult = contractService.getContractExecuteResult(tx.getHash());
-                }
-                if(contractResult != null) {
+            if (po != null) {
+                if (contractResult != null) {
                     // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中删除
-                    if(!contractResult.isSuccess()) {
-                        if(ContractUtil.isTransferMethod(txData.getMethodName())) {
+                    if (!contractResult.isSuccess()) {
+                        if (ContractUtil.isTransferMethod(txData.getMethodName())) {
                             contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(txData.getSender(), txHashBytes, new VarInt(0).encode()));
                         }
                     }
@@ -127,12 +128,12 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                     // 目前只处理Transfer事件
                     String event;
                     ContractAddressInfoPo contractAddressInfo;
-                    if(events != null && size > 0) {
-                        for(int i = 0; i < size; i++) {
+                    if (events != null && size > 0) {
+                        for (int i = 0; i < size; i++) {
                             event = events.get(i);
                             // 按照NRC20标准，TransferEvent事件中第一个参数是转出地址-from，第二个参数是转入地址-to, 第三个参数是金额
                             ContractTokenTransferInfoPo tokenTransferInfoPo = ContractUtil.convertJsonToTokenTransferInfoPo(event);
-                            if(tokenTransferInfoPo == null) {
+                            if (tokenTransferInfoPo == null) {
                                 continue;
                             }
                             String contractAddress = tokenTransferInfoPo.getContractAddress();
@@ -143,18 +144,18 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                                 continue;
                             }
                             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-                            if(ArraysTool.arrayEquals(senderContractAddressBytes, contractAddressBytes)) {
+                            if (ArraysTool.arrayEquals(senderContractAddressBytes, contractAddressBytes)) {
                                 contractAddressInfo = po;
                             } else {
                                 Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
                                 contractAddressInfo = contractAddressInfoResult.getData();
                             }
 
-                            if(contractAddressInfo == null) {
+                            if (contractAddressInfo == null) {
                                 continue;
                             }
                             // 事件不是NRC20合约的事件
-                            if(!contractAddressInfo.isNrc20()) {
+                            if (!contractAddressInfo.isNrc20()) {
                                 continue;
                             }
 
@@ -170,22 +171,20 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             // 删除子交易从全网账本
             // 删除子交易从合约账本
             // 删除子交易从本地账本
-            Collection<ContractTransferTransaction> contractTransferTxs = tx.getContractTransferTxs();
-            if(contractTransferTxs != null && contractTransferTxs.size() > 0) {
-                List<ContractTransferTransaction> contractTransferTxList = new ArrayList<>(contractTransferTxs);
-                Collections.reverse(contractTransferTxList);
+            List<ContractTransferTransaction> contractTransferTxList = this.extractContractTransferTxs(contractResult);
+            if (contractTransferTxList != null && !contractTransferTxList.isEmpty()) {
                 // 用于回滚本地账本
                 List<Transaction> txList = new ArrayList<>();
-                for(ContractTransferTransaction transferTx : contractTransferTxList) {
+                for (ContractTransferTransaction transferTx : contractTransferTxList) {
                     try {
                         txList.add(transferTx);
                         Result result = ledgerService.rollbackTx(transferTx);
-                        if(result.isFailed()) {
+                        if (result.isFailed()) {
                             Log.error("rollback contract transfer tx from ledger error. msg: {}", result.getMsg());
                             return result;
                         }
                         result = contractService.rollbackContractTransferTx(transferTx);
-                        if(result.isFailed()) {
+                        if (result.isFailed()) {
                             Log.error("rollback contract transfer tx from contract ledger error. msg: {}", result.getMsg());
                             return Result.getFailed();
                         }
@@ -195,7 +194,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                     }
                 }
                 Result result = accountLedgerService.rollbackTransactions(txList);
-                if(result.isFailed()) {
+                if (result.isFailed()) {
                     Log.error("rollback contract transfer tx from account ledger error. msg: {}", result.getMsg());
                     return Result.getFailed();
                 }
@@ -212,6 +211,20 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             return Result.getFailed();
         }
         return Result.getSuccess();
+    }
+
+    private List<ContractTransferTransaction> extractContractTransferTxs(ContractResult contractResult) {
+        if (contractResult == null) {
+            return new ArrayList<>();
+        }
+        List<ContractTransferTransaction> result = new ArrayList<>();
+        List<ContractTransfer> transfers = contractResult.getTransfers();
+        if (transfers != null && !transfers.isEmpty()) {
+            for (int i = transfers.size() - 1; i >= 0; i--) {
+                result.add((ContractTransferTransaction) ledgerService.getTx(transfers.get(i).getHash()));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -231,25 +244,25 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
              * 保存子交易到全网账本、合约账本、本地账本
              */
             Collection<ContractTransferTransaction> contractTransferTxs = tx.getContractTransferTxs();
-            if(contractTransferTxs != null && contractTransferTxs.size() > 0) {
+            if (contractTransferTxs != null && contractTransferTxs.size() > 0) {
 
-                for(ContractTransferTransaction transferTx : contractTransferTxs) {
+                for (ContractTransferTransaction transferTx : contractTransferTxs) {
                     try {
                         transferTx.setBlockHeight(blockHeight);
 
                         Result result = ledgerService.saveTx(transferTx);
-                        if(result.isFailed()) {
+                        if (result.isFailed()) {
                             Log.error("save contract transfer tx to ledger error. msg: {}", result.getMsg());
                             return result;
                         }
                         result = contractService.saveContractTransferTx(transferTx);
-                        if(result.isFailed()) {
+                        if (result.isFailed()) {
                             Log.error("save contract transfer tx to contract ledger error. msg: {}", result.getMsg());
                             return result;
                         }
 
                         result = accountLedgerService.saveConfirmedTransaction(transferTx);
-                        if(result.isFailed()) {
+                        if (result.isFailed()) {
                             Log.error("save contract transfer tx to account ledger error. msg: {}", result.getMsg());
                             return result;
                         }
@@ -269,11 +282,11 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             byte[] contractAddress = callContractData.getContractAddress();
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddress);
-            if(contractAddressInfoPoResult.isFailed()) {
+            if (contractAddressInfoPoResult.isFailed()) {
                 return contractAddressInfoPoResult;
             }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-            if(contractAddressInfoPo == null) {
+            if (contractAddressInfoPo == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());
@@ -287,28 +300,28 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
 
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
-            if(isTerminatedContract || !contractResult.isSuccess()) {
-                if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
+            if (isTerminatedContract || !contractResult.isSuccess()) {
+                if (contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
                     byte[] txHashBytes = tx.getHash().serialize();
                     byte[] infoKey = ArraysTool.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(infoKey);
                     ContractTokenTransferInfoPo po = infoResult.getData();
-                    if(po != null) {
+                    if (po != null) {
                         po.setStatus((byte) 2);
                         contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, po);
 
                         // 刷新token余额
-                        if(isTerminatedContract) {
+                        if (isTerminatedContract) {
                             // 终止的合约，回滚token余额
                             this.rollbackContractToken(po);
                             contractResult.setError(true);
                             contractResult.setErrorMessage("this contract has been terminated");
                         } else {
 
-                            if(po.getFrom() != null) {
+                            if (po.getFrom() != null) {
                                 vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), po.getContractAddress());
                             }
-                            if(po.getTo() != null) {
+                            if (po.getTo() != null) {
                                 vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), po.getContractAddress());
                             }
                         }
@@ -316,7 +329,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 }
             }
 
-            if(!isTerminatedContract) {
+            if (!isTerminatedContract) {
                 // 处理合约事件
                 vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
             }
@@ -339,10 +352,10 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             BigInteger token = po.getValue();
             String fromStr = null;
             String toStr = null;
-            if(from != null) {
+            if (from != null) {
                 fromStr = AddressTool.getStringAddressByBytes(from);
             }
-            if(to != null) {
+            if (to != null) {
                 toStr = AddressTool.getStringAddressByBytes(to);
             }
             contractBalanceManager.addContractToken(fromStr, contractAddressStr, token);
