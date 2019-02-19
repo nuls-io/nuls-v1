@@ -29,7 +29,7 @@
         </rollingPolicy>
         <!-- 对记录事件进行格式化 -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
@@ -51,7 +51,7 @@
         </rollingPolicy>
         <!-- 对记录事件进行格式化 -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
@@ -73,7 +73,7 @@
         </rollingPolicy>
         <!-- 对记录事件进行格式化 -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
@@ -95,7 +95,7 @@
         </rollingPolicy>
         <!-- 对记录事件进行格式化 -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
@@ -117,13 +117,13 @@
         </rollingPolicy>
         <!-- 对记录事件进行格式化 -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
     <!-- 日志输出级别 -->
     <root level="INFO">
-        <appender-ref ref="STDOUT"/>
+        <!--<appender-ref ref="STDOUT"/>-->
         <appender-ref ref="FILE"/>
     </root>
     <logger name="org.apache.ibatis" level="debug" additivity="false"/>
