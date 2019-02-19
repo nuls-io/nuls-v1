@@ -46,7 +46,7 @@ import java.util.Set;
  */
 public class BlockMonitorProcess {
 
-    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 600 * 1000L;
+    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
 
     private final ChainManager chainManager;
 
