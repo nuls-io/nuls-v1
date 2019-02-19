@@ -1357,6 +1357,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             return;
         }
         ContractTransfer transfer = new ContractTransfer(contractAddress, contractAddress, Na.valueOf(currentBalanceLongValue), Na.ZERO, false);
+        transfer.setOrginHash(hash);
         Result<ContractTransferTransaction> contractTransferResult = this.createContractTransferTx(transfer, time, toMaps, contractUsedCoinMap, blockHeight);
         if (contractTransferResult.isSuccess()) {
             ContractTransferTransaction _contractTransferTx = contractTransferResult.getData();
@@ -1365,7 +1366,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
             Log.info("Contract UTXOs need exchange, orgin tx hash is {}, current tx hash is {}", hash.toString(), _contractTransferTx.getHash().toString());
             // 保存内部转账交易hash和外部合约交易hash
-            transfer.setOrginHash(hash);
             transfer.setHash(_contractTransferTx.getHash());
             transfers.add(transfer);
             successContractTransferTxs.put(_contractTransferTx.getHash().getDigestHex(), _contractTransferTx);
