@@ -35,7 +35,6 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class TxFieldValidator implements NulsDataValidator<Transaction> {
 
-    public final static int MAX_REMARK_LEN = 100;
     public final static int MAX_TX_TYPE = 60000;
 
 
@@ -56,10 +55,6 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
                 break;
             }
             if (tx.getTime() == 0) {
-                result = false;
-                break;
-            }
-            if (tx.getRemark() != null && tx.getRemark().length > MAX_REMARK_LEN) {
                 result = false;
                 break;
             }

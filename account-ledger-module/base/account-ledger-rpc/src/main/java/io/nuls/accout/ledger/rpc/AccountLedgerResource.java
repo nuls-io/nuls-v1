@@ -158,9 +158,6 @@ public class AccountLedgerResource {
         byte[] remarkBytes = new byte[0];
 
         if (form.getRemark() != null && form.getRemark().length() > 0) {
-            if (!validTxRemark(form.getRemark())) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
 
             try {
                 remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
@@ -205,10 +202,6 @@ public class AccountLedgerResource {
         byte[] remarkBytes = new byte[0];
 
         if (form.getRemark() != null && form.getRemark().length() > 0) {
-            if (!validTxRemark(form.getRemark())) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-
             try {
                 remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
             } catch (UnsupportedEncodingException e) {
@@ -275,9 +268,6 @@ public class AccountLedgerResource {
         } catch (UnsupportedEncodingException e) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
         byte[] remarkBytes;
         try {
             remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
@@ -314,9 +304,6 @@ public class AccountLedgerResource {
             model.setAddress(AddressTool.getAddress(from.getAddress()));
             model.setPassword(from.getPassword());
             fromModelList.add(model);
-        }
-        if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Long toTotal = 0L;
         for (MultipleTxToDto to : form.getOutputs()) {
@@ -463,10 +450,6 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
@@ -531,10 +514,6 @@ public class AccountLedgerResource {
             byte[] remarkBytes = new byte[0];
 
             if (form.getRemark() != null && form.getRemark().length() > 0) {
-                if (!validTxRemark(form.getRemark())) {
-                    return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-                }
-
                 try {
                     remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
                 } catch (UnsupportedEncodingException e) {
@@ -1080,21 +1059,6 @@ public class AccountLedgerResource {
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
         return dtoResult.toRpcClientResult();
-    }
-
-    private boolean validTxRemark(String remark) {
-        if (StringUtils.isBlank(remark)) {
-            return true;
-        }
-        try {
-            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
-            if (bytes.length > 100) {
-                return false;
-            }
-            return true;
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
     }
 
     @GET
