@@ -216,6 +216,7 @@ public class VMHelper implements InitializingBean {
         programCall.setMethodName(methodName);
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
+        programCall.setViewMethod(customGasLimit);
 
         ProgramExecutor track;
         if(executor == null) {

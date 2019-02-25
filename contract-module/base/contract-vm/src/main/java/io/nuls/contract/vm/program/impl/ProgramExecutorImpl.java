@@ -190,6 +190,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
         programInvoke.setCreate(true);
         programInvoke.setInternalCall(false);
+        programInvoke.setViewMethod(false);
         return execute(programInvoke);
     }
 
@@ -210,6 +211,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setEstimateGas(programCall.isEstimateGas());
         programInvoke.setCreate(false);
         programInvoke.setInternalCall(programCall.isInternalCall());
+        programInvoke.setViewMethod(programCall.isViewMethod());
         return execute(programInvoke);
     }
 

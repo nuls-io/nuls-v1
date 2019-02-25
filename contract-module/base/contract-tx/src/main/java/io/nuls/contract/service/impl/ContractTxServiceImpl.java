@@ -867,7 +867,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
             result.setMsg(e.getMessage());
             return result;
         } catch (NulsException e) {
@@ -875,7 +875,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
             result.setMsg(e.getMessage());
             return result;
         }
