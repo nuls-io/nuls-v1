@@ -25,8 +25,7 @@ package io.nuls.contract.module.impl;
 
 
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.contract.entity.tx.CallContractTransaction;
-import io.nuls.contract.entity.tx.processor.CreateContractTxProcessor;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.module.AbstractContractModule;
 import io.nuls.contract.util.VMContext;
@@ -34,8 +33,8 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.tools.io.StringFileLoader;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.utils.TransactionManager;
 
 import java.util.Map;
 
@@ -54,6 +53,12 @@ public class ContractModuleBootstrap extends AbstractContractModule {
     public void init() {
         Log.debug("contract init");
         initERC20Standard();
+        initMaxViewGas();
+    }
+
+    private void initMaxViewGas() {
+        int maxViewGas = NulsConfig.MODULES_CONFIG.getCfgValue(ContractConstant.CFG_CONTRACT_SECTION, ContractConstant.CFG_CONTRACT_MAX_VIEW_GAS, ContractConstant.DEFAULT_MAX_VIEW_GAS);
+        VMContext.setCustomMaxViewGasLimit(maxViewGas);
     }
 
     private void initERC20Standard() {

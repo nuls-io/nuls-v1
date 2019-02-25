@@ -637,7 +637,7 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(ContractErrorCode.CONTRACT_NON_VIEW_METHOD).toRpcClientResult();
             }
 
-            ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, viewCall.getMethodDesc(),
+            ProgramResult programResult = vmHelper.invokeCustomGasViewMethod(contractAddressBytes, methodName, viewCall.getMethodDesc(),
                     viewCall.getArgs(method.argsType2Array()));
 
             Result result;

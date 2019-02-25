@@ -178,23 +178,39 @@ public class VMHelper implements InitializingBean {
         // 当前区块状态根
         byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
 
-        return this.invokeViewMethod(null, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+        return this.invokeViewMethod(null, false, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+    }
+
+    public ProgramResult invokeCustomGasViewMethod(byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+        // 当前区块高度
+        BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+        long blockHeight = blockHeader.getHeight();
+        // 当前区块状态根
+        byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
+
+        return this.invokeViewMethod(null, true, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
     private ProgramResult invokeViewMethod(ProgramExecutor executor, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, Object... args) {
-        return this.invokeViewMethod(executor, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, ContractUtil.twoDimensionalArray(args));
+        return this.invokeViewMethod(executor, false, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, ContractUtil.twoDimensionalArray(args));
     }
 
     public ProgramResult invokeViewMethod(byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
-        return this.invokeViewMethod(null, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+        return this.invokeViewMethod(null, false, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
-    public ProgramResult invokeViewMethod(ProgramExecutor executor, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+    public ProgramResult invokeViewMethod(ProgramExecutor executor, boolean customGasLimit, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
 
+        long gasLimit;
+        if(customGasLimit) {
+            gasLimit = vmContext.getCustomMaxViewGasLimit();
+        } else {
+            gasLimit = ContractConstant.CONTRACT_CONSTANT_GASLIMIT;
+        }
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddressBytes);
         programCall.setValue(BigInteger.ZERO);
-        programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
+        programCall.setGasLimit(gasLimit);
         programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
         programCall.setNumber(blockHeight);
         programCall.setMethodName(methodName);
