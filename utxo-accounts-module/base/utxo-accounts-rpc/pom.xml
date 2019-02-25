@@ -29,14 +29,14 @@
     <parent>
         <artifactId>utxo-accounts-module</artifactId>
         <groupId>io.nuls</groupId>
-       <version>1.2.0-beta2</version>
+       <version>1.2.0-beta3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.utxo-accounts-module</groupId>
     <artifactId>utxo-accounts-rpc</artifactId>
-   <version>1.2.0-beta2</version>
+   <version>1.2.0-beta3</version>
 
 
     <dependencies>
@@ -63,17 +63,17 @@
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account</artifactId>
-           <version>1.2.0-beta2</version>
+           <version>1.2.0-beta3</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.utxo-accounts-module</groupId>
             <artifactId>utxo-accounts-storage</artifactId>
-           <version>1.2.0-beta2</version>
+           <version>1.2.0-beta3</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.utxo-accounts-module</groupId>
             <artifactId>utxo-accounts-base</artifactId>
-           <version>1.2.0-beta2</version>
+           <version>1.2.0-beta3</version>
         </dependency>
     </dependencies>
     <build>
