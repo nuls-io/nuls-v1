@@ -701,13 +701,15 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             programCall.setArgs(args);
 
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            if (vmHelper.checkIsViewMethod(methodName, methodDesc, contractAddressBytes)) {
-                programCall.setValue(BigInteger.ZERO);
-                programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
-                programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
-
-                ProgramExecutor track = programExecutor.begin(prevStateRoot);
-                ProgramResult programResult = track.call(programCall);
+            ProgramMethod method;
+            if ((method = vmHelper.getMethodInfoByContractAddress(methodName, methodDesc, contractAddressBytes)).isView()) {
+                ProgramResult programResult = vmHelper.invokeCustomGasViewMethod(contractAddressBytes, methodName, methodDesc,
+                        ContractUtil.twoDimensionalArray(args, method.argsType2Array()));
+                //programCall.setValue(BigInteger.ZERO);
+                //programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
+                //programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
+                //ProgramExecutor track = programExecutor.begin(prevStateRoot);
+                //ProgramResult programResult = track.call(programCall);
                 Result result;
                 if (!programResult.isSuccess()) {
                     Log.error(programResult.getStackTrace());
@@ -865,7 +867,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
             result.setMsg(e.getMessage());
             return result;
         } catch (NulsException e) {
@@ -873,7 +875,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
             result.setMsg(e.getMessage());
             return result;
         }
@@ -923,13 +925,15 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         programCall.setArgs(args);
 
         // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-        if (vmHelper.checkIsViewMethod(methodName, methodDesc, contractAddressBytes)) {
-            programCall.setValue(BigInteger.ZERO);
-            programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
-            programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
-
-            ProgramExecutor track = programExecutor.begin(prevStateRoot);
-            ProgramResult programResult = track.call(programCall);
+        ProgramMethod method;
+        if ((method = vmHelper.getMethodInfoByContractAddress(methodName, methodDesc, contractAddressBytes)).isView()) {
+            ProgramResult programResult = vmHelper.invokeCustomGasViewMethod(contractAddressBytes, methodName, methodDesc,
+                    ContractUtil.twoDimensionalArray(args, method.argsType2Array()));
+            //programCall.setValue(BigInteger.ZERO);
+            //programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
+            //programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
+            //ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            //ProgramResult programResult = track.call(programCall);
             Result result;
             if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());

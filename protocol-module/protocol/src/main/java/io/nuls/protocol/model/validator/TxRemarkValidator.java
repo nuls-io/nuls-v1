@@ -24,6 +24,7 @@
 package io.nuls.protocol.model.validator;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -39,7 +40,7 @@ public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction data) {
         byte[] remark = data.getRemark();
-        if (remark != null && remark.length > MAX_REMARK_LEN) {
+        if (NulsContext.MAIN_NET_VERSION <= 2 && remark != null && remark.length > MAX_REMARK_LEN) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_SIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();

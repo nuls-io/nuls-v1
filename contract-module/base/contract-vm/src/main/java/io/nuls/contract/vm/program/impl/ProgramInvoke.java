@@ -86,6 +86,8 @@ public class ProgramInvoke {
      */
     private boolean estimateGas;
 
+    private boolean viewMethod;
+
     private boolean create;
 
     private boolean internalCall;
@@ -184,6 +186,14 @@ public class ProgramInvoke {
 
     public void setEstimateGas(boolean estimateGas) {
         this.estimateGas = estimateGas;
+    }
+
+    public boolean isViewMethod() {
+        return viewMethod;
+    }
+
+    public void setViewMethod(boolean viewMethod) {
+        this.viewMethod = viewMethod;
     }
 
     public boolean isCreate() {

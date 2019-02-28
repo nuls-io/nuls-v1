@@ -74,6 +74,8 @@ public class VMContext {
 
     public static Map<String, ProgramMethod> NRC20_METHODS = null;
 
+    private static int customMaxViewGasLimit;
+
     /**
      * @param hash
      * @return
@@ -218,5 +220,13 @@ public class VMContext {
             return new ArrayList<>();
         }
         return list;
+    }
+
+    public static int getCustomMaxViewGasLimit() {
+        return customMaxViewGasLimit;
+    }
+
+    public static void setCustomMaxViewGasLimit(int customMaxViewGasLimit) {
+        VMContext.customMaxViewGasLimit = customMaxViewGasLimit;
     }
 }
