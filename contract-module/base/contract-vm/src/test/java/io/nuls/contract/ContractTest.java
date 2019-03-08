@@ -53,7 +53,7 @@ public class ContractTest {
     private static final String BUYER = "TTapY7gpBm1DHEgwguSFFtuK3JvGZVKK";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         dbService = new LevelDBServiceImpl();
         programExecutor = new ProgramExecutorImpl(vmContext, dbService);
     }

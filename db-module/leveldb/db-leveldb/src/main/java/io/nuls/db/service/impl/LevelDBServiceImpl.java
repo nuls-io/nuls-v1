@@ -35,12 +35,8 @@ import java.util.Set;
 @Service
 public class LevelDBServiceImpl implements DBService {
 
-    public LevelDBServiceImpl() {
-        try {
-            LevelDBManager.init();
-        } catch (Exception e) {
-            //skip it
-        }
+    public LevelDBServiceImpl() throws Exception {
+        LevelDBManager.init();
     }
 
     @Override

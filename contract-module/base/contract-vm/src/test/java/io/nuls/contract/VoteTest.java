@@ -56,7 +56,7 @@ public class VoteTest {
     private static final String BUYER = "NsdwCuCKs2AXFfUT7PxXXJPm2XxybX6H";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         dbService = new LevelDBServiceImpl();
         programExecutor = new ProgramExecutorImpl(vmContext, dbService);
     }
