@@ -21,10 +21,12 @@ package io.nuls.db.service.impl;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 
@@ -35,8 +37,12 @@ import java.util.Set;
 @Service
 public class LevelDBServiceImpl implements DBService {
 
-    public LevelDBServiceImpl() throws Exception {
-        LevelDBManager.init();
+    public LevelDBServiceImpl() {
+        try {
+            LevelDBManager.init();
+        } catch (Exception e) {
+            throw new NulsRuntimeException(DBErrorCode.DB_AREA_NOT_EXIST, e);
+        }
     }
 
     @Override
@@ -131,12 +137,12 @@ public class LevelDBServiceImpl implements DBService {
 
     @Override
     public BatchOperation createWriteBatch(String area) {
-        if(StringUtils.isBlank(area)) {
+        if (StringUtils.isBlank(area)) {
             return null;
         }
         BatchOperationImpl batchOperation = new BatchOperationImpl(area);
         Result result = batchOperation.checkBatch();
-        if(result.isFailed()) {
+        if (result.isFailed()) {
             Log.error("DB batch create error: " + result.getMsg());
             return null;
         }
