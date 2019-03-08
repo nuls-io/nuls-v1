@@ -231,7 +231,7 @@ public class NodeManager {
 
         //监听被动连接的断开
         node.setDisconnectListener(() -> {
-            Log.info("------------in node disconnect:" + node.getId());
+//            Log.info("------------in node disconnect:" + node.getId());
             nodesContainer.getConnectedNodes().remove(node.getId());
             nodesContainer.markCanuseNodeByIp(ip, NodeStatusEnum.CONNECTABLE);
         });

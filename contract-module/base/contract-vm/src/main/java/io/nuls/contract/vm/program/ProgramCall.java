@@ -83,6 +83,8 @@ public class ProgramCall {
      */
     private boolean estimateGas;
 
+    private boolean viewMethod;
+
     private boolean internalCall;
 
     public void args(String... args) {
@@ -189,6 +191,14 @@ public class ProgramCall {
 
     public void setEstimateGas(boolean estimateGas) {
         this.estimateGas = estimateGas;
+    }
+
+    public boolean isViewMethod() {
+        return viewMethod;
+    }
+
+    public void setViewMethod(boolean viewMethod) {
+        this.viewMethod = viewMethod;
     }
 
     public boolean isInternalCall() {

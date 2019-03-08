@@ -100,4 +100,10 @@ public interface ContractConstant extends NulsConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
+    /**
+     *
+     */
+    String CFG_CONTRACT_SECTION = "contract";
+    String CFG_CONTRACT_MAX_VIEW_GAS = "max.view.gas";
+    int DEFAULT_MAX_VIEW_GAS = 100000000;
 }

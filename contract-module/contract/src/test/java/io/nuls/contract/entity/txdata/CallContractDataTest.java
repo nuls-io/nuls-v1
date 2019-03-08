@@ -20,7 +20,7 @@ public class CallContractDataTest {
     private CallContractData data;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         System.setProperty("protostuff.runtime.allow_null_array_element", "true");
         //System.setProperty("protostuff.runtime.auto_load_polymorphic_classes", "false");
         dbService = new LevelDBServiceImpl();

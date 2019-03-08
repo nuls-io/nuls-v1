@@ -190,6 +190,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
         programInvoke.setCreate(true);
         programInvoke.setInternalCall(false);
+        programInvoke.setViewMethod(false);
         return execute(programInvoke);
     }
 
@@ -210,6 +211,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setEstimateGas(programCall.isEstimateGas());
         programInvoke.setCreate(false);
         programInvoke.setInternalCall(programCall.isInternalCall());
+        programInvoke.setViewMethod(programCall.isViewMethod());
         return execute(programInvoke);
     }
 
@@ -220,8 +222,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (programInvoke.getGasLimit() < 1) {
             return revert("gas must be greater than zero");
         }
-        if (programInvoke.getGasLimit() > VM.MAX_GAS) {
-            return revert("gas must be less than " + VM.MAX_GAS);
+
+        long maxGas;
+        if (programInvoke.isViewMethod()) {
+            maxGas = VMContext.getCustomMaxViewGasLimit();
+        } else {
+            maxGas = VM.MAX_GAS;
+        }
+        if (programInvoke.getGasLimit() > maxGas) {
+            return revert("gas must be less than " + maxGas);
         }
         if (programInvoke.getValue().compareTo(BigInteger.ZERO) < 0) {
             return revert("value can't be less than zero");
