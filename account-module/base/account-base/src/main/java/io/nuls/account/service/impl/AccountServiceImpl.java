@@ -56,6 +56,7 @@ import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.ScriptBuilder;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -215,14 +216,25 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-
+        account.setOk(false);
         AccountPo po = new AccountPo(account);
         Result result = accountStorageService.saveAccount(po);
         if (result.isFailed()) {
             return result;
         }
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
+        TaskManager.asynExecuteRunnable(new Runnable() {
+            @Override
+            public void run() {
+                String address = account.getAddress().getBase58();
+                Result res = accountLedgerService.importLedger(address);
+                if (res.isFailed()) {
+                    AccountServiceImpl.this.removeAccount(address, password);
+                } else {
+                    AccountServiceImpl.this.finishImport(account);
+                }
+            }
+        });
         return Result.getSuccess().setData(account);
     }
 
@@ -293,13 +305,25 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(e.getErrorCode());
             }
         }
+        account.setOk(false);
         AccountPo po = new AccountPo(account);
         Result result = accountStorageService.saveAccount(po);
         if (result.isFailed()) {
             return result;
         }
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
+        TaskManager.asynExecuteRunnable(new Runnable() {
+            @Override
+            public void run() {
+                String address = account.getAddress().getBase58();
+                Result res = accountLedgerService.importLedger(address);
+                if (res.isFailed()) {
+                    AccountServiceImpl.this.removeAccount(address, password);
+                } else {
+                    AccountServiceImpl.this.finishImport(account);
+                }
+            }
+        });
         return Result.getSuccess().setData(account);
     }
 
@@ -342,18 +366,36 @@ public class AccountServiceImpl implements AccountService {
         } else {
             account.setAlias(acc.getAlias());
         }
-        Result res = accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
-        if (res.isFailed()) {
-            return res;
-        }
+//        Result res = accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
+//        if (res.isFailed()) {
+//            return res;
+//        }
+        account.setOk(false);
         AccountPo po = new AccountPo(account);
         Result result = accountStorageService.saveAccount(po);
         if (result.isFailed()) {
             return result;
         }
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-
+        TaskManager.asynExecuteRunnable(new Runnable() {
+            @Override
+            public void run() {
+                String address = account.getAddress().getBase58();
+                Result res = accountLedgerService.importLedger(address);
+                if (res.isFailed()) {
+                    AccountServiceImpl.this.removeAccount(address, password);
+                } else {
+                    AccountServiceImpl.this.finishImport(account);
+                }
+            }
+        });
         return Result.getSuccess().setData(account);
+    }
+
+    private void finishImport(Account account) {
+        account.setOk(true);
+        accountStorageService.saveAccount(new AccountPo(account));
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
     }
 
     @Override
@@ -651,11 +693,11 @@ public class AccountServiceImpl implements AccountService {
             accountList.add(account);
         }
         List<AliasPo> aliasList = aliasStorageService.getAliasList().getData();
-        for (AliasPo aliasPo:aliasList) {
+        for (AliasPo aliasPo : aliasList) {
             if (aliasPo.getAddress()[2] != NulsContext.P2SH_ADDRESS_TYPE) {
                 continue;
             }
-            for (MultiSigAccount multiSigAccount:accountList) {
+            for (MultiSigAccount multiSigAccount : accountList) {
                 if (Arrays.equals(aliasPo.getAddress(), multiSigAccount.getAddress().getAddressBytes())) {
                     multiSigAccount.setAlias(aliasPo.getAlias());
                     break;

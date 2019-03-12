@@ -100,6 +100,8 @@ public class Account implements Serializable {
 
     private String remark;
 
+    private boolean ok = true;
+
 
     /**
      * 账户是否被加密(是否设置过密码)
@@ -391,5 +393,13 @@ public class Account implements Serializable {
     @Override
     public int hashCode() {
         return Arrays.hashCode(pubKey);
+    }
+
+    public boolean isOk() {
+        return ok;
+    }
+
+    public void setOk(boolean ok) {
+        this.ok = ok;
     }
 }

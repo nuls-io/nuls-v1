@@ -58,4 +58,5 @@ public interface AccountErrorCode extends KernelErrorCode {
     ErrorCode MUST_BURN_A_NULS = ErrorCode.init("50022");
     ErrorCode SIGN_COUNT_TOO_LARGE = ErrorCode.init("50023");
     ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("50024");
+    ErrorCode IMPORTING_ACCOUNT = ErrorCode.init("50025");
 }

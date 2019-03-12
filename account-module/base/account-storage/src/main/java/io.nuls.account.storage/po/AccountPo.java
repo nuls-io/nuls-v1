@@ -58,6 +58,8 @@ public class AccountPo {
 
     private String remark;
 
+    private boolean ok = true;
+
     public AccountPo(){
     }
     public AccountPo(Account account){
@@ -93,6 +95,7 @@ public class AccountPo {
         }
         account.setStatus(this.getStatus());
         account.setRemark(this.remark);
+        account.setOk(this.ok);
         return account;
     }
 
@@ -174,5 +177,13 @@ public class AccountPo {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public boolean isOk() {
+        return ok;
+    }
+
+    public void setOk(boolean ok) {
+        this.ok = ok;
     }
 }
