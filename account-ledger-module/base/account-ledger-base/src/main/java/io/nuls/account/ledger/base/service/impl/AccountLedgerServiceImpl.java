@@ -1492,7 +1492,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         long start = -1;
         long end = NulsContext.getInstance().getBestHeight();
-        long begin = System.currentTimeMillis();
+//        long begin = System.currentTimeMillis();
         while (start <= end) {
             start += 1;
             for (long i = start; i <= end; i++) {
@@ -1507,7 +1507,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 break;
             }
         }
-        Log.info("================" + (System.currentTimeMillis() - begin));
+//        Log.info("================" + (System.currentTimeMillis() - begin));
         try {
             balanceManager.refreshBalance(addressBytes);
         } catch (Exception e) {
