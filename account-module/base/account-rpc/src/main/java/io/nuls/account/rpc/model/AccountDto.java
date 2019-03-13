@@ -35,6 +35,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "accountJSON")
 public class AccountDto {
+
     @ApiModelProperty(name = "address", value = "账户地址")
     private String address;
 
@@ -56,6 +57,8 @@ public class AccountDto {
     @ApiModelProperty(name = "remark", value = "账户备注")
     private String remark;
 
+    @ApiModelProperty(name = "ok", value = "数据同步完成")
+    private boolean ok;
 
     public AccountDto() {
 
@@ -71,6 +74,7 @@ public class AccountDto {
         }
         this.encrypted = account.isEncrypted();
         this.remark = account.getRemark();
+        this.ok = account.isOk();
     }
 
     public String getAddress() {
@@ -127,5 +131,13 @@ public class AccountDto {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public boolean isOk() {
+        return ok;
+    }
+
+    public void setOk(boolean ok) {
+        this.ok = ok;
     }
 }
