@@ -60,4 +60,8 @@ public enum NULSParams {
     public void setDataDir(String dataDir) {
         this.dataDir = dataDir;
     }
+
+    public String getProperty(String key) {
+        return paramsMap.get(key);
+    }
 }

@@ -262,7 +262,6 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     }
 
     private static String genAbsolutePath(String path) {
-        //todo 这里有问题
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = resource.getPath();
