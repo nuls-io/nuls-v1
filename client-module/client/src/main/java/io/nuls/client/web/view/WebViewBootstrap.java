@@ -26,6 +26,7 @@
 package io.nuls.client.web.view;
 
 import io.nuls.client.rpc.constant.RpcConstant;
+import io.nuls.kernel.args.NULSParams;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
 import javafx.application.Application;
@@ -211,6 +212,12 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     public void openBrowse() {
         String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
         int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
+        if (NULSParams.BOOTSTRAP.getRpcIp() != null) {
+            ip = NULSParams.BOOTSTRAP.getRpcIp();
+        }
+        if (NULSParams.BOOTSTRAP.getRpcPort() != null) {
+            port = NULSParams.BOOTSTRAP.getRpcPort();
+        }
         if ("0.0.0.0".equals(ip)) {
             ip = RpcConstant.DEFAULT_IP;
         }

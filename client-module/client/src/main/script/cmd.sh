@@ -48,7 +48,7 @@ fi
 JAVA_BIN=`which java`
 # try to use JAVA_HOME jre
 if [ -x ${JAVA_BIN} ]; then
-  ${JAVA_BIN} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+  ${JAVA_BIN} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS "$@"
   exit 0
 fi
 

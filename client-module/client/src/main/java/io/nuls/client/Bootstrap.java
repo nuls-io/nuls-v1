@@ -25,6 +25,7 @@
 
 package io.nuls.client;
 
+import io.nuls.kernel.args.NULSParams;
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
@@ -34,13 +35,11 @@ import io.nuls.client.version.WalletVersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
-import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
@@ -51,7 +50,6 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.base.download.thread.CollectThread;
-import io.nuls.protocol.base.download.thread.RequestThread;
 import io.nuls.protocol.service.DownloadService;
 
 import java.io.File;
@@ -71,6 +69,7 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
+            NULSParams.BOOTSTRAP.init(args);
             System.setProperty("protostuff.runtime.allow_null_array_element", "true");
             System.setProperty("file.encoding", UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
@@ -107,6 +106,12 @@ public class Bootstrap {
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             copyWebFiles();
+            if (NULSParams.BOOTSTRAP.getRpcIp() != null) {
+                ip = NULSParams.BOOTSTRAP.getRpcIp();
+            }
+            if (NULSParams.BOOTSTRAP.getRpcPort() != null) {
+                port = NULSParams.BOOTSTRAP.getRpcPort();
+            }
             RpcServerManager.getInstance().startServer(ip, port);
 
             LanguageService languageService = NulsContext.getServiceBean(LanguageService.class);

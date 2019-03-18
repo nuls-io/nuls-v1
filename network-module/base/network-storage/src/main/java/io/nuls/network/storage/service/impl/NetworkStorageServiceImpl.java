@@ -31,6 +31,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.args.NULSParams;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -247,14 +248,21 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     private File getStoreageFile() throws IOException {
         Properties properties = ConfigLoader.loadProperties("db_config.properties");
         String path = properties.getProperty("leveldb.datapath", "./data");
+        if (NULSParams.BOOTSTRAP.getDataDir() != null) {
+            path = NULSParams.BOOTSTRAP.getDataDir();
+        }
+        if (path.startsWith(".")) {
+            path = genAbsolutePath(path);
+        }
 
-        File dir = new File(genAbsolutePath(path));
+        File dir = new File(path);
         File file = new File(dir, NetworkConstant.NODE_FILE_NAME);
 
         return file;
     }
 
     private static String genAbsolutePath(String path) {
+        //todo 这里有问题
         String[] paths = path.split("/|\\\\");
         URL resource = ClassLoader.getSystemClassLoader().getResource(".");
         String classPath = resource.getPath();
