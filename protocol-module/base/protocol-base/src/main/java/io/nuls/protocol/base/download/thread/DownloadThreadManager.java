@@ -57,13 +57,9 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     private NetworkNewestBlockInfos newestInfos;
-    private String queueName;
-
-    private int maxDowncount = 10;
 
     public DownloadThreadManager(NetworkNewestBlockInfos newestInfos) {
         this.newestInfos = newestInfos;
-        this.queueName = queueName;
     }
 
     @Override
@@ -72,9 +68,11 @@ public class DownloadThreadManager implements Callable<Boolean> {
             boolean isContinue = checkFirstBlock();
 
             if (!isContinue) {
+                Log.info("dowload done 1.");
                 return true;
             }
         } catch (NulsRuntimeException e) {
+            Log.error(e);
             return false;
         }
 
@@ -87,8 +85,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
         collectThread.setConfiguration(localBestHeight + 1, netBestHeight, requestThread, future);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-collect", collectThread);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-request", requestThread);
-        boolean result =  future.get();
-        Log.info(Thread.currentThread().getId()+"-"+collectThread.getStartHeight()+"-"+collectThread.getRequestStartHeight()+"::::"+result);
+        boolean result = future.get();
+        Log.info(Thread.currentThread().getId() + "-" + collectThread.getStartHeight() + "-" + collectThread.getRequestStartHeight() + "::::" + result);
         return result;
     }
 
