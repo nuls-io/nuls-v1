@@ -224,6 +224,7 @@ public class NativeAddress {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
         programCall.setEstimateGas(programInvoke.isEstimateGas());
+        programCall.setViewMethod(programInvoke.isViewMethod());
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
@@ -241,6 +242,8 @@ public class NativeAddress {
             frame.vm.getEvents().addAll(programResult.getEvents());
             return programResult.getResult();
         } else if (programResult.isError()) {
+            //frame.throwRuntimeException(programResult.getErrorMessage());
+            //return null;
             throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
         } else {
             throw new RuntimeException("error contract status");
