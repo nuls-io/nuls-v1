@@ -24,7 +24,11 @@ public enum NULSParams {
                 String value = null;
                 if (args.length > (i + 1)) {
                     value = args[i + 1];
-                    i += 1;
+                    if (value.startsWith("--")) {
+                        value = null;
+                    } else {
+                        i += 1;
+                    }
                 }
                 paramsMap.put(param.substring(2), value);
             }
