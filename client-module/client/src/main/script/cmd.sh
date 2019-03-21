@@ -41,7 +41,7 @@ CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
 
 if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
-  ${SERVER_HOME}/jre/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+  ${SERVER_HOME}/jre/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS "$@"
   exit 0
 fi
 
@@ -52,7 +52,7 @@ if [ -x ${JAVA_BIN} ]; then
   exit 0
 fi
 
- $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+ $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS "$@"
 
 echo "The JAVA_HOME environment variable is not defined"
 echo "This environment variable is needed to run this program"
