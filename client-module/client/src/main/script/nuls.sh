@@ -53,6 +53,7 @@ pid_file=${SERVER_HOME}/nuls.pid
 while [ $# -ge 2 ] ; do
     case "$1" in
             --pid-file) pid_file="$2"; break;;
+            *) shift 2;;
     esac
 done
 
