@@ -50,6 +50,8 @@ fi
 
 pid_file=${SERVER_HOME}/nuls.pid
 
+params="$@"
+
 while [ $# -ge 2 ] ; do
     case "$1" in
             --pid-file) pid_file="$2"; break;;
@@ -82,6 +84,6 @@ if [ -z "$JAVA_VERSION" ]; then
     JAVA_BIN="${SERVER_HOME}/jre/bin/java"
 fi
 
-nohup ${JAVA_BIN} ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} "$@" 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 & echo "$!" > $pid_file &
+nohup ${JAVA_BIN} ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} $params 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 & echo "$!" > $pid_file &
 exit 0
 
