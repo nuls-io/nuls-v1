@@ -1418,4 +1418,52 @@ public class AccountResource {
         return result.toRpcClientResult();
     }
 
+    @POST
+    @Path("/signMessage")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[消息签名] 通过私钥对消息进行签名, 返回签名结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult signMessage(@ApiParam(name = "form", value = "消息签名表单数据", required = true)
+                                                   SignMessageForm form) {
+        //check the parameter
+        String signatureBase64 = null;
+        String address = form.getAddress();
+        String password = form.getPassword();
+        String message = form.getMessage();
+        Result rs = accountService.signMessage(address,password,message);
+        if (rs.isSuccess()) {
+            signatureBase64 = (String) rs.getData();
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("signatureBase64", signatureBase64);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/verifyMessageSignature")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[验证消息签名] 创建离线账户, 该账户不保存到数据库, 并将直接返回账户的所有信息 ", notes = "result.data: List<Account>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult verifySignMessage(@ApiParam(name = "form", value = "账户表单数据", required = true)
+                                                        VerifyMessageSignatureForm form) {
+
+        //check the parameter
+        Boolean result = false;
+        String address = form.getAddress();
+        String signatureBase64 = form.getSignatureBase64();
+        String message = form.getMessage();
+        Result rs = accountService.verifyMessageSignature(address,message,signatureBase64);
+        if (rs.isSuccess()) {
+            result = (Boolean) rs.getData();
+        }
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("result", result);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
 }

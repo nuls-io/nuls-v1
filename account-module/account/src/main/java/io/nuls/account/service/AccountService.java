@@ -407,4 +407,40 @@ public interface AccountService {
      * @return
      */
     Result<Boolean> removeMultiSigAccount(String address);
+
+    /**
+     * @auther EdwardChan
+     *
+     * @since Mar. 20th 2019
+     *
+     *
+     * 对消息进行签名
+     *
+     * @param address 对消息进行签名的地址
+     *
+     * @param password 账户的密码(如果已经设置密码则密码输入)
+     *
+     * @param message 需要签名的字符串
+     *
+     * @return 签名结果字符串
+     */
+    Result<String> signMessage(String address, String password, String message);
+
+    /**
+     * @auther EdwardChan
+     *
+     * @since Mar. 20th 2019
+     *
+     * 验证消息签名是否正确
+     *
+     * @param address 需要验证的地址
+     *
+     * @param message 消息
+     *
+     * @param signatureBase64 签名值
+     *
+     *
+     * @return 如果签名验证通过返回true,如果签名验证失败返回false
+     */
+    Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64);
 }

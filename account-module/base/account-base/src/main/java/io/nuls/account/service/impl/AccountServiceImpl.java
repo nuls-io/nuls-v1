@@ -60,6 +60,7 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -784,4 +785,81 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed();
         }
     }
+
+    /**
+     * @auther EdwardChan
+     *
+     * @since Mar. 20th 2019
+     *
+     *
+     * 对消息进行签名
+     *
+     * @param address 对消息进行签名的地址
+     *
+     * @param password 账户的密码(如果已经设置密码则密码输入)
+     *
+     * @param message 需要签名的字符串
+     *
+     * @return 签名结果字符串
+     */
+    @Override
+    public Result<String> signMessage(String address, String password, String message) {
+        String signatureBase64;
+        //计算签名
+        try {
+            //查询出账户私钥
+            Account account = getAccountByAddress(address);
+            if (null == account) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (account.isEncrypted() && account.isLocked()) {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            //将消息加盐
+            message = "ddd" + message;
+            ECKey key = ECKey.fromPrivate(new BigInteger(account.getPriKey()));
+            signatureBase64 = key.signMessage(message,null);
+        } catch (Exception e) {
+            Log.error("",e);
+            return Result.getFailed();
+        }
+        return Result.getSuccess().setData(signatureBase64);
+    }
+
+    /**
+     * @auther EdwardChan
+     *
+     * @since Mar. 20th 2019
+     *
+     * 验证消息签名是否正确
+     *
+     * @param address 需要验证的地址
+     *
+     * @param message 消息
+     *
+     * @param signatureBase64 签名值
+     *
+     *
+     * @return 如果签名验证通过返回true,如果签名验证失败返回false
+     */
+    @Override
+    public Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64) {
+        boolean result = false;
+        try {
+            ECKey recoveryECKey = ECKey.signedMessageToKey(message, signatureBase64);
+            String recoveryAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(recoveryECKey.getPubKey()));
+            if (recoveryAddress != null && recoveryAddress.equals(address)) {
+                result = true;
+            } else {
+                Log.info("verifyMessageSignature failed,address:{},message:{},signatureBase64:{}",address,message,signatureBase64);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
+        return Result.getSuccess().setData(result);
+    }
+
 }
