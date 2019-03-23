@@ -13,7 +13,7 @@ public class ECKeyTest {
         ECKey key = new ECKey();
         System.out.println(key.getPrivateKeyAsHex());
         System.out.println(key.getPublicKeyAsHex());
-        String message = "Hello,I'am test case！@##$%998877";
+        String message = "Nuls Signed Message:\nHello,I'am test case！@##$%998877";
         String signatureBase64 = key.signMessage(message,null);
         System.out.println(signatureBase64);
         System.out.println(Base64.decode(signatureBase64).length);

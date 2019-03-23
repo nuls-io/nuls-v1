@@ -847,14 +847,19 @@ public class AccountServiceImpl implements AccountService {
     public Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64) throws SignatureException {
         boolean result = false;
         message = AccountConstant.SIGN_MESSAGE_SALT + message;
-        ECKey recoveryECKey = ECKey.signedMessageToKey(message, signatureBase64);
-        String recoveryAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(recoveryECKey.getPubKey()));
-        if (recoveryAddress != null && recoveryAddress.equals(address)) {
-            result = true;
-        } else {
-            Log.info("verifyMessageSignature failed,address:{},message:{},signatureBase64:{}",address,message,signatureBase64);
+        try {
+            ECKey recoveryECKey = ECKey.signedMessageToKey(message, signatureBase64);
+            String recoveryAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(recoveryECKey.getPubKey()));
+            if (recoveryAddress != null && recoveryAddress.equals(address)) {
+                result = true;
+            } else {
+                Log.info("verifyMessageSignature failed,address:{},message:{},signatureBase64:{}",address,message,signatureBase64);
+            }
+        } catch (SignatureException e) {
+            Log.info("",e);
         }
         return Result.getSuccess().setData(result);
+
     }
 
 }
