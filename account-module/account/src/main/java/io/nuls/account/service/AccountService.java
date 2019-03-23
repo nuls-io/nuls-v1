@@ -31,10 +31,10 @@ import io.nuls.account.model.MultiSigAccount;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Address;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
+import java.security.SignatureException;
 import java.util.Collection;
 import java.util.List;
 
@@ -424,7 +424,7 @@ public interface AccountService {
      *
      * @return 签名结果字符串
      */
-    Result<String> signMessage(String address, String password, String message);
+    Result<String> signMessage(String address, String password, String message)throws NulsException;
 
     /**
      * @auther EdwardChan
@@ -442,5 +442,5 @@ public interface AccountService {
      *
      * @return 如果签名验证通过返回true,如果签名验证失败返回false
      */
-    Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64);
+    Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64) throws SignatureException;
 }

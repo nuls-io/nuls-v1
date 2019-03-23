@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
@@ -64,6 +65,7 @@ import org.junit.Assert;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -803,28 +805,25 @@ public class AccountServiceImpl implements AccountService {
      * @return 签名结果字符串
      */
     @Override
-    public Result<String> signMessage(String address, String password, String message) {
+    public Result<String> signMessage(String address, String password, String message) throws NulsException {
         String signatureBase64;
         //计算签名
-        try {
-            //查询出账户私钥
-            Account account = getAccountByAddress(address);
-            if (null == account) {
-                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            if (account.isEncrypted() && account.isLocked()) {
-                if (!account.unlock(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
-            //将消息加盐
-            message = "ddd" + message;
-            ECKey key = ECKey.fromPrivate(new BigInteger(account.getPriKey()));
-            signatureBase64 = key.signMessage(message,null);
-        } catch (Exception e) {
-            Log.error("",e);
-            return Result.getFailed();
+
+        //查询出账户私钥
+        Account account = getAccountByAddress(address);
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.unlock(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        //将消息加盐
+        message = AccountConstant.SIGN_MESSAGE_SALT + message;
+        ECKey key = ECKey.fromPrivate(new BigInteger(account.getPriKey()));
+        signatureBase64 = key.signMessage(message,null);
+
         return Result.getSuccess().setData(signatureBase64);
     }
 
@@ -845,19 +844,15 @@ public class AccountServiceImpl implements AccountService {
      * @return 如果签名验证通过返回true,如果签名验证失败返回false
      */
     @Override
-    public Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64) {
+    public Result<Boolean> verifyMessageSignature(String address, String message, String signatureBase64) throws SignatureException {
         boolean result = false;
-        try {
-            ECKey recoveryECKey = ECKey.signedMessageToKey(message, signatureBase64);
-            String recoveryAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(recoveryECKey.getPubKey()));
-            if (recoveryAddress != null && recoveryAddress.equals(address)) {
-                result = true;
-            } else {
-                Log.info("verifyMessageSignature failed,address:{},message:{},signatureBase64:{}",address,message,signatureBase64);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed();
+        message = AccountConstant.SIGN_MESSAGE_SALT + message;
+        ECKey recoveryECKey = ECKey.signedMessageToKey(message, signatureBase64);
+        String recoveryAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(recoveryECKey.getPubKey()));
+        if (recoveryAddress != null && recoveryAddress.equals(address)) {
+            result = true;
+        } else {
+            Log.info("verifyMessageSignature failed,address:{},message:{},signatureBase64:{}",address,message,signatureBase64);
         }
         return Result.getSuccess().setData(result);
     }

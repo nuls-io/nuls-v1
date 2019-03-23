@@ -1427,43 +1427,72 @@ public class AccountResource {
     })
     public RpcClientResult signMessage(@ApiParam(name = "form", value = "消息签名表单数据", required = true)
                                                    SignMessageForm form) {
-        //check the parameter
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
         String signatureBase64 = null;
         String address = form.getAddress();
         String password = form.getPassword();
         String message = form.getMessage();
-        Result rs = accountService.signMessage(address,password,message);
-        if (rs.isSuccess()) {
-            signatureBase64 = (String) rs.getData();
+        //check the parameter
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Map<String, String> map = new HashMap<>();
-        map.put("signatureBase64", signatureBase64);
-        return Result.getSuccess().setData(map).toRpcClientResult();
+        if (StringUtils.isBlank(message)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            Result rs = accountService.signMessage(address,password,message);
+            if (rs.isSuccess()) {
+                signatureBase64 = (String) rs.getData();
+            }
+            Map<String, String> map = new HashMap<>();
+            map.put("signatureBase64", signatureBase64);
+            return Result.getSuccess().setData(map).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error("",e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+        }
     }
 
     @POST
     @Path("/verifyMessageSignature")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[验证消息签名] 创建离线账户, 该账户不保存到数据库, 并将直接返回账户的所有信息 ", notes = "result.data: List<Account>")
+    @ApiOperation(value = "[验证消息签名] 对消息的签名账户进行验证", notes = "result.data: List<Account>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult verifySignMessage(@ApiParam(name = "form", value = "账户表单数据", required = true)
+    public RpcClientResult verifySignMessage(@ApiParam(name = "form", value = "验证消息签名数据", required = true)
                                                         VerifyMessageSignatureForm form) {
-
         //check the parameter
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
         Boolean result = false;
         String address = form.getAddress();
         String signatureBase64 = form.getSignatureBase64();
         String message = form.getMessage();
-        Result rs = accountService.verifyMessageSignature(address,message,signatureBase64);
-        if (rs.isSuccess()) {
-            result = (Boolean) rs.getData();
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("result", result);
-        return Result.getSuccess().setData(map).toRpcClientResult();
+        if (StringUtils.isBlank(message)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(signatureBase64)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            Result rs = accountService.verifyMessageSignature(address,message,signatureBase64);
+            if (rs.isSuccess()) {
+                result = (Boolean) rs.getData();
+            }
+            Map<String, Boolean> map = new HashMap<>();
+            map.put("result", result);
+            return Result.getSuccess().setData(map).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error("",e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+        }
     }
 
 }
