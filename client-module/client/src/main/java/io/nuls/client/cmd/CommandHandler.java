@@ -119,6 +119,8 @@ public class CommandHandler {
         register(new ResetPasswordProcessor());
         register(new SetAliasProcessor());
         register(new SetPasswordProcessor());
+        register(new SignMessageProcessor());
+        register(new VerifyMessageSignatureProcessor());
 
         /**
          * Multi-signature account
