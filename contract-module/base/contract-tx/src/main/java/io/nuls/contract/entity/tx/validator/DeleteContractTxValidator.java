@@ -69,7 +69,7 @@ public class DeleteContractTxValidator implements NulsDataValidator<DeleteContra
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract deleter is not the transaction creator.");
+            Log.error("contract delete error: The contract deleter is not the transaction creator.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
@@ -79,24 +79,24 @@ public class DeleteContractTxValidator implements NulsDataValidator<DeleteContra
         }
         ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
         if(contractAddressInfoPo == null) {
-            Log.error("contract data error: The contract does not exist.");
+            Log.error("contract delete error: The contract does not exist.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
         }
         if(!ArraysTool.arrayEquals(sender, contractAddressInfoPo.getSender())) {
-            Log.error("contract data error: The contract deleter is not the contract creator.");
+            Log.error("contract delete error: The contract deleter is not the contract creator.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
         Result<ContractBalance> result = contractUtxoService.getBalance(contractAddressBytes);
         ContractBalance balance = (ContractBalance) result.getData();
         if(balance == null) {
-            Log.error("contract data error: That balance of the contract is abnormal.");
+            Log.error("contract delete error: That balance of the contract is abnormal.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
         Na totalBalance = balance.getBalance();
         if(totalBalance.compareTo(Na.ZERO) != 0) {
-            Log.error("contract data error: The balance of the contract is not 0.");
+            Log.error("contract delete error: The balance of the contract is not 0.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_DELETE_BALANCE);
         }
 
