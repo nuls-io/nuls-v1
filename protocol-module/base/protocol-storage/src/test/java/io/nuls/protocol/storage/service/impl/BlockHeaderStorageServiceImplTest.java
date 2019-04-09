@@ -128,7 +128,7 @@ public class BlockHeaderStorageServiceImplTest {
         assertEquals(po.getMerkleHash(), entity.getMerkleHash());
         assertTrue(Arrays.equals(po.getExtend(), entity.getExtend()));
         assertTrue(Arrays.equals(po.getPackingAddress(), entity.getPackingAddress()));
-        assertEquals(po.getScriptSign().getPublicKey(), entity.getScriptSign().getPublicKey());
+        assertTrue(Arrays.equals(po.getScriptSign().getPublicKey(), entity.getScriptSign().getPublicKey()));
         assertEquals(po.getScriptSign().getSignData(), entity.getScriptSign().getSignData());
         assertEquals(po.getTime(), entity.getTime());
         assertEquals(po.getTxCount(), entity.getTxCount());

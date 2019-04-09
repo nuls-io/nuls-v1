@@ -216,7 +216,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
         }
-        result.setData(new Integer(1));
+        result.setData(1);
         return result;
     }
 
@@ -304,7 +304,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         List<byte[]> localAccountList = AccountLegerUtils.getLocalAddresses();
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx, localAccountList);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -360,17 +360,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollbackTransaction(txListToRollback.get(i));
         }
-        return Result.getSuccess().setData(new Integer(txListToRollback.size()));
+        return Result.getSuccess().setData(txListToRollback.size());
     }
 
     private Result<Integer> rollbackTransaction(Transaction tx) {
         if (!AccountLegerUtils.isLocalTransaction(tx)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
         if (tx.isSystemTx()) {
             return deleteTransaction(tx);
@@ -387,12 +387,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> deleteTransaction(Transaction tx) {
         if (!AccountLegerUtils.isLocalTransaction(tx)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -684,7 +684,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             //获取这个地址的所有coin的总大小
             List<Coin> coinList = balanceManager.getCoinListByAddress(address);
             if (coinList.isEmpty()) {//没有可用余额
-                Result.getFailed(TransactionErrorCode.DATA_ERROR);
+                return Result.getFailed(TransactionErrorCode.DATA_ERROR);
             }
             tx.setCoinData(null);
             //默认coindata中to为38 +备注+签名
@@ -1388,7 +1388,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
             return tx;
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException | NulsException e) {
             Log.error(e);
             return null;
         } finally {
@@ -1540,7 +1540,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> deleteUnconfirmedTx(byte[] address) {
         Result result = getAllUnconfirmedTransaction();
         if (result.getData() == null) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
         List<Transaction> txs = (List<Transaction>) result.getData();
         int i = 0;
@@ -1556,13 +1556,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
-        return Result.getSuccess().setData(new Integer(i));
+        return Result.getSuccess().setData(i);
     }
 
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {
 
         if (!AccountLegerUtils.isTxRelatedToAddress(tx, address)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);

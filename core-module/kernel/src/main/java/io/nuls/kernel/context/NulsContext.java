@@ -83,12 +83,6 @@ public class NulsContext {
      */
     public static byte CONTRACT_ADDRESS_TYPE = 2;
 
-
-    /*
-     *  chain name
-     */
-    public static String CHAIN_NAME = "NULS";
-
     public static String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
 
     /**
@@ -223,7 +217,7 @@ public class NulsContext {
         try {
             return SpringLiteContext.getBean(tClass);
         } catch (NulsRuntimeException e) {
-            if (e.getCode().equals(KernelErrorCode.DATA_ERROR)) {
+            if (KernelErrorCode.DATA_ERROR.getCode().equals(e.getCode())) {
                 throw e;
             }
             if (l > 1200) {

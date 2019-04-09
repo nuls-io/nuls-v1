@@ -83,7 +83,7 @@ public class TransactionInfoServiceImpl implements TransactionInfoService {
         }
 
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> savedKeyList = new ArrayList<>();
@@ -102,7 +102,7 @@ public class TransactionInfoServiceImpl implements TransactionInfoService {
             }
             return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
         }
-        return Result.getSuccess().setData(new Integer(addresses.size()));
+        return Result.getSuccess().setData(addresses.size());
     }
 
     @Override
@@ -141,6 +141,6 @@ public class TransactionInfoServiceImpl implements TransactionInfoService {
             transactionInfoStorageService.deleteTransactionInfo(infoKey);
         }
 
-        return Result.getSuccess().setData(new Integer(addressCount));
+        return Result.getSuccess().setData(addressCount);
     }
 }

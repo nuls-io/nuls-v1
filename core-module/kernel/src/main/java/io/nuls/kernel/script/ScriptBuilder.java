@@ -299,31 +299,11 @@ public class ScriptBuilder {
      * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
      * 根据签名和公钥创建一个pay-to-address的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
      */
-    public static Script createInputScript(@Nullable TransactionSignature signature, ECKey pubKey) {
-        byte[] pubkeyBytes = pubKey.getPubKey();
-        //byte[] sigBytes = signature != null ? signature.encodeToBitcoin() : new byte[]{};
-        byte[] sigBytes = null;
-        return new ScriptBuilder().data(sigBytes).data(pubkeyBytes).build();
-    }
-
-    /**
-     * Creates a scriptSig that can redeem a pay-to-address output.
-     * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
-     * 根据签名和公钥创建一个pay-to-address的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
-     */
     public static Script createNulsInputScript(@Nullable byte[] signBytes, byte[] pubKeyBytes) {
+        if (null == signBytes || null == pubKeyBytes) {
+            throw new RuntimeException();
+        }
         return new ScriptBuilder().data(signBytes).data(pubKeyBytes).build();
-    }
-
-    /**
-     * Creates a scriptSig that can redeem a pay-to-pubkey output.
-     * If given signature is null, incomplete scriptSig will be created with OP_0 instead of signature
-     * 根据签名创建一个pay-to-public_key的inputScript/scriptSig用于解锁交易的OutputScript/scriptPublicKry
-     */
-    public static Script createInputScript(@Nullable TransactionSignature signature) {
-        //byte[] sigBytes = signature != null ? signature.encodeToBitcoin() : new byte[]{};
-        byte[] sigBytes = null;
-        return new ScriptBuilder().data(sigBytes).build();
     }
 
     /**

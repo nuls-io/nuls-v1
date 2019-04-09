@@ -161,6 +161,9 @@ public class Node extends BaseNulsData {
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Node)) {
+            return false;
+        }
         Node other = (Node) obj;
         if (StringUtils.isBlank(other.getId())) {
             return false;

@@ -79,7 +79,7 @@ public class VersionUtils {
         for (int i = 0; i < intArr0.length; i++) {
             Integer val1 = intArr0[i];
             Integer val2 = intArr1[i];
-            if (val1 != val2) {
+            if (val1.intValue() != val2.intValue()) {
                 return false;
             }
         }

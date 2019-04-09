@@ -257,9 +257,7 @@ public class NativeAddress {
         }
         BigInteger balance = frame.vm.getProgramExecutor().getAccount(address).getBalance();
         if (balance.compareTo(value) < 0) {
-            if (frame.vm.getProgramContext().isEstimateGas()) {
-                balance = value;
-            } else {
+            if (!frame.vm.getProgramContext().isEstimateGas()) {
                 throw new ErrorException(String.format("contract[%s] not enough balance", toString(address)), frame.vm.getGasUsed(), null);
             }
         }
@@ -269,8 +267,6 @@ public class NativeAddress {
 
     /**
      * native
-     *
-     * @see Address#valid(String)
      */
     private static Result valid(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];

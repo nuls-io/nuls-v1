@@ -51,7 +51,7 @@ public class DateUtil {
         return df.format(date);
     }
 
-//    /**
+    //    /**
 //     * 把日期转换成yyyy-MM-dd HH:mm:ss格式
 //     *
 //     * @param date
@@ -64,7 +64,7 @@ public class DateUtil {
         return new SimpleDateFormat(DEFAULT_PATTERN).format(date);
     }
 
-//    /**
+    //    /**
 //     * 把日期转换成pattern格式
 //     *
 //     * @param date
@@ -78,7 +78,7 @@ public class DateUtil {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-//    /**
+    //    /**
 //     * @param date
 //     * @return Date
 //     */
@@ -90,7 +90,7 @@ public class DateUtil {
         return new Date();
     }
 
-//    /**
+    //    /**
 //     * @param date
 //     * @param pattern
 //     * @return Date
@@ -102,7 +102,8 @@ public class DateUtil {
             throw new RuntimeException(e.getMessage());
         }
     }
-//
+
+    //
 //    /**
 //     * 判断传入的日期是不是当月的第一天
 //     *
@@ -115,7 +116,7 @@ public class DateUtil {
         return calendar.get(Calendar.DAY_OF_MONTH) == 1;
     }
 
-//    /**
+    //    /**
 //     * 判断传入的日期是不是当年的第一天
 //     *
 //     * @param date
@@ -127,7 +128,7 @@ public class DateUtil {
         return calendar.get(Calendar.DAY_OF_YEAR) == 1;
     }
 
-//    /**
+    //    /**
 //     * 去点时分秒后返回
 //     *
 //     * @param date
@@ -142,7 +143,7 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-//    /**
+    //    /**
 //     * 把时间加上day天后返回，如果传负数代表减day天
 //     *
 //     * @param date
@@ -156,7 +157,7 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-//    /**
+    //    /**
 //     * 多少个月前后的今天
 //     *
 //     * @param date
@@ -170,7 +171,7 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-//    /**
+    //    /**
 //     * 获取上一个月的第一天
 //     *
 //     * @return Date
@@ -185,7 +186,7 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-//    /**
+    //    /**
 //     * 获取本月的第一天
 //     *
 //     * @return Date
@@ -194,7 +195,7 @@ public class DateUtil {
         return getFirstDayOfMonth(new Date());
     }
 
-//    /**
+    //    /**
 //     * 获取本月的第一天
 //     * @param date
 //     * @return Date
@@ -209,7 +210,7 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-//    /**
+    //    /**
 //     * 获取上一年的第一天
 //     *
 //     * @return Date
@@ -268,7 +269,7 @@ public class DateUtil {
         return obj == null || EMPTY_SRING.equals(obj);
     }
 
-//    /**
+    //    /**
 //     * 获取星期几
 //     *
 //     * @param c
@@ -302,88 +303,6 @@ public class DateUtil {
         return "星期一";
     }
 
-//    /**
-//     * 时间标签
-//     *
-//     * @param startTime
-//     * @param endTime
-//     * @param showSuffix
-//     * @return String
-//     */
-    public static String convertLebalFull(Date startTime, Date endTime,
-                                          boolean showSuffix) {
-        if (startTime == null || endTime == null) {
-            return EMPTY_SRING;
-        }
-        // 相差的秒数
-        long time = (startTime.getTime() - endTime.getTime()) / 1000;
-        String label = analyzeTime(time, true);
-        if (showSuffix) {
-            label += (time > 0) ? "前" : "后";
-        }
-        return label;
-    }
-
-//    /**
-//     * 时间标签
-//     *
-//     * @param startTime
-//     * @param endTime
-//     * @param showSuffix
-//     * @return String
-//     */
-    public static String convertLebal(Date startTime, Date endTime,
-                                      boolean showSuffix) {
-        if (startTime == null || endTime == null) {
-            return EMPTY_SRING;
-        }
-        // 相差的秒数
-        long time = (startTime.getTime() - endTime.getTime()) / 1000;
-        String label = analyzeTime(time, false);
-        if (showSuffix) {
-            label += (time > 0) ? "前" : "后";
-        }
-        return label;
-    }
-
-    public static String analyzeTime(long time, boolean showFull) {
-        String remark = EMPTY_SRING;
-        long tempTime = Math.abs(time);
-        if (tempTime < 60) {
-            remark = String.format("%s秒", tempTime);
-        } else if (tempTime < 3600) {
-            remark = String.format("%s分%s秒", tempTime / 60, tempTime % 60);
-        } else if (tempTime / 3600 < 24) {
-            if (showFull) {
-                remark = String.format("%s小时%s分%s秒", tempTime / 3600,
-                        (tempTime / 60) % 60, tempTime % 60);
-            } else {
-                remark = String.format("%s小时%s分", tempTime / 3600,
-                        (tempTime / 60) % 60);
-            }
-        } else if (tempTime / (3600 * 24L) < 30) {
-            if (showFull) {
-                remark = String.format("%s天%s小时%s分%s秒",
-                        tempTime / (3600 * 24L), (tempTime / 3600) % 24,
-                        (tempTime / 60) % 60, tempTime % 60);
-            } else {
-                remark = String.format("%s天%s小时", tempTime / (3600 * 24L),
-                        (tempTime / 3600) % 24);
-            }
-        } else if (tempTime / (3600 * 24 * 30L) <= 12) {
-            if (showFull) {
-                remark = String.format("%个月%s天%s小时", tempTime
-                                / (3600 * 24 * 30L), tempTime / (3600 * 24L),
-                        (tempTime / 3600) % 24);
-            } else {
-                remark = tempTime / (3600 * 24 * 30L) + "个月" + tempTime
-                        / (3600 * 24L) % 30 + "天";
-            }
-        } else if (tempTime / (3600 * 24 * 30L) < 12) {
-
-        }
-        return remark;
-    }
 
     public static Date getToday() {
         return rounding(new Date());
@@ -393,7 +312,7 @@ public class DateUtil {
         return rounding(dateAdd(new Date(), -1));
     }
 
-//    /**
+    //    /**
 //     * 获取两个日期之间的间隔天数
 //     *
 //     * @param startTime
@@ -414,7 +333,7 @@ public class DateUtil {
         return rounding(dateAdd(new Date(), 1));
     }
 
-//    /**
+    //    /**
 //     * 检查传入的时间是否在当前时间小时数之后
 //     *
 //     * @param date
