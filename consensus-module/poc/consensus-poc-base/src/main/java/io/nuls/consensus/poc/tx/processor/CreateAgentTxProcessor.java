@@ -48,6 +48,7 @@ import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.HashSet;
@@ -96,7 +97,13 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
             return ValidateResult.getSuccessResult();
         }
 
-        Set<String> addressHexSet = new HashSet<>();
+        Set<String> addressSet = new HashSet<>();
+
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        for (Agent agent : agentList) {
+            addressSet.add(agent.getAgentAddressStr());
+            addressSet.add(agent.getPackingAddressStr());
+        }
 
         for (Transaction transaction : txList) {
             if (transaction.getType() == ConsensusConstant.TX_TYPE_REGISTER_AGENT) {
@@ -104,17 +111,15 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
                 Agent agent = createAgentTransaction.getTxData();
 
-                String agentAddressHex = Hex.encode(agent.getAgentAddress());
-                String packAddressHex = Hex.encode(agent.getPackingAddress());
 
-                if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
+                if (!addressSet.add(agent.getPackingAddressStr()) || !addressSet.add(agent.getAgentAddressStr())) {
                     return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_EXIST).setData(transaction);
                 }
             } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                 RedPunishData redPunishData = redPunishTransaction.getTxData();
-                String addressHex = Hex.encode(redPunishData.getAddress());
-                if (!addressHexSet.add(addressHex)) {
+                String address = AddressTool.getStringAddressByBytes(redPunishData.getAddress());
+                if (!addressSet.add(address)) {
                     return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT).setData(transaction);
                 }
             }

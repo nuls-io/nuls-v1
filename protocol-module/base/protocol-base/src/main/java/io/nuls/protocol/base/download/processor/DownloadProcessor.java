@@ -76,7 +76,7 @@ public class DownloadProcessor extends Thread {
         boolean isContinue = checkNetworkAndStatus();
 
         if (!isContinue) {
-            Log.info("isContinue:false,status:{}", downloadStatus);
+//            Log.info("isContinue:false,status:{}", downloadStatus);
             return;
         }
 

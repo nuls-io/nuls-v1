@@ -638,4 +638,8 @@ public class AliasService {
             return Result.getSuccess().setData(Hex.encode(tx.serialize()));
         }
     }
+
+    public List<AliasPo> getAllAlias() {
+        return this.aliasStorageService.getAliasList().getData();
+    }
 }

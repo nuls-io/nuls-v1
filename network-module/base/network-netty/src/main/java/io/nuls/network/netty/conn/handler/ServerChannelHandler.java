@@ -97,7 +97,7 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.error("----------------- server exceptionCaught -------------------");
+//        Log.error("----------------- server exceptionCaught -------------------");
         if (!(cause instanceof IOException)) {
             SocketChannel channel = (SocketChannel) ctx.channel();
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());

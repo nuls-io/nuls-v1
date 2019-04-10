@@ -93,10 +93,17 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
         if (null == txList || txList.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
+
         Set<String> aliasNames = new HashSet<>();
         Set<String> accountAddress = new HashSet<>();
+
+        List<AliasPo> polist = this.aliasService.getAllAlias();
+        for (AliasPo po : polist) {
+            aliasNames.add(po.getAlias());
+            accountAddress.add(Hex.encode(po.getAddress()));
+        }
         for (Transaction transaction : txList) {
-            if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS){
+            if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
                 AliasTransaction aliasTransaction = (AliasTransaction) transaction;
                 Alias alias = aliasTransaction.getTxData();
                 if (!aliasNames.add(alias.getAlias())) {
