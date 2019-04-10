@@ -438,6 +438,7 @@ public class ChainContainer implements Cloneable {
                 }
             }
             int countOfTooMuchYP = 0;
+            Set<String> redPunishAddressSet = new HashSet<>();
             for (RedPunishTransaction redTx : redPunishTxList) {
                 RedPunishData data = redTx.getTxData();
                 if (data.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
@@ -454,6 +455,10 @@ public class ChainContainer implements Cloneable {
                 boolean result = verifyRedPunish(redTx);
                 if (!result) {
                     return result;
+                }
+                if (!redPunishAddressSet.add(AddressTool.getStringAddressByBytes(redTx.getTxData().getAddress()))) {
+                    BlockLog.debug("red punish repeat!" + block.getHeader().getHash());
+                    return false;
                 }
             }
             if (countOfTooMuchYP != punishAddress.size()) {

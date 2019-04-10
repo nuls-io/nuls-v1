@@ -137,8 +137,11 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
                     return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
                 }
                 DepositPo depositPo = depositStorageService.get(transaction.getTxData().getJoinTxHash());
+                if (depositPo.getDelHeight() > 0) {
+                    return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);
+                }
                 AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash());
-                if (null == agentPo) {
+                if (null == agentPo || agentPo.getDelHeight() > 0) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
                 }
                 if (addressSet.contains(AddressTool.getStringAddressByBytes(agentPo.getAgentAddress()))) {
