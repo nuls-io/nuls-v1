@@ -101,6 +101,12 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (agent.getBlockHeight() == txList.get(0).getBlockHeight()) {
+                continue;
+            }
             addressSet.add(agent.getAgentAddressStr());
             addressSet.add(agent.getPackingAddressStr());
         }

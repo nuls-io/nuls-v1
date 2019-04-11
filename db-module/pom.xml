@@ -5,13 +5,13 @@
     <parent>
         <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
-       <version>1.2.1-beta</version>
+       <version>1.2.1-beta2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls</groupId>
     <artifactId>db-module</artifactId>
-   <version>1.2.1-beta</version>
+   <version>1.2.1-beta2</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-           <version>1.2.1-beta</version>
+           <version>1.2.1-beta2</version>
         </dependency>
     </dependencies>
 

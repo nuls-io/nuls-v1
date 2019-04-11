@@ -128,7 +128,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             }
         }
         if (!needHashList.isEmpty()) {
-            Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
+//            Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
             GetTxGroupRequest request = new GetTxGroupRequest();
             GetTxGroupParam param = new GetTxGroupParam();
             param.setTxHashList(needHashList);
