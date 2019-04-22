@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
@@ -160,6 +161,12 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
                         return result;
                     }
                     transaction.getTxData().setAddress(agentTransaction.getTxData().getAgentAddress());
+                }
+                AgentPo po = agentStorageService.get(transaction.getTxData().getCreateTxHash());
+                if (null == po || po.getDelHeight() > 0) {
+                    ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
+                    result.setData(transaction);
+                    return result;
                 }
                 if (addressSet.contains(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()))) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);

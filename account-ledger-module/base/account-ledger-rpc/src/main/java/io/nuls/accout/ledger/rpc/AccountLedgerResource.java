@@ -877,26 +877,28 @@ public class AccountLedgerResource {
                     tokenInfoList = list;
                 }
                 TransactionInfo info = null;
-                for (ContractTokenTransferInfoPo po : tokenInfoList) {
-                    info = new TransactionInfo();
-                    // 临时type，用于区分资产类型 - 基础币和代币
-                    info.setTxType(1000);
-                    NulsDigestData hashData = new NulsDigestData();
-                    try {
-                        hashData.parse(po.getTxHash(), 0);
-                    } catch (NulsException e) {
-                        Log.error(e);
-                        //skip it
+                if (null != tokenInfoList) {
+                    for (ContractTokenTransferInfoPo po : tokenInfoList) {
+                        info = new TransactionInfo();
+                        // 临时type，用于区分资产类型 - 基础币和代币
+                        info.setTxType(1000);
+                        NulsDigestData hashData = new NulsDigestData();
+                        try {
+                            hashData.parse(po.getTxHash(), 0);
+                        } catch (NulsException e) {
+                            Log.error(e);
+                            //skip it
+                        }
+                        info.setTxHash(hashData);
+                        info.setContractAddress(AddressTool.getAddress(po.getContractAddress()));
+                        info.setTime(po.getTime());
+                        info.setBlockHeight(po.getBlockHeight());
+                        info.setStatus(po.getStatus());
+                        info.setInfo(po.getInfo(addressBytes));
+                        info.setSymbol(po.getSymbol());
+                        result.add(info);
+                        hashCheckSet.add(hashData.getDigestHex());
                     }
-                    info.setTxHash(hashData);
-                    info.setContractAddress(AddressTool.getAddress(po.getContractAddress()));
-                    info.setTime(po.getTime());
-                    info.setBlockHeight(po.getBlockHeight());
-                    info.setStatus(po.getStatus());
-                    info.setInfo(po.getInfo(addressBytes));
-                    info.setSymbol(po.getSymbol());
-                    result.add(info);
-                    hashCheckSet.add(hashData.getDigestHex());
                 }
             }
         }

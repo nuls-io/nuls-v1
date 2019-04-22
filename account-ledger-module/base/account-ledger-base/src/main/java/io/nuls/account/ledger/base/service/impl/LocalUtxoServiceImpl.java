@@ -97,7 +97,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 fromSource = from.getOwner();
 
                 fromOfFromCoin = from.getFrom();
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     utxoFromSource = new byte[tx.getHash().size()];
                     fromIndex = new byte[fromSource.length - utxoFromSource.length];
 
@@ -118,7 +118,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     from.setFrom(fromOfFromCoin);
                 }
 
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     Log.warn("from coin not found!");
                     continue;
                 }
@@ -126,13 +126,13 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 byte[] toAddress = fromOfFromCoin.getAddress();
 
                 boolean addressIsMatch = false;
-                for(byte[] addresses : addressesList) {
-                    if(Arrays.equals(toAddress, addresses)) {
+                for (byte[] addresses : addressesList) {
+                    if (Arrays.equals(toAddress, addresses)) {
                         addressIsMatch = true;
                         break;
                     }
                 }
-                if(!addressIsMatch) {
+                if (!addressIsMatch) {
                     continue;
                 }
 
@@ -156,13 +156,13 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 toAddress = to.getAddress();
 
                 boolean addressIsMatch = false;
-                for(byte[] addresses : addressesList) {
-                    if(Arrays.equals(toAddress, addresses)) {
+                for (byte[] addresses : addressesList) {
+                    if (Arrays.equals(toAddress, addresses)) {
                         addressIsMatch = true;
                         break;
                     }
                 }
-                if(!addressIsMatch) {
+                if (!addressIsMatch) {
                     continue;
                 }
 
@@ -196,7 +196,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     //if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner()))
-                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getAddress())) {
+                    if (null == AccountLegerUtils.isLocalAccount(tos.get(i).getAddress())) {
                         continue;
                     }
                     outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
@@ -220,7 +220,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 fromSource = from.getOwner();
 
                 fromOfFromCoin = from.getFrom();
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     utxoFromSource = new byte[tx.getHash().size()];
                     fromIndex = new byte[fromSource.length - utxoFromSource.length];
                     System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
@@ -239,13 +239,13 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     from.setFrom(fromOfFromCoin);
                 }
 
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     Log.warn("from coin not found!");
                     continue;
                 }
 
                 address = fromOfFromCoin.getAddress();
-                if(!AccountLegerUtils.isLocalAccount(address)) {
+                if (null == AccountLegerUtils.isLocalAccount(address)) {
                     continue;
                 }
                 try {
@@ -318,7 +318,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
     protected void saveUTXO(byte[] outKey, byte[] serialize) {
         localUtxoStorageService.saveUTXO(outKey, serialize);
     }
-
 
 
     @Override

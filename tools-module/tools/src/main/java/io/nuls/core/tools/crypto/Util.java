@@ -400,8 +400,8 @@ public class Util {
         byte[] b = new byte[hex.length() / 2];
         for (int i = 0, j = 0, l = hex.length(); i < l; i++, j++) {
             String swap = "" + arr[i++] + arr[i];
-            int byteint = Integer.parseInt(swap, 16) & 0xFF;
-            b[j] = new Integer(byteint).byteValue();
+            Integer byteint = Integer.parseInt(swap, 16) & 0xFF;
+            b[j] = byteint.byteValue();
         }
         return b;
     }

@@ -335,7 +335,7 @@ public class ConsensusProcess {
         }
 
         StringBuilder str = new StringBuilder();
-        str.append(self.getPackingAddress());
+        str.append(AddressTool.getStringAddressByBytes(self.getPackingAddress()));
         str.append(" ,order:" + self.getPackingIndexOfRound());
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");

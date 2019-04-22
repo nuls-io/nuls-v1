@@ -76,4 +76,11 @@ public interface AccountConstant extends NulsConstant {
     String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
 
     String ACCOUNTKEYSTORE_FOLDER_NAME ="backup";
+
+    /**
+     * 消息进行签名时的盐
+     *
+     * **/
+    String SIGN_MESSAGE_SALT = "Nuls Signed Message:\n";
+
 }

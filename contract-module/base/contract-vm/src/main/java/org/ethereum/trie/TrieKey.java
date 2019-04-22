@@ -179,6 +179,9 @@ public final class TrieKey {
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof TrieKey)) {
+            return false;
+        }
         TrieKey k = (TrieKey) obj;
         int len = getLength();
 

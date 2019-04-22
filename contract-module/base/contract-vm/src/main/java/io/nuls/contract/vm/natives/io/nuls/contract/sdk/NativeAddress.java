@@ -224,6 +224,7 @@ public class NativeAddress {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
         programCall.setEstimateGas(programInvoke.isEstimateGas());
+        programCall.setViewMethod(programInvoke.isViewMethod());
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
@@ -241,6 +242,8 @@ public class NativeAddress {
             frame.vm.getEvents().addAll(programResult.getEvents());
             return programResult.getResult();
         } else if (programResult.isError()) {
+            //frame.throwRuntimeException(programResult.getErrorMessage());
+            //return null;
             throw new ErrorException(programResult.getErrorMessage(), programResult.getGasUsed(), programResult.getStackTrace());
         } else {
             throw new RuntimeException("error contract status");
@@ -254,9 +257,7 @@ public class NativeAddress {
         }
         BigInteger balance = frame.vm.getProgramExecutor().getAccount(address).getBalance();
         if (balance.compareTo(value) < 0) {
-            if (frame.vm.getProgramContext().isEstimateGas()) {
-                balance = value;
-            } else {
+            if (!frame.vm.getProgramContext().isEstimateGas()) {
                 throw new ErrorException(String.format("contract[%s] not enough balance", toString(address)), frame.vm.getGasUsed(), null);
             }
         }
@@ -266,8 +267,6 @@ public class NativeAddress {
 
     /**
      * native
-     *
-     * @see Address#valid(String)
      */
     private static Result valid(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];

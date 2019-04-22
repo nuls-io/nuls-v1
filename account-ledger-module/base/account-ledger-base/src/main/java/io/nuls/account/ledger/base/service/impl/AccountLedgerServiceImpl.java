@@ -81,6 +81,8 @@ import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.model.validator.TxRemarkValidator;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
+import io.nuls.utxo.accounts.model.UtxoAccountsBalance;
+import io.nuls.utxo.accounts.service.UtxoAccountsBalanceService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -121,6 +123,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Autowired
     private ContractService contractService;
+
+    @Autowired
+    private UtxoAccountsBalanceService utxoAccountsBalanceService;
 
     private Lock lock = new ReentrantLock();
     private Lock saveLock = new ReentrantLock();
@@ -211,7 +216,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
         }
-        result.setData(new Integer(1));
+        result.setData(1);
         return result;
     }
 
@@ -299,7 +304,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         List<byte[]> localAccountList = AccountLegerUtils.getLocalAddresses();
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx, localAccountList);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -355,17 +360,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollbackTransaction(txListToRollback.get(i));
         }
-        return Result.getSuccess().setData(new Integer(txListToRollback.size()));
+        return Result.getSuccess().setData(txListToRollback.size());
     }
 
     private Result<Integer> rollbackTransaction(Transaction tx) {
         if (!AccountLegerUtils.isLocalTransaction(tx)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
         if (tx.isSystemTx()) {
             return deleteTransaction(tx);
@@ -382,12 +387,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> deleteTransaction(Transaction tx) {
         if (!AccountLegerUtils.isLocalTransaction(tx)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -425,13 +430,23 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (address == null || address.length != Address.ADDRESS_LENGTH) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-
-        if (!AccountLegerUtils.isLocalAccount(address)) {
+        Account account = AccountLegerUtils.isLocalAccount(address);
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-
-        Balance balance = balanceManager.getBalance(address).getData();
-
+        Balance balance;
+        if (account.isOk()) {
+            balance = balanceManager.getBalance(address).getData();
+        } else {
+            balance = new Balance();
+            Result<UtxoAccountsBalance> result = this.utxoAccountsBalanceService.getUtxoAccountsBalance(address);
+            if (!result.isFailed()) {
+                UtxoAccountsBalance uab = result.getData();
+                balance.setBalance(uab.getBalance());
+                balance.setLocked(uab.getHadLocked());
+                balance.setUsable(balance.getBalance().subtract(balance.getLocked()));
+            }
+        }
         if (balance == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -669,7 +684,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             //获取这个地址的所有coin的总大小
             List<Coin> coinList = balanceManager.getCoinListByAddress(address);
             if (coinList.isEmpty()) {//没有可用余额
-                Result.getFailed(TransactionErrorCode.DATA_ERROR);
+                return Result.getFailed(TransactionErrorCode.DATA_ERROR);
             }
             tx.setCoinData(null);
             //默认coindata中to为38 +备注+签名
@@ -761,6 +776,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
+            }
+            if (!account.isOk()) {
+                return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
             }
 
             // 检查to是否为合约地址，如果是合约地址，则返回错误
@@ -1370,7 +1388,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
             return tx;
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException | NulsException e) {
             Log.error(e);
             return null;
         } finally {
@@ -1384,6 +1402,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Result<Account> accountResult = accountService.getAccount(from);
         if (accountResult.isFailed()) {
             return accountResult;
+        }
+        if (!accountResult.getData().isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
         }
         TransferTransaction tx = new TransferTransaction();
         try {
@@ -1454,7 +1475,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * 导入账户
      */
     @Override
-    public Result importLedgerByAddress(String address) {
+    public Result importLedger(String address) {
         if (address == null || !AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -1469,9 +1490,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
 
-        long start = 0;
+        long start = -1;
         long end = NulsContext.getInstance().getBestHeight();
+//        long begin = System.currentTimeMillis();
         while (start <= end) {
+            start += 1;
             for (long i = start; i <= end; i++) {
                 List<Transaction> txs = blockService.getBlock(i, true).getData().getTxs();
                 for (Transaction tx : txs) {
@@ -1484,6 +1507,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 break;
             }
         }
+//        Log.info("================" + (System.currentTimeMillis() - begin));
         try {
             balanceManager.refreshBalance(addressBytes);
         } catch (Exception e) {
@@ -1516,7 +1540,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> deleteUnconfirmedTx(byte[] address) {
         Result result = getAllUnconfirmedTransaction();
         if (result.getData() == null) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
         List<Transaction> txs = (List<Transaction>) result.getData();
         int i = 0;
@@ -1532,13 +1556,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
-        return Result.getSuccess().setData(new Integer(i));
+        return Result.getSuccess().setData(i);
     }
 
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {
 
         if (!AccountLegerUtils.isTxRelatedToAddress(tx, address)) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -1652,6 +1676,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
+            }
+
+            if (!account.isOk()) {
+                return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
             }
             TransferTransaction tx = new TransferTransaction();
             TransactionSignature transactionSignature = new TransactionSignature();

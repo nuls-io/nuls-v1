@@ -104,7 +104,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
         if (batchResult.isFailed()) {
             return batchResult;
         }
-        Result result = Result.getSuccess().setData(new Integer(utxos.size()));
+        Result result = Result.getSuccess().setData(utxos.size());
 
         if(result.isSuccess() && cacheMap != null) {
             for(Map.Entry<byte[], byte[]> entry : utxosToSaveEntries) {

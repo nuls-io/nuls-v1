@@ -53,7 +53,7 @@ public class PerformanceTest {
     private List<Transaction> txList;
 
     @BeforeClass
-    public static void init() {
+    public static void init() throws Exception {
         dbService = new LevelDBServiceImpl();
         dbService.destroyArea(areaName);
         dbService.createArea(areaName);

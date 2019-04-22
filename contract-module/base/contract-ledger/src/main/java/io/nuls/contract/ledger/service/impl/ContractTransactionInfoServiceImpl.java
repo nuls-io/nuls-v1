@@ -70,7 +70,7 @@ public class ContractTransactionInfoServiceImpl implements ContractTransactionIn
         }
 
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            return Result.getSuccess().setData(0);
         }
 
         List<byte[]> savedKeyList = new ArrayList<>();
@@ -135,6 +135,6 @@ public class ContractTransactionInfoServiceImpl implements ContractTransactionIn
             contractTransactionInfoStorageService.deleteTransactionInfo(
                     ArraysTool.concatenate(addresses.get(i), txHashBytes));
         }
-        return Result.getSuccess().setData(new Integer(addressCount));
+        return Result.getSuccess().setData(addressCount);
     }
 }

@@ -493,74 +493,6 @@ public class Script {
         }
     }
 
-    /**
-     * Creates an incomplete scriptSig that, once filled with signatures, can redeem output containing this scriptPubKey.
-     * Instead of the signatures resulting script has OP_0.
-     * Having incomplete input script allows to pass around partially signed tx.
-     * It is expected that this program later on will be updated with proper signatures.
-     * <p>
-     * 创建一个空Script
-     */
-    public Script createEmptyInputScript(@Nullable ECKey key, @Nullable Script redeemScript) {
-        if (isSentToAddress()) {
-            checkArgument(key != null, "Key required to create pay-to-address input script");
-            return ScriptBuilder.createInputScript(null, key);
-        } else if (isSentToRawPubKey()) {
-            return ScriptBuilder.createInputScript(null);
-        } else if (isPayToScriptHash()) {
-            checkArgument(redeemScript != null, "Redeem script required to create P2SH input script");
-            return ScriptBuilder.createP2SHMultiSigInputScript(null, redeemScript);
-        } else {
-            throw new ScriptException("Do not understand script type: " + this);
-        }
-    }
-
-    /**
-     * Returns a copy of the given scriptSig with the signature inserted in the given position.
-     */
-    public Script getScriptSigWithSignature(Script scriptSig, byte[] sigBytes, int index) {
-        int sigsPrefixCount = 0;
-        int sigsSuffixCount = 0;
-        if (isPayToScriptHash()) {
-            sigsPrefixCount = 1; // OP_0 <sig>* <redeemScript>
-            sigsSuffixCount = 1;
-        } else if (isSentToMultiSig()) {
-            sigsPrefixCount = 1; // OP_0 <sig>*
-        } else if (isSentToAddress()) {
-            sigsSuffixCount = 1; // <sig> <pubkey>
-        }
-        return ScriptBuilder.updateScriptWithSignature(scriptSig, sigBytes, index, sigsPrefixCount, sigsSuffixCount);
-    }
-
-
-    /**
-     * Returns the index where a signature by the key should be inserted.  Only applicable to
-     * a P2SH scriptSig.
-     */
-    public int getSigInsertionIndex(Sha256Hash hash, ECKey signingKey) {
-        // Iterate over existing signatures, skipping the initial OP_0, the final redeem script
-        // and any placeholder OP_0 sigs.
-        List<ScriptChunk> existingChunks = chunks.subList(1, chunks.size() - 1);
-        ScriptChunk redeemScriptChunk = chunks.get(chunks.size() - 1);
-        checkNotNull(redeemScriptChunk.data);
-        Script redeemScript = new Script(redeemScriptChunk.data);
-
-        int sigCount = 0;
-        int myIndex = redeemScript.findKeyInRedeem(signingKey);
-        for (ScriptChunk chunk : existingChunks) {
-            if (chunk.opcode == OP_0) {
-                // OP_0, skip
-            } else {
-                checkNotNull(chunk.data);
-                if (myIndex < redeemScript.findSigInRedeem(chunk.data, hash)) {
-                    return sigCount;
-                }
-                sigCount++;
-            }
-        }
-        return sigCount;
-    }
-
     private int findKeyInRedeem(ECKey key) {
         checkArgument(chunks.get(0).isOpCode()); // P2SH scriptSig
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
@@ -572,38 +504,6 @@ public class Script {
 
         throw new IllegalStateException("Could not find matching key " + key.toString() + " in script " + this);
     }
-
-    /**
-     * Returns a list of the keys required by this script, assuming a multi-sig script.
-     *
-     * @throws ScriptException if the script type is not understood or is pay to address or is P2SH (run this method on the "Redeem script" instead).
-     */
-    public List<ECKey> getPubKeys() {
-        if (!isSentToMultiSig()) {
-            throw new ScriptException("Only usable for multisig scripts.");
-        }
-
-        ArrayList<ECKey> result = Lists.newArrayList();
-        int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-        for (int i = 0; i < numKeys; i++) {
-            result.add(ECKey.fromPublicOnly(chunks.get(1 + i).data));
-        }
-        return result;
-    }
-
-    private int findSigInRedeem(byte[] signatureBytes, Sha256Hash hash) {
-        checkArgument(chunks.get(0).isOpCode()); // P2SH scriptSig
-        int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-       /* TransactionSignature signature = TransactionSignature.decodeFromBitcoin(signatureBytes, true);
-        for (int i = 0 ; i < numKeys ; i++) {
-            if (ECKey.fromPublicOnly(chunks.get(i + 1).data).verify(hash, signature)) {
-                return i;
-            }
-        }*/
-
-        throw new IllegalStateException("Could not find matching key for signature on " + hash.toString() + " sig " + Hex.encode(signatureBytes));
-    }
-
 
     ////////////////////// Interface used during verification of transactions/blocks ////////////////////////////////
 
@@ -657,39 +557,6 @@ public class Script {
     }
 
     /**
-     * Gets the count of regular SigOps in the script program (counting multisig ops as 20)
-     */
-    public static int getSigOpCount(byte[] program) throws ScriptException {
-        Script script = new Script();
-        try {
-            script.parse(program);
-        } catch (ScriptException e) {
-            // Ignore errors and count up to the parse-able length
-        }
-        return getSigOpCount(script.chunks, false);
-    }
-
-    /**
-     * Gets the count of P2SH Sig Ops in the Script scriptSig
-     */
-    public static long getP2SHSigOpCount(byte[] scriptSig) throws ScriptException {
-        Script script = new Script();
-        try {
-            script.parse(scriptSig);
-        } catch (ScriptException e) {
-            // Ignore errors and count up to the parse-able length
-        }
-        for (int i = script.chunks.size() - 1; i >= 0; i--) {
-            if (!script.chunks.get(i).isOpCode()) {
-                Script subScript = new Script();
-                subScript.parse(script.chunks.get(i).data);
-                return getSigOpCount(subScript.chunks, true);
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Returns number of signatures required to satisfy this script.
      */
     public int getNumberOfSignaturesRequiredToSpend() {
@@ -707,29 +574,6 @@ public class Script {
         }
     }
 
-    /**
-     * Returns number of bytes required to spend this script. It accepts optional ECKey and redeemScript that may
-     * be required for certain types of script to estimate target size.
-     */
-    public int getNumberOfBytesRequiredToSpend(@Nullable ECKey pubKey, @Nullable Script redeemScript) {
-        if (isPayToScriptHash()) {
-            // scriptSig: <sig> [sig] [sig...] <redeemscript>
-            checkArgument(redeemScript != null, "P2SH script requires redeemScript to be spent");
-            return redeemScript.getNumberOfSignaturesRequiredToSpend() * SIG_SIZE + redeemScript.getProgram().length;
-        } else if (isSentToMultiSig()) {
-            // scriptSig: OP_0 <sig> [sig] [sig...]
-            return getNumberOfSignaturesRequiredToSpend() * SIG_SIZE + 1;
-        } else if (isSentToRawPubKey()) {
-            // scriptSig: <sig>
-            return SIG_SIZE;
-        } else if (isSentToAddress()) {
-            // scriptSig: <sig> <pubkey>
-            int uncompressedPubKeySize = 65;
-            return SIG_SIZE + (pubKey != null ? pubKey.getPubKey().length : uncompressedPubKeySize);
-        } else {
-            throw new IllegalStateException("Unsupported script type");
-        }
-    }
 
     /**
      * <p>Whether or not this is a scriptPubKey representing a pay-to-script-hash output. In such outputs, the logic that

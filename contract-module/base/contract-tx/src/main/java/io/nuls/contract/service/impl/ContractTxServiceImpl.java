@@ -139,8 +139,11 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if (accountResult.isFailed()) {
                 return accountResult;
             }
+            if (!accountResult.getData().isOk()) {
+                return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
+            }
 
-            if(!ContractUtil.checkPrice(price.longValue())) {
+            if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
@@ -206,7 +209,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -217,7 +220,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 track = programExecutor.begin(prevStateRoot);
                 programCreate.setGasLimit(realGasLimit);
                 programResult = track.create(programCreate);
-                if(!programResult.isSuccess()) {
+                if (!programResult.isSuccess()) {
                     Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -329,12 +332,12 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      */
     @Override
     public Result validateContractCreateTx(Long gasLimit, Long price,
-                                   byte[] contractCode, String[][] args) {
+                                           byte[] contractCode, String[][] args) {
         try {
             AssertUtil.canNotEmpty(contractCode, "the contractCode can not be empty");
             Na value = Na.ZERO;
 
-            if(!ContractUtil.checkPrice(price.longValue())) {
+            if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
@@ -372,7 +375,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -383,7 +386,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 track = programExecutor.begin(prevStateRoot);
                 programCreate.setGasLimit(realGasLimit);
                 programResult = track.create(programCreate);
-                if(!programResult.isSuccess()) {
+                if (!programResult.isSuccess()) {
                     Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -391,7 +394,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 }
             }
             return Result.getSuccess();
-        }  catch (NulsException e) {
+        } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
@@ -580,7 +583,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -591,7 +594,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 track = programExecutor.begin(prevStateRoot);
                 programCreate.setGasLimit(realGasLimit);
                 programResult = track.create(programCreate);
-                if(!programResult.isSuccess()) {
+                if (!programResult.isSuccess()) {
                     Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -663,7 +666,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 value = Na.ZERO;
             }
 
-            if(!ContractUtil.checkPrice(price.longValue())) {
+            if (!ContractUtil.checkPrice(price.longValue())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
@@ -681,6 +684,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 }
             }
 
+            if (!account.isOk()) {
+                return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
+            }
             byte[] senderBytes = AddressTool.getAddress(sender);
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
@@ -762,7 +768,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ProgramResult programResult = track.call(programCall);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -773,7 +779,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 track = programExecutor.begin(prevStateRoot);
                 programCall.setGasLimit(realGasLimit);
                 programResult = track.call(programCall);
-                if(!programResult.isSuccess()) {
+                if (!programResult.isSuccess()) {
                     Log.error(programResult.getStackTrace());
                     Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                     result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -829,7 +835,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             // 保存未确认Token转账
             Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(tx, sender, contractAddress, methodName, args);
-            if(unConfirmedTokenTransferResult.isFailed()) {
+            if (unConfirmedTokenTransferResult.isFailed()) {
                 return unConfirmedTokenTransferResult;
             }
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
@@ -896,12 +902,12 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      */
     @Override
     public Result validateContractCallTx(String sender, Long value, Long gasLimit, Long price, String contractAddress,
-                                 String methodName, String methodDesc, String[][] args) {
+                                         String methodName, String methodDesc, String[][] args) {
         AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
         AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
         AssertUtil.canNotEmpty(methodName, "the methodName can not be empty");
 
-        if(!ContractUtil.checkPrice(price.longValue())) {
+        if (!ContractUtil.checkPrice(price.longValue())) {
             return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
         }
 
@@ -961,7 +967,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         ProgramResult programResult = track.call(programCall);
 
         // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
-        if(!programResult.isSuccess()) {
+        if (!programResult.isSuccess()) {
             Log.error(programResult.getStackTrace());
             Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
             result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -972,7 +978,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             track = programExecutor.begin(prevStateRoot);
             programCall.setGasLimit(realGasLimit);
             programResult = track.call(programCall);
-            if(!programResult.isSuccess()) {
+            if (!programResult.isSuccess()) {
                 Log.error(programResult.getStackTrace());
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
@@ -989,16 +995,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if(po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
+            if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
                 byte[] txHashBytes = tx.getHash().serialize();
                 byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
                 ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
-                if(ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
+                if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
                     String to = args[0][0];
                     String tokenValue = args[1][0];
                     BigInteger token = new BigInteger(tokenValue);
                     Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
-                    if(result.isFailed()) {
+                    if (result.isFailed()) {
                         return result;
                     }
                     contractBalanceManager.addContractToken(to, contractAddress, token);
@@ -1008,14 +1014,14 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 } else {
                     String from = args[0][0];
                     // 转出的不是自己的代币（代币授权逻辑），则不保存token待确认交易，因为有调用合约的待确认交易
-                    if(!sender.equals(from)) {
+                    if (!sender.equals(from)) {
                         return Result.getSuccess();
                     }
                     String to = args[1][0];
                     String tokenValue = args[2][0];
                     BigInteger token = new BigInteger(tokenValue);
                     Result result = contractBalanceManager.subtractContractToken(from, contractAddress, token);
-                    if(result.isFailed()) {
+                    if (result.isFailed()) {
                         return result;
                     }
                     contractBalanceManager.addContractToken(to, contractAddress, token);
@@ -1033,7 +1039,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 tokenTransferInfoPo.setTxHash(txHashBytes);
                 tokenTransferInfoPo.setStatus((byte) 0);
                 Result result = contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, tokenTransferInfoPo);
-                if(result.isFailed()) {
+                if (result.isFailed()) {
                     return result;
                 }
                 return Result.getSuccess().setData(infoKey);
@@ -1139,11 +1145,11 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
             Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
-            if(contractAddressInfoPoResult.isFailed()) {
+            if (contractAddressInfoPoResult.isFailed()) {
                 return contractAddressInfoPoResult;
             }
             ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-            if(contractAddressInfoPo == null) {
+            if (contractAddressInfoPo == null) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
@@ -1153,23 +1159,23 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             // 获取合约当前状态
             ProgramStatus status = vmHelper.getContractStatus(stateRoot, contractAddressBytes);
             boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
-            if(isTerminatedContract) {
+            if (isTerminatedContract) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
             }
 
             byte[] senderBytes = AddressTool.getAddress(sender);
-            if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+            if (!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
             }
 
             Result<ContractBalance> result = contractBalanceManager.getBalance(contractAddressBytes);
             ContractBalance balance = (ContractBalance) result.getData();
-            if(balance == null) {
+            if (balance == null) {
                 return result;
             }
 
             Na totalBalance = balance.getBalance();
-            if(totalBalance.compareTo(Na.ZERO) != 0) {
+            if (totalBalance.compareTo(Na.ZERO) != 0) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
             }
 
@@ -1185,6 +1191,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
+            }
+            if (!account.isOk()) {
+                return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT);
             }
 
             DeleteContractTransaction tx = new DeleteContractTransaction();
@@ -1293,11 +1302,11 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
         Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
-        if(contractAddressInfoPoResult.isFailed()) {
+        if (contractAddressInfoPoResult.isFailed()) {
             return contractAddressInfoPoResult;
         }
         ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
-        if(contractAddressInfoPo == null) {
+        if (contractAddressInfoPo == null) {
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
         }
 
@@ -1307,23 +1316,23 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         // 获取合约当前状态
         ProgramStatus status = vmHelper.getContractStatus(stateRoot, contractAddressBytes);
         boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
-        if(isTerminatedContract) {
+        if (isTerminatedContract) {
             return Result.getFailed(ContractErrorCode.CONTRACT_DELETED);
         }
 
         byte[] senderBytes = AddressTool.getAddress(sender);
-        if(!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
+        if (!ArraysTool.arrayEquals(senderBytes, contractAddressInfoPo.getSender())) {
             return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_CREATER);
         }
 
         Result<ContractBalance> result = contractBalanceManager.getBalance(contractAddressBytes);
         ContractBalance balance = (ContractBalance) result.getData();
-        if(balance == null) {
+        if (balance == null) {
             return result;
         }
 
         Na totalBalance = balance.getBalance();
-        if(totalBalance.compareTo(Na.ZERO) != 0) {
+        if (totalBalance.compareTo(Na.ZERO) != 0) {
             return Result.getFailed(ContractErrorCode.CONTRACT_DELETE_BALANCE);
         }
 

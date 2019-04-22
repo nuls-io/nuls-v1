@@ -213,7 +213,7 @@ public interface AccountLedgerService {
      * @param address address
      * @return true if a address is a local address
      */
-    Result importLedgerByAddress(String address);
+    Result importLedger(String address);
 
     /**
      * @param address address

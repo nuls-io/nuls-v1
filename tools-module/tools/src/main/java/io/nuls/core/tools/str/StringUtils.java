@@ -157,7 +157,7 @@ public class StringUtils {
             }
             remark = remark.trim();
             byte[] aliasBytes = remark.getBytes("UTF-8");
-            if (aliasBytes.length < 0 || aliasBytes.length > 60) {
+            if (aliasBytes.length > 60) {
                 return false;
             }
             return true;

@@ -257,6 +257,13 @@ public class PocConsensusResource {
         if (StringUtils.isBlank(form.getRewardAddress())) {
             form.setRewardAddress(form.getAgentAddress());
         }
+        Account account = accountService.getAccount(form.getAgentAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
+        }
         CreateAgentTransaction tx = new CreateAgentTransaction();
         tx.setTime(TimeService.currentTimeMillis());
         Agent agent = new Agent();
@@ -305,6 +312,13 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getAddress(), "address can not be null");
         AssertUtil.canNotEmpty(form.getAgentHash(), "agent hash can not be null");
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
+        }
         DepositTransaction tx = new DepositTransaction();
         Deposit deposit = new Deposit();
         deposit.setAddress(AddressTool.getAddress(form.getAddress()));
@@ -353,6 +367,13 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(address, "address can not be null");
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Account account = accountService.getAccount(address).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
         }
 
         StopAgentTransaction tx = new StopAgentTransaction();
@@ -408,6 +429,9 @@ public class PocConsensusResource {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
         }
         CancelDepositTransaction tx = new CancelDepositTransaction();
         CancelDeposit cancelDeposit = new CancelDeposit();
@@ -469,6 +493,9 @@ public class PocConsensusResource {
         Account account = accountService.getAccount(form.getAgentAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
         }
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
@@ -534,6 +561,9 @@ public class PocConsensusResource {
             if (!account.validatePassword(form.getPassword())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
+        }
+        if (!account.isOk()) {
+            return Result.getFailed(AccountErrorCode.IMPORTING_ACCOUNT).toRpcClientResult();
         }
 
         DepositTransaction tx = new DepositTransaction();

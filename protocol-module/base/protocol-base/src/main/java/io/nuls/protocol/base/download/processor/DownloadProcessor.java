@@ -76,6 +76,7 @@ public class DownloadProcessor extends Thread {
         boolean isContinue = checkNetworkAndStatus();
 
         if (!isContinue) {
+//            Log.info("isContinue:false,status:{}", downloadStatus);
             return;
         }
 
@@ -109,6 +110,7 @@ public class DownloadProcessor extends Thread {
 
         if (newestInfos.getNodes().size() < ProtocolConstant.ALIVE_MIN_NODE_COUNT) {
             downloadStatus = DownloadStatus.WAIT;
+            Log.info("too few nodes");
             return;
         }
         NulsContext.getInstance().setNetBestBlockHeight(newestInfos.getNetBestHeight());
@@ -241,7 +243,7 @@ public class DownloadProcessor extends Thread {
     private void waitNetworkNotChange() throws NulsRuntimeException {
         //等待10秒内节点没有变化（一般是增长），则开始同步
         //Wait for no change in the node within 10 seconds (usually growth), then start synchronization
-
+        Log.info("start waiting 1.");
         int nodeSize = networkService.getAvailableNodes().size();
 
         long now = TimeService.currentTimeMillis();
@@ -270,6 +272,7 @@ public class DownloadProcessor extends Thread {
             return;
         }
         downloadStatus = DownloadStatus.READY;
+        Log.info("dowload ready 1.");
     }
 
     private boolean checkNetworkAndStatus() {

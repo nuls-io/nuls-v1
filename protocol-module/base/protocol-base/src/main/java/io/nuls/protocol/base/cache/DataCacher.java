@@ -25,7 +25,6 @@
 
 package io.nuls.protocol.base.cache;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.MessageDataType;
 

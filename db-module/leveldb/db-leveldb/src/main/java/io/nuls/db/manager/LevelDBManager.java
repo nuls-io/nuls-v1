@@ -25,6 +25,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
+import io.nuls.kernel.args.NULSParams;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
@@ -144,6 +145,9 @@ public class LevelDBManager {
     public static File loadDataPath() throws Exception {
         Properties properties = ConfigLoader.loadProperties("db_config.properties");
         String path = properties.getProperty("leveldb.datapath", "./data");
+        if (NULSParams.BOOTSTRAP.getDataDir() != null) {
+            path = NULSParams.BOOTSTRAP.getDataDir();
+        }
         String maxStr = properties.getProperty("leveldb.area.max", "50");
         try {
             max = Integer.parseInt(maxStr);

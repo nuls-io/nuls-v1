@@ -69,7 +69,7 @@ public class BigDecimalTest implements Contract {
          * 构造函数测试
          */
         BigDecimal _int = new BigDecimal(19);
-        BigDecimal _double = new BigDecimal(4.56);
+        BigDecimal _double = new BigDecimal(4.56D);
         BigDecimal _long = new BigDecimal(5634345L);
         BigDecimal _String = new BigDecimal("1000022");
 
@@ -112,7 +112,7 @@ public class BigDecimalTest implements Contract {
          */
         BigDecimal hex = new BigDecimal("192320012000000000000000");
         hex.byteValueExact();
-        hex.plus();
+//        hex.plus();
         BigDecimal pow = hex.pow(6);
 
         sb.append("\npow: " + pow.toString() + " ==== " + pow.toPlainString());

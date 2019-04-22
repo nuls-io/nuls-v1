@@ -50,18 +50,18 @@ public class AccountLegerUtils {
 
     private final static int TX_HASH_LENGTH = NulsDigestData.HASH_LENGTH;
 
-    public static boolean isLocalAccount(byte[] address) {
+    public static Account isLocalAccount(byte[] address) {
         Collection<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
-            return false;
+            return null;
         }
 
         for (Account account : localAccountList) {
             if (Arrays.equals(account.getAddress().getAddressBytes(), address)) {
-                return true;
+                return account;
             }
         }
-        return false;
+        return null;
     }
 
     public static List<byte[]> getLocalAddresses() {
@@ -131,17 +131,17 @@ public class AccountLegerUtils {
         }
         List<byte[]> addresses = tx.getAllRelativeAddress();
         for (int j = 0; j < addresses.size(); j++) {
-            if (AccountLegerUtils.isLocalAccount(addresses.get(j))) {
+            if (AccountLegerUtils.isLocalAccount(addresses.get(j)) != null) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean isTxRelatedToAddress(Transaction tx, byte[] address){
+    public static boolean isTxRelatedToAddress(Transaction tx, byte[] address) {
         List<byte[]> sourceAddresses = tx.getAllRelativeAddress();
-        for (byte[] tmpAddress : sourceAddresses){
-            if(Arrays.equals(tmpAddress, address)){
+        for (byte[] tmpAddress : sourceAddresses) {
+            if (Arrays.equals(tmpAddress, address)) {
                 return true;
             }
         }
@@ -149,7 +149,7 @@ public class AccountLegerUtils {
     }
 
     public static byte[] getTxHashBytes(byte[] fromBytes) {
-        if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
+        if (fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
             return null;
         }
         byte[] txBytes = new byte[TX_HASH_LENGTH];
@@ -159,14 +159,14 @@ public class AccountLegerUtils {
 
     public static String getTxHash(byte[] fromBytes) {
         byte[] txBytes = getTxHashBytes(fromBytes);
-        if(txBytes != null) {
+        if (txBytes != null) {
             return Hex.encode(txBytes);
         }
         return null;
     }
 
     public static byte[] getIndexBytes(byte[] fromBytes) {
-        if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
+        if (fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
             return null;
         }
         int length = fromBytes.length - TX_HASH_LENGTH;
@@ -177,7 +177,7 @@ public class AccountLegerUtils {
 
     public static Integer getIndex(byte[] fromBytes) {
         byte[] indexBytes = getIndexBytes(fromBytes);
-        if(indexBytes != null) {
+        if (indexBytes != null) {
             VarInt varInt = new VarInt(indexBytes, 0);
             return Math.toIntExact(varInt.value);
         }

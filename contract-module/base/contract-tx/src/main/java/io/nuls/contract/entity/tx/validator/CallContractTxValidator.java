@@ -30,6 +30,7 @@ import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.txdata.CallContractData;
 import io.nuls.contract.ledger.util.ContractLedgerUtil;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -38,6 +39,7 @@ import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -60,12 +62,12 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
 
         if(!ContractLedgerUtil.isExistContractAddress(contractAddress)) {
-            Log.error("contract data error: The contract does not exist.");
+            Log.error("contract call error: The contract does not exist.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
         }
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract caller is not the transaction creator.");
+            Log.error("contract call error: The contract caller is not the transaction creator.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
@@ -82,26 +84,34 @@ public class CallContractTxValidator implements NulsDataValidator<CallContractTr
             }
 
             if (coin.getLockTime() != 0) {
-                Log.error("contract data error: The amount of the transfer cannot be locked(UTXO status error).");
+                Log.error("contract call error: The amount of the transfer cannot be locked(UTXO status error).");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.UTXO_STATUS_CHANGE);
             }
 
             if (!ArraysTool.arrayEquals(owner, contractAddress)) {
-                Log.error("contract data error: The receiver is not the contract address.");
+                Log.error("contract call error: The receiver is not the contract address.");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             } else {
                 contractReceivedNa = contractReceivedNa.add(coin.getNa());
             }
 
             if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
-                Log.error("contract data error: The amount of the transfer is too small.");
+                Log.error("contract call error: The amount of the transfer is too small.");
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TOO_SMALL_AMOUNT);
             }
         }
         if (contractReceivedNa.isLessThan(transferNa)) {
-            Log.error("contract data error: Insufficient amount to transfer to the contract address.");
+            Log.error("contract call error: Insufficient amount to transfer to the contract address.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.INVALID_AMOUNT);
         }
-        return ValidateResult.getSuccessResult();
+
+        Na realFee = tx.getCoinData().getFee();
+        Na fee = TransactionFeeCalculator.getTransferFee(tx.size()).add(Na.valueOf(LongUtils.mul(txData.getGasLimit(), txData.getPrice())));
+        if (realFee.isGreaterOrEquals(fee)) {
+            return ValidateResult.getSuccessResult();
+        } else {
+            Log.error("contract call error: The contract transaction fee is not right.");
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+        }
     }
 }

@@ -91,7 +91,7 @@ public class BlockHeaderPoTest {
         assertEquals(po.getMerkleHash(), newPo.getMerkleHash());
         assertTrue(Arrays.equals(po.getExtend(), newPo.getExtend()));
         assertTrue(Arrays.equals(po.getPackingAddress(), newPo.getPackingAddress()));
-        assertEquals(po.getScriptSign().getPublicKey(), newPo.getScriptSign().getPublicKey());
+        assertTrue(Arrays.equals(po.getScriptSign().getPublicKey(), newPo.getScriptSign().getPublicKey()));
         assertEquals(po.getScriptSign().getSignData(), newPo.getScriptSign().getSignData());
         assertEquals(po.getTime(), newPo.getTime());
         assertEquals(po.getTxCount(), newPo.getTxCount());

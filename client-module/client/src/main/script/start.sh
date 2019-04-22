@@ -50,14 +50,14 @@ fi
 
 # check jre exist
 if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
-  nohup ${SERVER_HOME}/jre/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
+  nohup ${SERVER_HOME}/jre/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} "$@" 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
   exit 0
 fi
 
 JAVA_BIN=`which java`
 # try to use JAVA_HOME jre
 if [ -x ${JAVA_BIN} ]; then
-  nohup ${JAVA_BIN} ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
+  nohup ${JAVA_BIN} ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} "$@" 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
   exit 0
 fi
 

@@ -29,12 +29,15 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.entity.tx.CreateContractTransaction;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -53,16 +56,23 @@ public class CreateContractTxValidator implements NulsDataValidator<CreateContra
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
         if(!ContractUtil.isLegalContractAddress(contractAddress)) {
-            Log.error("contract data error: Illegal contract address.");
+            Log.error("contract create error: Illegal contract address.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
         }
         Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
 
         if (!addressSet.contains(AddressTool.getStringAddressByBytes(sender))) {
-            Log.error("contract data error: The contract creater is not the transaction creator.");
+            Log.error("contract create error: The contract creater is not the transaction creator.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
 
-        return ValidateResult.getSuccessResult();
+        Na realFee = tx.getCoinData().getFee();
+        Na fee = TransactionFeeCalculator.getTransferFee(tx.size()).add(Na.valueOf(LongUtils.mul(txData.getGasLimit(), txData.getPrice())));
+        if (realFee.isGreaterOrEquals(fee)) {
+            return ValidateResult.getSuccessResult();
+        } else {
+            Log.error("contract create error: The contract transaction fee is not right.");
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+        }
     }
 }

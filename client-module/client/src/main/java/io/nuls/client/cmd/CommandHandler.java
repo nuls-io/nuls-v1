@@ -39,6 +39,7 @@ import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.args.NULSParams;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
@@ -118,6 +119,8 @@ public class CommandHandler {
         register(new ResetPasswordProcessor());
         register(new SetAliasProcessor());
         register(new SetPasswordProcessor());
+        register(new SignMessageProcessor());
+        register(new VerifyMessageSignatureProcessor());
 
         /**
          * Multi-signature account
@@ -211,6 +214,9 @@ public class CommandHandler {
                 NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(mode + "/" + NulsConstant.MODULES_CONFIG_FILE);
             }
             port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
+            if (NULSParams.BOOTSTRAP.getRpcPort() != null) {
+                port = NULSParams.BOOTSTRAP.getRpcPort() + "";
+            }
             String chainId = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_CHAIN_ID, "8964");
             NulsContext.getInstance().setDefaultChainId(Short.parseShort(chainId));
         } catch (Exception e) {
@@ -242,6 +248,7 @@ public class CommandHandler {
         if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
+        NULSParams.BOOTSTRAP.init(args);
         CommandHandler instance = new CommandHandler();
         instance.init();
         try {
@@ -280,7 +287,7 @@ public class CommandHandler {
     }
 
     private static String[] parseArgs(String line) throws UnsupportedEncodingException {
-        if(StringUtils.isBlank(line)) {
+        if (StringUtils.isBlank(line)) {
             return new String[0];
         }
         Matcher matcher = CMD_PATTERN.matcher(line);
@@ -293,7 +300,7 @@ public class CommandHandler {
         }
 
         String[] args = result.split("\\s+");
-        for(int i = 0, length = args.length; i < length; i++) {
+        for (int i = 0, length = args.length; i < length; i++) {
             args[i] = URLDecoder.decode(args[i], StandardCharsets.UTF_8.toString());
         }
         return args;
