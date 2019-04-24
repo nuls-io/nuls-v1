@@ -86,6 +86,32 @@ public class BlockResource {
 
 
     @GET
+    @Path("/header/txHash/height/{height}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据区块高度查询区块头", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BlockDto.class)
+    })
+    public RpcClientResult getHeaderHashesByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
+                                                   @PathParam("height") Integer height) {
+        AssertUtil.canNotEmpty(height);
+        Result<Block> blockResult = blockService.getBlock(height);
+        if (blockResult.isFailed()) {
+            return blockResult.toRpcClientResult();
+        }
+        BlockHeaderDto dto = null;
+        try {
+            dto = new BlockHeaderDto(blockResult.getData());
+            List<String> list = blockService.getBlockTxHash(height);
+            dto.setTxHash(list);
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.IO_ERROR).toRpcClientResult();
+        }
+        return Result.getSuccess().setData(dto).toRpcClientResult();
+    }
+
+    @GET
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "根据区块hash查询区块头", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
@@ -111,6 +137,42 @@ public class BlockResource {
         }
         try {
             result.setData(new BlockHeaderDto(block));
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.IO_ERROR).toRpcClientResult();
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/header/txHash/hash/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据区块hash查询区块头", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BlockDto.class)
+    })
+    public RpcClientResult getHeaderHash(@ApiParam(name = "hash", value = "区块hash", required = true)
+                                         @PathParam("hash") String hash) {
+        AssertUtil.canNotEmpty(hash);
+        hash = StringUtils.formatStringPara(hash);
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = Result.getSuccess();
+        Block block = null;
+        try {
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (block == null) {
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL).toRpcClientResult();
+        }
+        try {
+            BlockHeaderDto dto = new BlockHeaderDto(block);
+            List<String> list = blockService.getBlockTxHash(block.getHeader().getHeight());
+            dto.setTxHash(list);
+            result.setData(dto);
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.IO_ERROR).toRpcClientResult();

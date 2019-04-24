@@ -32,6 +32,8 @@ import io.nuls.kernel.model.Result;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.model.SmallBlock;
 
+import java.util.List;
+
 /**
  * 区块处理服务接口
  * The block handles the service interface.
@@ -112,6 +114,8 @@ public interface BlockService {
      * @return 区块/block
      */
     Result<Block> getBlock(long height, boolean isNeedContractTransfer);
+
+    List<String> getBlockTxHash(long height);
 
     /**
      * 保存区块到存储中

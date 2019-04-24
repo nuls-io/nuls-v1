@@ -36,6 +36,7 @@ import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ln on 2018/5/8.
@@ -93,6 +94,11 @@ public class ConsensusBlockServiceImpl implements BlockService {
 
     @Override
     public Result<Block> getBlock(long height, boolean isNeedContractTransfer) {
+        return null;
+    }
+
+    @Override
+    public List<String> getBlockTxHash(long height) {
         return null;
     }
 
