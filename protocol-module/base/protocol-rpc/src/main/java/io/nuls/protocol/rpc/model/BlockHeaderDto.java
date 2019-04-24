@@ -37,6 +37,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -97,6 +98,8 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(name = "size", value = "大小")
     private int size;
+
+    private List<String> txHash;
 
     public BlockHeaderDto(Block block) throws IOException {
         this(block.getHeader());
@@ -291,5 +294,13 @@ public class BlockHeaderDto {
 
     public void setExtend(String extend) {
         this.extend = extend;
+    }
+
+    public List<String> getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(List<String> txHash) {
+        this.txHash = txHash;
     }
 }

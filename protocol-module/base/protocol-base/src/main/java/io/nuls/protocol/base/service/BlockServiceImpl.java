@@ -276,6 +276,18 @@ public class BlockServiceImpl implements BlockService {
         return Result.getSuccess().setData(block);
     }
 
+    @Override
+    public List<String> getBlockTxHash(long height) {
+        BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(height);
+        List<String> list = new ArrayList<>();
+        if (null != headerPo && null != headerPo.getTxHashList()) {
+            for (NulsDigestData hash : headerPo.getTxHashList()) {
+                list.add(hash.getDigestHex());
+            }
+        }
+        return list;
+    }
+
     /**
      * 保存区块到存储中
      * Save the block to the store.

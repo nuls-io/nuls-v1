@@ -59,6 +59,9 @@ public class BlockHeader extends BaseNulsData {
     private transient byte[] packingAddress;
     private transient String packingAddressStr;
 
+
+
+
     public BlockHeader() {
     }
 
