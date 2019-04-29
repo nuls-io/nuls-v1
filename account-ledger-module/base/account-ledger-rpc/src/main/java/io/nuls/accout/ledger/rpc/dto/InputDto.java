@@ -58,10 +58,13 @@ public class InputDto {
     public InputDto(Coin input) {
         this.fromHash = AccountLegerUtils.getTxHash(input.getOwner());
         this.fromIndex = AccountLegerUtils.getIndex(input.getOwner());
-        //this.address = AddressTool.getStringAddressByBytes(input.getFrom().());
-        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getAddress());
-        this.value = input.getFrom().getNa().getValue();
-        this.lockTime = input.getFrom().getLockTime();
+        if (input.getFromAddress() != null) {
+            this.address = input.getFromAddress();
+        } else {
+            this.address = AddressTool.getStringAddressByBytes(input.getFrom().getAddress());
+        }
+        this.value = input.getNa().getValue();
+        this.lockTime = input.getLockTime();
     }
 
     public String getAddress() {

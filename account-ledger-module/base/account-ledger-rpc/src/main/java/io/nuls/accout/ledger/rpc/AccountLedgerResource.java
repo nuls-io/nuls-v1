@@ -70,6 +70,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -1097,6 +1098,16 @@ public class AccountLedgerResource {
             } else {
                 Transaction tx = txResult.getData();
                 tx.setStatus(TxStatusEnum.UNCONFIRM);
+                String fromAddress = null;
+                if (tx.getTransactionSignature() != null) {
+                    TransactionSignature signature = new TransactionSignature();
+                    signature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                    if (signature.getP2PHKSignatures() != null && signature.getP2PHKSignatures().size() == 1) {
+                        byte[] addressBytes = AddressTool.getAddress(signature.getP2PHKSignatures().get(0).getPublicKey());
+                        fromAddress = AddressTool.getStringAddressByBytes(addressBytes);
+                    }
+                }
+
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
                 if (coinData != null) {
@@ -1109,20 +1120,24 @@ public class AccountLedgerResource {
                         Transaction fromTx;
                         Coin fromUtxo;
                         for (Coin from : froms) {
-                            owner = from.getOwner();
-                            // owner拆分出txHash和index
-                            fromHash = AccountLegerUtils.getTxHashBytes(owner);
-                            fromIndex = AccountLegerUtils.getIndex(owner);
-                            // 查询from UTXO
-                            fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash, 0);
-                            //获取上一笔的to,先查未确认,如果没有再查已确认
-                            fromTx = accountLedgerService.getUnconfirmedTransaction(fromHashObj).getData();
-                            if (null == fromTx) {
-                                fromTx = ledgerService.getTx(fromHashObj);
+                            if (fromAddress != null) {
+                                from.setFromAddress(fromAddress);
+                            } else {
+                                owner = from.getOwner();
+                                // owner拆分出txHash和index
+                                fromHash = AccountLegerUtils.getTxHashBytes(owner);
+                                fromIndex = AccountLegerUtils.getIndex(owner);
+                                // 查询from UTXO
+                                fromHashObj = new NulsDigestData();
+                                fromHashObj.parse(fromHash, 0);
+                                //获取上一笔的to,先查未确认,如果没有再查已确认
+                                fromTx = accountLedgerService.getUnconfirmedTransaction(fromHashObj).getData();
+                                if (null == fromTx) {
+                                    fromTx = ledgerService.getTx(fromHashObj);
+                                }
+                                fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
+                                from.setFrom(fromUtxo);
                             }
-                            fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
-                            from.setFrom(fromUtxo);
                         }
                     }
                     txDto = new TransactionDto(tx);

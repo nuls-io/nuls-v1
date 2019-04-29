@@ -50,9 +50,12 @@ public class InputDto {
     public InputDto(Coin input) {
         this.fromHash = LedgerUtil.getTxHash(input.getOwner());
         this.fromIndex = LedgerUtil.getIndex(input.getOwner());
-        //this.address = AddressTool.getStringAddressByBytes(input.getFrom().());
-        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getAddress());
-        this.value = input.getFrom().getNa().getValue();
+        if (input.getFromAddress() != null) {
+            this.address = input.getFromAddress();
+        } else {
+            this.address = AddressTool.getStringAddressByBytes(input.getFrom().getAddress());
+        }
+        this.value = input.getNa().getValue();
     }
 
     public String getAddress() {
