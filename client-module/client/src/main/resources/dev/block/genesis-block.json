@@ -3,43 +3,8 @@
   "time": "1531152000000",
   "txs": [
     {
-      "address": "Nse9XfuzZQn7jofrV5uABiNLQwFadV2K",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "Nse5x9foSzFjuwkwZLSvSjAHHLVf3MKJ",
-      "amount": 20000000,
-      "lockTime": 0
-    },
-    {
-      "address": "Nsdz8mKKFMehRDVRZFyXNuuenugUYM7M",
-      "amount": 20000000,
-      "lockTime": 0
-    },
-    {
-      "address": "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "NsdyTdiuZUyvnbq5ns6MAwfLjfmW1NRJ",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "NsdvCLtZZBX4QHkZcvkyrRfoeJjRorRW",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "Nse5ZkiQs1Q1pdEtRKwXk6Nk6ooYu2L2",
-      "amount": 10000000,
-      "lockTime": 0
-    },
-    {
-      "address": "NsdtydTVWskMc7GkZzbsq2FoChqKFwMf",
-      "amount": 10000000,
+      "address": "TTayzgKDoZxv5tttUwPDARtkQLWWc1wi",
+      "amount": 100000000,
       "lockTime": 0
     }
   ],

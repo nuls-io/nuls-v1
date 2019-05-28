@@ -27,6 +27,7 @@ package io.nuls.protocol.base.service;
 
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -66,6 +67,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private ContractService contractService;
 
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
@@ -176,6 +179,16 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
+        try {
+            ValidateResult validateResult = contractService.baseValidate(tx);
+            if(validateResult.isFailed()) {
+                return validateResult;
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
+
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
         consensusService.newTx(tx);
