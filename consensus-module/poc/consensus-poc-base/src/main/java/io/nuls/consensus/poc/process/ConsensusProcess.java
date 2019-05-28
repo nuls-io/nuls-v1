@@ -327,7 +327,7 @@ public class ConsensusProcess {
             extendsData.setNextSeedHash(nextSeedHash);
             RandomSeedStatusPo po = new RandomSeedStatusPo();
             po.setAddress(self.getPackingAddress());
-            Log.info("{}====={}====={}", bd.getHeight(), Hex.encode(nextSeed), Hex.encode(nextSeedHash));
+//            Log.info("{}====={}====={}", bd.getHeight(), Hex.encode(nextSeed), Hex.encode(nextSeedHash));
             po.setSeedHash(nextSeedHash);
             po.setNextSeed(nextSeed);
             po.setHeight(bd.getHeight());
