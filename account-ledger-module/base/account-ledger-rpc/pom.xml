@@ -5,14 +5,14 @@
     <parent>
         <artifactId>account-ledger-module</artifactId>
         <groupId>io.nuls</groupId>
-       <version>1.2.1</version>
+       <version>1.2.2-beta</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.account-ledger-module</groupId>
     <artifactId>account-ledger-rpc</artifactId>
-   <version>1.2.1</version>
+   <version>1.2.2-beta</version>
 
 
     <dependencies>
@@ -39,17 +39,17 @@
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger</artifactId>
-           <version>1.2.1</version>
+           <version>1.2.2-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger-base</artifactId>
-           <version>1.2.1</version>
+           <version>1.2.2-beta</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-           <version>1.2.1</version>
+           <version>1.2.2-beta</version>
         </dependency>
     </dependencies>
     <build>
