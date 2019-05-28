@@ -55,9 +55,10 @@
         </protocol>
 
         <!-- extend 版本继承哪个版本-->
-        <protocol version="2" block="" extend="1" percent="90" delay="30">
+        <protocol version="2" block="" extend="1" percent="80" delay="3">
             <!-- 当前版本作废的交易协议-->
             <!--<tx-discards>-->
+            <!--<tx-discard ref="transferTx_V1"/>-->
             <!--</tx-discards>-->
             <txs>
                 <tx ref="callContractTx_V1"/>
@@ -67,6 +68,8 @@
                 <tx ref="dappTx_V1"/>
             </txs>
         </protocol>
-        <protocol version="3" block="" extend="2" percent="90" delay="30"></protocol>
+        <!-- extend 版本继承哪个版本-->
+        <protocol version="3" block="" extend="2" percent="90" delay="3">
+        </protocol>
     </protocols>
 </nuls-version>

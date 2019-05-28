@@ -27,6 +27,7 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.dto.ContractTransfer;
+import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.tx.ContractTransferTransaction;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
@@ -181,4 +182,6 @@ public interface ContractService {
     void createCurrentBlockHeader(BlockHeader tempHeader);
 
     void removeCurrentBlockHeader();
+
+    ValidateResult baseValidate(Transaction tx) throws NulsException;
 }

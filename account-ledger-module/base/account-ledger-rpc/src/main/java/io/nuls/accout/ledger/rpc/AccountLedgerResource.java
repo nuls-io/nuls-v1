@@ -739,6 +739,10 @@ public class AccountLedgerResource {
         try {
             byte[] data = Hex.decode(form.getTxHex());
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            ValidateResult validateResult = contractService.baseValidate(tx);
+            if(validateResult.isFailed()) {
+                return validateResult.toRpcClientResult();
+            }
             Result result = accountLedgerService.broadcast(tx);
             if (result.isSuccess()) {
                 Map<String, Object> map = new HashMap<>();
