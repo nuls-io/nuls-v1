@@ -68,6 +68,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PHKSignature;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.script.TransactionSignature;
@@ -327,6 +328,60 @@ public class AccountLedgerResource {
             result.setData(map);
         }
         return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/signMultipleTx")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "签名多地址转账交易", notes = "result.data: resultJson 返回签名后的txHex")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signMultipleTx(@ApiParam(name = "form", value = "签名多地址转账交易", required = true)
+                                                  MulitpleTxForm form) {
+        String txHex = form.getTxHex();
+        List<String> priKeys = form.getPriKeys();
+        String password = form.getPassword();
+        if (StringUtils.isBlank(txHex) || priKeys.isEmpty()) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        List<String> signKeys = new ArrayList<>(priKeys.size());
+        for (int i = 0; i < priKeys.size(); i++) {
+            String encryptPrivKey = priKeys.get(i);
+            if (StringUtils.isBlank(password)) {
+                signKeys.add(encryptPrivKey);
+                continue;
+            }
+            byte[] privateKeyBytes = null;
+            try {
+                privateKeyBytes = AESEncrypt.decrypt(Hex.decode(encryptPrivKey), password);
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.DECRYPT_ACCOUNT_ERROR).toRpcClientResult();
+            }
+            signKeys.add(Hex.encode(privateKeyBytes));
+        }
+
+        // conversion private key string to ECKey
+        List<ECKey> keys = signKeys.stream()
+                .map(p -> ECKey.fromPrivate(new BigInteger(Hex.decode(p))))
+                .collect(Collectors.toList());
+
+        try {
+            byte[] data = Hex.decode(txHex);
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            List<P2PHKSignature> p2PHKSignatures = SignatureUtil.createSignaturesByEckey(tx, keys);
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
+            txHex = Hex.encode(tx.serialize());
+            Map<String, String> map = new HashMap<>();
+            map.put("value", txHex);
+            return Result.getSuccess().setData(map).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+        }
     }
 
 //    @POST
