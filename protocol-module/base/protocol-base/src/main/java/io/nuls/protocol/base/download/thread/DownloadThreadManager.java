@@ -86,7 +86,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-collect", collectThread);
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "download-request", requestThread);
         boolean result = future.get();
-        Log.info(Thread.currentThread().getId() + "-" + collectThread.getStartHeight() + "-" + collectThread.getRequestStartHeight() + "::::" + result);
+//        Log.info(Thread.currentThread().getId() + "-" + collectThread.getStartHeight() + "-" + collectThread.getRequestStartHeight() + "::::" + result);
         return result;
     }
 
