@@ -26,7 +26,6 @@ package testcontract.testsign;
 import io.nuls.contract.sdk.Contract;
 import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.sdk.annotation.View;
-import io.nuls.core.tools.crypto.ECKey;
 
 /**
  * @author: PierreLuo
@@ -39,7 +38,7 @@ public class TestSignData implements Contract {
     }
 
     /**
-     * @see ECKey#sign(byte[]) How did the signature data come from?
+     * @see io.nuls.core.tools.crypto.ECKey#sign(byte[]) How did the signature data come from?
      * @return true or false
      */
     public boolean verifyDefaultData() {
@@ -58,7 +57,7 @@ public class TestSignData implements Contract {
     }
 
     /**
-     * @see ECKey#sign(byte[]) How did the signature data come from?
+     * @see io.nuls.core.tools.crypto.ECKey#sign(byte[]) How did the signature data come from?
      * @return true or false
      */
     @View
