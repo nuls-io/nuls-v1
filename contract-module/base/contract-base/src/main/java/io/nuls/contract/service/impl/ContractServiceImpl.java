@@ -35,6 +35,9 @@ import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.entity.tx.*;
+import io.nuls.contract.entity.tx.validator.CallContractTxValidator;
+import io.nuls.contract.entity.tx.validator.CreateContractTxValidator;
+import io.nuls.contract.entity.tx.validator.DeleteContractTxValidator;
 import io.nuls.contract.entity.txdata.*;
 import io.nuls.contract.helper.VMHelper;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
@@ -68,6 +71,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.constant.ProtocolConstant;
 
@@ -78,6 +82,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.ledger.util.LedgerUtil.asBytes;
 import static io.nuls.ledger.util.LedgerUtil.asString;
 
@@ -118,6 +123,13 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     @Autowired
     private VMContext vmContext;
+
+    @Autowired
+    private CreateContractTxValidator createContractTxValidator;
+    @Autowired
+    private CallContractTxValidator callContractTxValidator;
+    @Autowired
+    private DeleteContractTxValidator deleteContractTxValidator;
 
     private ProgramExecutor programExecutor;
 
@@ -417,7 +429,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
 
         // 保存非合约交易转入合约地址的utxo
-        if (tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx.getType() != TX_TYPE_CALL_CONTRACT) {
             result = contractUtxoService.saveUtxoForContractAddress(tx);
             if (result.isFailed()) {
                 Log.error("save confirmed non-call-contract transfer utxo error, reason is {}.", result.getMsg());
@@ -507,7 +519,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
 
         // 删除非合约交易转入合约地址的utxo
-        if (tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx.getType() != TX_TYPE_CALL_CONTRACT) {
             result = contractUtxoService.deleteUtxoOfTransaction(tx);
             if (result.isFailed()) {
                 Log.error("rollback non-call-contract transfer utxo error, reason is {}.", result.getMsg());
@@ -754,7 +766,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
         }
 
-        if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
+        if (txType == TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTransaction = (CreateContractTransaction) tx;
             CreateContractData createContractData = createContractTransaction.getTxData();
             if (!ContractUtil.checkPrice(createContractData.getPrice())) {
@@ -781,7 +793,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 }
             }
             return result;
-        } else if (txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (txType == TX_TYPE_CALL_CONTRACT) {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
             if (!ContractUtil.checkPrice(callContractData.getPrice())) {
@@ -805,7 +817,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 contractResult.setValue(callContractData.getValue());
             }
             return result;
-        } else if (txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (txType == TX_TYPE_DELETE_CONTRACT) {
             DeleteContractTransaction deleteContractTransaction = (DeleteContractTransaction) tx;
             DeleteContractData deleteContractData = deleteContractTransaction.getTxData();
             Result<ContractResult> result = deleteContract(track, height, stateRoot, deleteContractData);
@@ -884,7 +896,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
 
     private void rollbackContractTempBalance(Transaction tx, ContractResult contractResult) {
-        if (tx != null && tx.getType() == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+        if (tx != null && tx.getType() == TX_TYPE_CALL_CONTRACT) {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
             byte[] contractAddress = callContractData.getContractAddress();
@@ -1531,5 +1543,24 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     @Override
     public void removeCurrentBlockHeader() {
         vmContext.removeCurrentBlockHeader();
+    }
+
+    @Override
+    public ValidateResult baseValidate(Transaction tx) throws NulsException {
+        if(tx == null) {
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.NULL_PARAMETER);
+        }
+        int type = tx.getType();
+        switch (type) {
+            case TX_TYPE_CREATE_CONTRACT:
+                return createContractTxValidator.validate((CreateContractTransaction) tx);
+            case TX_TYPE_CALL_CONTRACT:
+                return callContractTxValidator.validate((CallContractTransaction) tx);
+            case TX_TYPE_DELETE_CONTRACT:
+                return deleteContractTxValidator.validate((DeleteContractTransaction) tx);
+            default:
+                break;
+        }
+        return ValidateResult.getSuccessResult();
     }
 }

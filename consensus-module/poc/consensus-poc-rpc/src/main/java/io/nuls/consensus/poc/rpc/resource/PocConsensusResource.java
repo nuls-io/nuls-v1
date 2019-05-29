@@ -293,7 +293,7 @@ public class PocConsensusResource {
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         Map<String, Long> map = new HashMap<>();
         map.put("fee", fee.getValue());
         map.put("maxAmount", getMaxAmount(fee, form.getAgentAddress(), tx));
@@ -335,7 +335,7 @@ public class PocConsensusResource {
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         Map<String, Long> map = new HashMap<>();
         map.put("fee", fee.getValue());
         map.put("maxAmount", getMaxAmount(fee, form.getAddress(), tx));
@@ -398,9 +398,9 @@ public class PocConsensusResource {
         tx.setTxData(stopAgent);
         CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na resultFee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         Map<String, Long> map = new HashMap<>();
         map.put("fee", fee.getValue());
         map.put("maxAmount", getMaxAmount(resultFee, address, tx));
@@ -461,9 +461,9 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na resultFee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
 
         Map<String, Long> map = new HashMap<>();
         map.put("fee", fee.getValue());
@@ -685,7 +685,7 @@ public class PocConsensusResource {
         CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
 
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -1151,7 +1151,7 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -1237,7 +1237,7 @@ public class PocConsensusResource {
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, scriptSignLenth);
@@ -1286,7 +1286,7 @@ public class PocConsensusResource {
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
         int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, scriptSignLenth);
@@ -1337,9 +1337,9 @@ public class PocConsensusResource {
         tx.setTxData(stopAgent);
         CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na resultFee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, 0);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -1605,7 +1605,7 @@ public class PocConsensusResource {
         tx.setTxData(stopAgent);
         CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         //将赎回脚本先存储在签名脚本中
@@ -1704,7 +1704,7 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(108 + tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         //将赎回脚本先存储在签名脚本中

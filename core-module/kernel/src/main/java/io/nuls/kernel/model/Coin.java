@@ -60,6 +60,8 @@ public class Coin extends BaseNulsData {
 
     private transient byte[] tempOwner;
 
+    private transient String fromAddress;
+
     public Coin() {
     }
 
@@ -214,5 +216,13 @@ public class Coin extends BaseNulsData {
             }
         }
         return address;
+    }
+
+    public String getFromAddress() {
+        return fromAddress;
+    }
+
+    public void setFromAddress(String fromAddress) {
+        this.fromAddress = fromAddress;
     }
 }

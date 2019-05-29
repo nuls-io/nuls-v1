@@ -36,6 +36,9 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.TransactionSignature;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.rpc.model.InputDto;
@@ -90,6 +93,16 @@ public class TransactionResource {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
+                String fromAddress = null;
+                if (tx.getTransactionSignature() != null) {
+                    TransactionSignature signature = new TransactionSignature();
+                    signature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                    if (signature.getP2PHKSignatures() != null && signature.getP2PHKSignatures().size() == 1) {
+                        byte[] addressBytes = AddressTool.getAddress(signature.getP2PHKSignatures().get(0).getPublicKey());
+                        fromAddress = AddressTool.getStringAddressByBytes(addressBytes);
+                    }
+                }
+
                 if (coinData != null) {
                     // 组装from数据
                     List<Coin> froms = coinData.getFrom();
@@ -100,16 +113,20 @@ public class TransactionResource {
                         Transaction fromTx;
                         Coin fromUtxo;
                         for (Coin from : froms) {
-                            owner = from.getOwner();
-                            // owner拆分出txHash和index
-                            fromHash = LedgerUtil.getTxHashBytes(owner);
-                            fromIndex = LedgerUtil.getIndex(owner);
-                            // 查询from UTXO
-                            fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash, 0);
-                            fromTx = ledgerService.getTx(fromHashObj);
-                            fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
-                            from.setFrom(fromUtxo);
+                            if (fromAddress != null) {
+                                from.setFromAddress(fromAddress);
+                            } else {
+                                owner = from.getOwner();
+                                // owner拆分出txHash和index
+                                fromHash = LedgerUtil.getTxHashBytes(owner);
+                                fromIndex = LedgerUtil.getIndex(owner);
+                                // 查询from UTXO
+                                fromHashObj = new NulsDigestData();
+                                fromHashObj.parse(fromHash, 0);
+                                fromTx = ledgerService.getTx(fromHashObj);
+                                fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
+                                from.setFrom(fromUtxo);
+                            }
                         }
                     }
                     txDto = new TransactionDto(tx);
