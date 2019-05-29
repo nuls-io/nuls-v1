@@ -52,10 +52,6 @@ public class TestSignData implements Contract {
         return Utils.verifySignatureData(data, sign, pub);
     }
 
-    public static void main(String[] args) {
-        ECKey ecKey = new ECKey();
-    }
-
     @View
     public boolean verifyView(String data, String sign, String pub) {
         return Utils.verifySignatureData(data, sign, pub);
