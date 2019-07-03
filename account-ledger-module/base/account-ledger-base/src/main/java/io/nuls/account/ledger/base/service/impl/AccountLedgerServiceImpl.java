@@ -1009,8 +1009,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, Na amount, String remark, Na price) {
+    public Result multipleAddressTransfer(Set<String> addressSet, List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, Na amount, String remark, Na price) {
         try {
+
             for (MultipleAddressTransferModel from : fromList) {
                 Result<Account> accountResult = accountService.getAccount(from.getAddress());
                 if (accountResult.isFailed()) {
@@ -1025,6 +1026,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                         return result;
                     }
                 }
+
             }
             for (MultipleAddressTransferModel to : toList) {
                 // 检查to是否为合约地址，如果是合约地址，则返回错误
@@ -1058,7 +1060,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
 
 
-            CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size() + tx.getCoinData().getAddresses().size() * P2PHKSignature.SERIALIZE_LENGTH, price);
+            CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size() + addressSet.size() * P2PHKSignature.SERIALIZE_LENGTH, price);
 
             List<Coin> fromCoinList = new ArrayList<>();//从多个地址中获取币 from
             List<Coin> changeCoinList = new ArrayList<>();
