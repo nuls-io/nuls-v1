@@ -1057,7 +1057,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 price = TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES;
             }
 
-            CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size(), price);
+
+            CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size() + tx.getCoinData().getAddresses().size() * P2PHKSignature.SERIALIZE_LENGTH, price);
 
             List<Coin> fromCoinList = new ArrayList<>();//从多个地址中获取币 from
             List<Coin> changeCoinList = new ArrayList<>();
