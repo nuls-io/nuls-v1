@@ -25,6 +25,8 @@
 
 package io.nuls.consensus.poc.util;
 
+import io.nuls.core.tools.crypto.Hex;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Coin;
 
 import java.util.Comparator;
@@ -48,6 +50,10 @@ public class CoinDataComparator implements Comparator<Coin> {
         } else if (o1.getNa().getValue() < o2.getNa().getValue()) {
             return -1;
         }
+        if (NulsContext.MAIN_NET_VERSION == 4) {
+            return Hex.encode(o1.getOwner()).compareTo(Hex.encode(o2.getOwner()));
+        }
+
         return new String(o1.getOwner()).compareTo(new String(o2.getOwner()));
     }
 }
