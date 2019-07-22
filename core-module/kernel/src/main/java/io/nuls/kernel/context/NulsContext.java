@@ -58,6 +58,10 @@ public class NulsContext {
      * 主网运行中的版本，默认为1，会根据钱包更新到的块的最新版本做修改
      */
     public static volatile Integer MAIN_NET_VERSION = 1;
+    /**
+     * 主网运行中的版本对应的区块起始高度，默认为0，会根据钱包更新到最新版本做修改
+     */
+    public static volatile Long MAIN_NET_VERSION_HEIGHT = 0L;
 
     /**
      * 切换序列化交易HASH方法的高度
