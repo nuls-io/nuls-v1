@@ -70,7 +70,8 @@ public class NulsContext {
      */
     public static boolean isNetFinished() {
         long bestHeight = NulsContext.getInstance().getBestHeight();
-        if (MAIN_NET_VERSION >= 4 && false) {
+        //todo
+        if (MAIN_NET_VERSION >= 4 && bestHeight - MAIN_NET_VERSION_HEIGHT >= 20) {
             return true;
         }
         return false;
