@@ -53,7 +53,6 @@ public class CoinDataComparator implements Comparator<Coin> {
         if (NulsContext.MAIN_NET_VERSION == 4) {
             return Hex.encode(o1.getOwner()).compareTo(Hex.encode(o2.getOwner()));
         }
-
         return new String(o1.getOwner()).compareTo(new String(o2.getOwner()));
     }
 }
