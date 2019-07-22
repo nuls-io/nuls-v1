@@ -90,7 +90,7 @@ public class RoundManager {
                     roundList.clear();
                     initRound();
                 }
-            }finally {
+            } finally {
                 Lockers.ROUND_LOCK.unlock();
             }
         }
@@ -109,7 +109,7 @@ public class RoundManager {
                 round.setPreRound(null);
             }
             return true;
-        }finally {
+        } finally {
             Lockers.ROUND_LOCK.unlock();
         }
     }
@@ -284,6 +284,11 @@ public class RoundManager {
             member.setCreditVal(0);
             member.setRoundStartTime(round.getStartTime());
             memberList.add(member);
+        }
+
+        if (NulsContext.isNetFinished()) {
+            round.init(memberList);
+            return;
         }
 
         List<Deposit> depositTempList = new ArrayList<>();

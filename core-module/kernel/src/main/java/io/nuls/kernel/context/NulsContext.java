@@ -64,6 +64,19 @@ public class NulsContext {
     public static volatile Long MAIN_NET_VERSION_HEIGHT = 0L;
 
     /**
+     * 最后一次升级，用于判断是否停止网络
+     *
+     * @return;
+     */
+    public static boolean isNetFinished() {
+        long bestHeight = NulsContext.getInstance().getBestHeight();
+        if (MAIN_NET_VERSION >= 4 && false) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 切换序列化交易HASH方法的高度
      */
     public static Long CHANGE_HASH_SERIALIZE_HEIGHT;
