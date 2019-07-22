@@ -70,7 +70,6 @@ public class NulsContext {
      */
     public static boolean isNetFinished(int delay) {
         long bestHeight = NulsContext.getInstance().getBestHeight();
-        //todo
         if (MAIN_NET_VERSION >= 4 && bestHeight - MAIN_NET_VERSION_HEIGHT >= delay) {
             return true;
         }
