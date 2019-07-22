@@ -45,6 +45,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
@@ -134,8 +135,12 @@ public class ConsensusScheduler {
                 //todo 正式上线这里会改成1200000L
                 consensusVersionHeight = ProtocolConstant.START_CHECK_PROTOCOL_HEIGHT;
             }
-            NulsVersionManager.loadVersionByHeight(consensusVersionHeight);
 
+            NulsVersionManager.loadVersionByHeight(consensusVersionHeight);
+            ProtocolContainer container = NulsVersionManager.getProtocolContainer(NulsContext.MAIN_NET_VERSION);
+            if (container != null) {
+                NulsContext.MAIN_NET_VERSION_HEIGHT = container.getEffectiveHeight();
+            }
             //获取最新的区块高度
             long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
 

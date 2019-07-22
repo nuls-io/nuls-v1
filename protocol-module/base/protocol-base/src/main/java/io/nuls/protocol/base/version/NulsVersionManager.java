@@ -67,8 +67,6 @@ public class NulsVersionManager {
         Integer mainVersion = vmss.getMainVersion();
         if (mainVersion != null) {
             NulsContext.MAIN_NET_VERSION = mainVersion;
-            ProtocolInfoPo po = getVersionManagerStorageService().getProtocolInfoPo(mainVersion);
-            NulsContext.MAIN_NET_VERSION_HEIGHT = po.getEffectiveHeight();
         }
         NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = vmss.getChangeTxHashBlockHeight();
         ProtocolContainer container = getProtocolContainer(1);
