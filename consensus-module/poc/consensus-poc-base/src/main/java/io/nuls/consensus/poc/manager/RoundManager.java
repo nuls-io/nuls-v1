@@ -286,7 +286,7 @@ public class RoundManager {
             memberList.add(member);
         }
 
-        if (NulsContext.MAIN_NET_VERSION == 4) {
+        if (NulsContext.isNetFinished()) {
             round.init(memberList);
             return;
         }
