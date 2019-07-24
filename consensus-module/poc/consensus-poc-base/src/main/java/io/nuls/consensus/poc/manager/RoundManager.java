@@ -38,6 +38,7 @@ import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.ConsensusLog;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
@@ -90,7 +91,7 @@ public class RoundManager {
                     roundList.clear();
                     initRound();
                 }
-            }finally {
+            } finally {
                 Lockers.ROUND_LOCK.unlock();
             }
         }
@@ -109,7 +110,7 @@ public class RoundManager {
                 round.setPreRound(null);
             }
             return true;
-        }finally {
+        } finally {
             Lockers.ROUND_LOCK.unlock();
         }
     }
@@ -284,6 +285,11 @@ public class RoundManager {
             member.setCreditVal(0);
             member.setRoundStartTime(round.getStartTime());
             memberList.add(member);
+        }
+
+        if (NulsContext.isNetFinished(NulsConfig.MODULES_CONFIG.getCfgValue(PocConsensusProtocolConstant.CFG_CONSENSUS_SECTION, PocConsensusProtocolConstant.STOP_DELAY, Integer.MAX_VALUE))) {
+            round.init(memberList);
+            return;
         }
 
         List<Deposit> depositTempList = new ArrayList<>();

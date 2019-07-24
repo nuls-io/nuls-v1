@@ -38,6 +38,7 @@ public interface PocConsensusProtocolConstant {
     String PROPERTY_PARTAKE_PACKING = "partake.packing";
     String PROPERTY_SEED_NODES = "seed.nodes";
     String SEED_NODES_DELIMITER = ",";
+    String STOP_DELAY = "stop.delay";
 
     String GENESIS_BLOCK_FILE = "block/genesis-block.json";
 
@@ -111,5 +112,5 @@ public interface PocConsensusProtocolConstant {
     /**
      * lock of lockTime,(max of int48)(281474976710655L)
      */
-    long LOCK_OF_LOCK_TIME = -1L ;
+    long LOCK_OF_LOCK_TIME = -1L;
 }

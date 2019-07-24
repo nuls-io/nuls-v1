@@ -27,6 +27,9 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.cache.LimitHashMap;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
@@ -103,6 +106,9 @@ public final class TxMemoryPool {
      * @return TxContainer
      */
     public Transaction get() {
+        if (NulsContext.isNetFinished(NulsConfig.MODULES_CONFIG.getCfgValue(PocConsensusProtocolConstant.CFG_CONSENSUS_SECTION, PocConsensusProtocolConstant.STOP_DELAY, Integer.MAX_VALUE))) {
+            return null;
+        }
         return txQueue.poll();
     }
 

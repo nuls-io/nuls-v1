@@ -79,11 +79,13 @@ import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.model.validator.TxMaxSizeValidator;
+import io.protostuff.Output;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.*;
@@ -297,7 +299,7 @@ public class AccountLedgerResource {
         if (form.getInputs() == null || form.getOutputs() == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-
+        Set<String> addressSet = new HashSet<>();
         for (MulipleTxFromDto from : form.getInputs()) {
             MultipleAddressTransferModel model = new MultipleAddressTransferModel();
             if (!AddressTool.validAddress(from.getAddress())) {
@@ -306,6 +308,7 @@ public class AccountLedgerResource {
             model.setAddress(AddressTool.getAddress(from.getAddress()));
             model.setPassword(from.getPassword());
             fromModelList.add(model);
+            addressSet.add(from.getAddress());
         }
         Long toTotal = 0L;
         for (MultipleTxToDto to : form.getOutputs()) {
@@ -321,7 +324,7 @@ public class AccountLedgerResource {
         if (toTotal < 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
+        Result result = accountLedgerService.multipleAddressTransfer(addressSet, fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRICE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -698,6 +701,121 @@ public class AccountLedgerResource {
             result.setData(map);
         }
         return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/createMultipleTx")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建多账户转账交易", notes = "result.data: resultJson 返回交易Hex")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult createMultipleTx(@ApiParam(name = "form", value = "交易输入输出", required = true)
+                                                    TransactionForm form) {
+        if (form.getInputs() == null || form.getInputs().isEmpty()) {
+            return RpcClientResult.getFailed("inputs error");
+        }
+        if (form.getOutputs() == null || form.getOutputs().isEmpty()) {
+            return RpcClientResult.getFailed("outputs error");
+        }
+
+        byte[] remark = null;
+        if (!StringUtils.isBlank(form.getRemark())) {
+            try {
+                remark = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                return RpcClientResult.getFailed("remark error");
+            }
+        }
+
+        List<Coin> outputList = new ArrayList<>();
+        for (int i = 0; i < form.getOutputs().size(); i++) {
+            OutputDto outputDto = form.getOutputs().get(i);
+            Coin to = new Coin();
+            try {
+                if (!AddressTool.validAddress(outputDto.getAddress())) {
+                    return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+                }
+                byte[] owner = AddressTool.getAddress(outputDto.getAddress());
+                if (owner[2] == 3) {
+                    Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                    to.setOwner(scriptPubkey.getProgram());
+                } else {
+                    to.setOwner(AddressTool.getAddress(outputDto.getAddress()));
+
+                }
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            try {
+                to.setNa(Na.valueOf(outputDto.getValue()));
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+            }
+            if (outputDto.getLockTime() < 0) {
+                return RpcClientResult.getFailed("lockTime error");
+            }
+
+            to.setLockTime(outputDto.getLockTime());
+            outputList.add(to);
+        }
+
+        List<Coin> inputsList = new ArrayList<>();
+        Set<String> addressSet = new HashSet<>();
+        for (int i = 0; i < form.getInputs().size(); i++) {
+            InputDto inputDto = form.getInputs().get(i);
+            if (inputDto.getAddress() == null) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            addressSet.add(inputDto.getAddress());
+            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
+            Coin coin = new Coin();
+            coin.setOwner(key);
+            coin.setNa(Na.valueOf(inputDto.getValue()));
+            coin.setLockTime(inputDto.getLockTime());
+            inputsList.add(coin);
+        }
+
+        TransferTransaction tx = new TransferTransaction();
+        CoinData coinData = new CoinData();
+        coinData.setFrom(inputsList);
+        coinData.setTo(outputList);
+        tx.setCoinData(coinData);
+        tx.setTime(TimeService.currentTimeMillis());
+        tx.setRemark(remark);
+        // 兜底，防止手续费不足
+        // 暂不支持 output 包含脚本交易
+
+        if (!isFeeEnough(tx, P2PHKSignature.SERIALIZE_LENGTH * addressSet.size())) {
+            return Result.getFailed(TransactionErrorCode.FEE_NOT_RIGHT).toRpcClientResult();
+        }
+
+        try {
+            String txHex = Hex.encode(tx.serialize());
+            Map<String, String> map = new HashMap<>();
+            map.put("value", txHex);
+            return Result.getSuccess().setData(map).toRpcClientResult();
+        } catch (IOException e) {
+            Log.error(e);
+            return RpcClientResult.getFailed(e.getMessage());
+        }
+    }
+
+    public static boolean isFeeEnough(Transaction tx, int signatureSize) {
+        int size = tx.size() + signatureSize;
+        Na minFee = TransactionFeeCalculator.getTransferFee(size);
+        //计算inputs和outputs的差额 ，求手续费
+        Na fee = Na.ZERO;
+        for (Coin coin : tx.getCoinData().getFrom()) {
+            fee = fee.add(coin.getNa());
+        }
+        for (Coin coin : tx.getCoinData().getTo()) {
+            fee = fee.subtract(coin.getNa());
+        }
+        if (fee.isLessThan(minFee)) {
+            return false;
+        }
+        return true;
     }
 
     @POST

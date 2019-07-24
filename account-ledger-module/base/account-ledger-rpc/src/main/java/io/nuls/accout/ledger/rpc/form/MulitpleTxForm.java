@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "创建多账户转账交易form")
+@ApiModel(value = "签名多账户转账交易form")
 public class MulitpleTxForm {
 
     @ApiModelProperty(name = "txHex", value = "交易序列化字符串", required = true)

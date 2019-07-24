@@ -37,9 +37,16 @@ public class TestSignData implements Contract {
         return Utils.verifySignatureData(data, sign, pub);
     }
 
+    /**
+     * @see io.nuls.core.tools.crypto.ECKey#sign(byte[]) How did the signature data come from?
+     * @return true or false
+     */
     public boolean verifyDefaultData() {
+        // raw data [byte array to hex string]
         String data = "416e67656c696c6c6f75";
+        // signature data [byte array to hex string]
         String sign = "3044022077186ebccb5694e67270724ec1849693072719cb83ccfadbdbe85dab3fc77c1902204fede64d08df7ef9a04a00444b393d2362ee92fec64d7d37855a0746121d58de";
+        // public key [byte array to hex string]
         String pub = "02ab62dc4833795666e75409c0c42b33ae7f8ee496b69e86a0d07276a5c445309f";
         return Utils.verifySignatureData(data, sign, pub);
     }
@@ -49,10 +56,17 @@ public class TestSignData implements Contract {
         return Utils.verifySignatureData(data, sign, pub);
     }
 
+    /**
+     * @see io.nuls.core.tools.crypto.ECKey#sign(byte[]) How did the signature data come from?
+     * @return true or false
+     */
     @View
     public boolean verifyDefaultDataView() {
+        // raw data [byte array to hex string]
         String data = "416e67656c696c6c6f75";
+        // signature data [byte array to hex string]
         String sign = "3044022077186ebccb5694e67270724ec1849693072719cb83ccfadbdbe85dab3fc77c1902204fede64d08df7ef9a04a00444b393d2362ee92fec64d7d37855a0746121d58de";
+        // public key [byte array to hex string]
         String pub = "02ab62dc4833795666e75409c0c42b33ae7f8ee496b69e86a0d07276a5c445309f";
         return Utils.verifySignatureData(data, sign, pub);
     }
