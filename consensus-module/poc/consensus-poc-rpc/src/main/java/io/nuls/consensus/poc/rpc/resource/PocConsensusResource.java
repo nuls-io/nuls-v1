@@ -774,7 +774,7 @@ public class PocConsensusResource {
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
             Agent agent = agentList.get(i);
             AgentDTO agentDTO = new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData());
-            Integer version = NulsVersionManager.getConsensusVersionMap().get(agentDTO.getPackingAddress());
+            Integer version = 10000;
             if (version == null) {
                 agentDTO.setVersion("--");
             } else {
