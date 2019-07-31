@@ -1355,7 +1355,7 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/alias")
+    @Path("/allalias")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[查询] 查询全部别名列表数据")
     @ApiResponses(value = {
