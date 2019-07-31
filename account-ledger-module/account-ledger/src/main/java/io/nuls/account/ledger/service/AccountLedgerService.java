@@ -268,7 +268,7 @@ public interface AccountLedgerService {
      * @return
      */
 
-    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, Na amount, String remark, Na price);
+    Result multipleAddressTransfer(Set<String> addressSet,List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, Na amount, String remark, Na price);
 
 
     Result sendFrom(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, Na amount, String remark, Na price);

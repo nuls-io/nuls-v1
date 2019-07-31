@@ -34,6 +34,7 @@ import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
@@ -52,6 +53,7 @@ import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -237,6 +239,10 @@ public class ConsensusTool {
 
     private static List<Coin> calcReward(List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) {
         List<Coin> rewardList = new ArrayList<>();
+        if (NulsContext.isNetFinished(NulsConfig.MODULES_CONFIG.getCfgValue(PocConsensusProtocolConstant.CFG_CONSENSUS_SECTION, PocConsensusProtocolConstant.STOP_DELAY, Integer.MAX_VALUE))) {
+            return rewardList;
+        }
+
         if (self.getOwnDeposit().getValue() == Na.ZERO.getValue()) {
             long totalFee = 0;
             for (Transaction tx : txList) {

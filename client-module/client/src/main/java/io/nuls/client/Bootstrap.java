@@ -150,7 +150,7 @@ public class Bootstrap {
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            if (i > 60) {
+            if (i > 10) {
                 i = 0;
                 if (!downloadService.isDownloadSuccess().isSuccess() && CollectThread.getInstance().getStartHeight() > 0) {
                     Log.info("collect-start:{},request-start:{},BlockQueueSize:{}", CollectThread.getInstance().getStartHeight(), CollectThread.getInstance().getRequestStartHeight(), BlockQueueProvider.getInstance().size());

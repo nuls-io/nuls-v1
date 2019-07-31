@@ -196,6 +196,7 @@ public class NulsProtocolProcess {
         container.setEffectiveHeight(blockHeader.getHeight() + 1);
         if (container.getVersion() > NulsContext.MAIN_NET_VERSION) {
             NulsContext.MAIN_NET_VERSION = container.getVersion();
+            NulsContext.MAIN_NET_VERSION_HEIGHT = container.getEffectiveHeight();
             getVersionManagerStorageService().saveMainVersion(container.getVersion());
         }
         if (container.getVersion() == 2) {
@@ -453,6 +454,7 @@ public class NulsProtocolProcess {
                 }
             }
             NulsContext.MAIN_NET_VERSION = version;
+            NulsContext.MAIN_NET_VERSION_HEIGHT = container.getEffectiveHeight();
             getVersionManagerStorageService().saveMainVersion(version);
             if (version == 1) {
                 getVersionManagerStorageService().deleteChangeTxHashBlockHeight();

@@ -26,10 +26,14 @@
 package io.nuls.account.model;
 
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Address;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import org.junit.Test;
+
+import java.math.BigInteger;
 
 /**
  * @author: Niels Wang
@@ -39,11 +43,15 @@ public class AddressTest {
     @Test
     public void test() {
         short chainId = 8964;
-        while (true) {
-            ECKey ecKey = new ECKey();
-            String address = getAddress(chainId, ecKey.getPubKey());
-                System.out.println(address );//+ ":::::::" + ecKey.getPrivateKeyAsHex());
-        }
+        NulsContext.getInstance().defaultChainId = chainId;
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1,Hex.decode("60a958883bee99abc16b59a191ae25f8854c5edb2daea7ee1e19425b728edf6a")));
+        System.out.println(ecKey.getPublicKeyAsHex(true));
+//        while (true) {
+//            ECKey ecKey = new ECKey();
+//            String address = getAddress(chainId, ecKey.getPubKey());
+//                System.out.println(address );//+ ":::::::" + ecKey.getPrivateKeyAsHex());
+//        }
+        System.out.println(getAddress(chainId, Hex.decode("0369926e4c82ab5499a14ef115e1d2d0d4dfb1c44b4de46434e79fc3da928d29ab")));
     }
 
 
@@ -53,6 +61,7 @@ public class AddressTest {
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
         Address address = new Address(chainId, (byte) 1, hash160);
+        System.out.println(Hex.encode(address.getAddressBytes()));
         return address.getBase58();
     }
 

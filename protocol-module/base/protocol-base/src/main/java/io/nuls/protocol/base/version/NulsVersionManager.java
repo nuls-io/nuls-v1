@@ -97,6 +97,7 @@ public class NulsVersionManager {
                 //如果有协议升级了，要做升级相关处理
                 if (container.getStatus() == ProtocolContainer.VALID && container.getVersion() > NulsContext.MAIN_NET_VERSION) {
                     NulsContext.MAIN_NET_VERSION = container.getVersion();
+                    NulsContext.MAIN_NET_VERSION_HEIGHT = container.getEffectiveHeight();
                     getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
                     //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
                     if (container.getVersion() == 2) {

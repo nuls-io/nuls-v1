@@ -69,6 +69,8 @@
         </protocol>
         <!-- extend 版本继承哪个版本-->
         <protocol version="3" block="" extend="2" percent="90" delay="10000">
+        </protocol> <!-- extend 版本继承哪个版本-->
+        <protocol version="4" block="" extend="3" percent="80" delay="10000">
         </protocol>
     </protocols>
 </nuls-version>
