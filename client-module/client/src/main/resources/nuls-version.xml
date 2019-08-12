@@ -69,5 +69,7 @@
         </protocol>
         <protocol version="3" block="" extend="2" percent="90" delay="30000">
         </protocol>
+        <protocol version="4" block="" extend="3" percent="80" delay="30000">
+        </protocol>
     </protocols>
 </nuls-version>
