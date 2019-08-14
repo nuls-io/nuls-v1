@@ -46,7 +46,7 @@ import java.util.Set;
  */
 public class BlockMonitorProcess {
 
-    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
+    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 100000L;
 
     private final ChainManager chainManager;
 
@@ -84,12 +84,12 @@ public class BlockMonitorProcess {
         }
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         if (count > minCount && addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
-            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
+//            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
             return;
         }
         if (downloadService.isDownloadSuccess().isSuccess() &&
                 bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
-            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
+//            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
         }
     }
 }

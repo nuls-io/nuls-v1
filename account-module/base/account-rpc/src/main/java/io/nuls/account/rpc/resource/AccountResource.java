@@ -36,6 +36,7 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
 import io.nuls.contract.dto.ContractTokenInfo;
@@ -324,7 +325,7 @@ public class AccountResource {
             fee = ((Na) result.getData()).getValue();
             //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
             long feeMax = TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
-            if(fee > feeMax){
+            if (fee > feeMax) {
                 AliasTransaction tx = new AliasTransaction();
                 tx.setTime(TimeService.currentTimeMillis());
                 Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
@@ -899,7 +900,7 @@ public class AccountResource {
         }
         AccountKeyStore accountKeyStore = result.getData();
         String filePath = form.getPath();
-        if(StringUtils.isBlank(filePath)) {
+        if (StringUtils.isBlank(filePath)) {
             URL resource = ClassLoader.getSystemClassLoader().getResource("");
             try {
                 filePath = URLDecoder.decode(resource.getPath(), "UTF-8") + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
@@ -910,7 +911,6 @@ public class AccountResource {
         }
         return backUpFile(filePath, new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
     }
-
 
 
     /**
@@ -1216,11 +1216,11 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
-        if(form.getPubkeys().size() < form.getM()){
+        if (form.getPubkeys().size() < form.getM()) {
             return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
         }
         Set<String> pubkeySet = new HashSet<>(form.getPubkeys());
-        if(pubkeySet.size() < form.getPubkeys().size()){
+        if (pubkeySet.size() < form.getPubkeys().size()) {
             return Result.getFailed(AccountErrorCode.PUBKEY_REPEAT).toRpcClientResult();
         }
         Result result = accountService.createMultiAccount(form.getPubkeys(), form.getM());
@@ -1240,8 +1240,8 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult alias(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
-                                              CreateMultiAliasForm form) {
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+                                         CreateMultiAliasForm form) {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
         if (form == null) {
@@ -1262,7 +1262,7 @@ public class AccountResource {
         if (!aliasService.isAliasUsable(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST).toRpcClientResult();
         }
-        Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword());
+        Result result = aliasService.setMutilAlias(form.getAddress(), form.getSignAddress(), form.getAlias(), form.getPassword());
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("txData", (String) result.getData());
@@ -1271,7 +1271,7 @@ public class AccountResource {
         return result.toRpcClientResult();
     }
 
-	
+
     @POST
     @Path("/importMultiAccount")
     @Produces(MediaType.APPLICATION_JSON)
@@ -1286,7 +1286,7 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
-        if(form.getPubkeys().size() < form.getM()){
+        if (form.getPubkeys().size() < form.getM()) {
             return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
         }
         Result result = accountService.saveMultiSigAccount(form.getAddress(), form.getPubkeys(), form.getM());
@@ -1355,13 +1355,29 @@ public class AccountResource {
     }
 
     @GET
+    @Path("/allalias")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[查询] 查询全部别名列表数据")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getAliasList() throws Exception {
+        List<AliasPo> result = aliasService.getAllAlias();
+        Map<String, String> map = new HashMap<>();
+        for (AliasPo po : result) {
+            map.put(Hex.encode(po.getAddress()), po.getAlias());
+        }
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
+    @GET
     @Path("multiAccount/alias/fee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名手续费] 获取设置别名手续 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) throws Exception{
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) throws Exception {
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -1374,7 +1390,7 @@ public class AccountResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
@@ -1401,8 +1417,8 @@ public class AccountResource {
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES,scriptSignLenth);
+        int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRICE_PRE_1024_BYTES, scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
@@ -1426,7 +1442,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult signMessage(@ApiParam(name = "form", value = "消息签名表单数据", required = true)
-                                                   SignMessageForm form) {
+                                               SignMessageForm form) {
         if (form == null) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -1442,7 +1458,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         try {
-            Result rs = accountService.signMessage(address,password,message);
+            Result rs = accountService.signMessage(address, password, message);
             if (rs.isSuccess()) {
                 signatureBase64 = (String) rs.getData();
             }
@@ -1450,7 +1466,7 @@ public class AccountResource {
             map.put("signatureBase64", signatureBase64);
             return Result.getSuccess().setData(map).toRpcClientResult();
         } catch (Exception e) {
-            Log.error("",e);
+            Log.error("", e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
     }
@@ -1463,7 +1479,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult verifySignMessage(@ApiParam(name = "form", value = "验证消息签名数据", required = true)
-                                                        VerifyMessageSignatureForm form) {
+                                                     VerifyMessageSignatureForm form) {
         //check the parameter
         if (form == null) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
@@ -1482,7 +1498,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         try {
-            Result rs = accountService.verifyMessageSignature(address,message,signatureBase64);
+            Result rs = accountService.verifyMessageSignature(address, message, signatureBase64);
             if (rs.isSuccess()) {
                 result = (Boolean) rs.getData();
             }
@@ -1490,7 +1506,7 @@ public class AccountResource {
             map.put("result", result);
             return Result.getSuccess().setData(map).toRpcClientResult();
         } catch (Exception e) {
-            Log.error("",e);
+            Log.error("", e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
     }
