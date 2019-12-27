@@ -22,7 +22,7 @@ To learn more about us, visit [nuls.io](https://nuls.io/).
  
 Contributions to Nuls are welcomed!
 We sincerely invite developers who experienced in blockchain field to join in NULS technology community. 
-Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers
+Details: s: https://nuls.community/d/9-recruitment-of-community-developers
 To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
  
 ## Getting Started
@@ -36,7 +36,7 @@ Nuls is based on the Java and you can choose your favorite OS.
 JDK:[JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)  
 Maven:[Maven 3.3+](http://maven.apache.org/download.cgi)  
 IDE: Any one you  like
-> JetBrains [IntelliJ IDEA](https://www.jetbrains.com/idea/) is recommended, but we do not rovoke the IDE war.
+> JetBrains [IntelliJ IDEA](https://www.jetbrains.com/idea/) is recommended, but we do not provoke the IDE war.
 
 
 ### Code style guide
